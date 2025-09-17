@@ -1,4 +1,4 @@
-from pix_erase.application.errors.authorization import AuthorizationError
+from pix_erase.domain.user.errors.access_service import AuthorizationError
 from pix_erase.domain.common.services.base import DomainService
 from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.errors.access_service import (

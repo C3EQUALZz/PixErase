@@ -11,8 +11,7 @@ class UserRole(StrEnum):
 
     SUPER_ADMIN = "super_admin"
     ADMIN = "admin"
-    ANNOTATOR = "annotator"
-    REVIEWER = "reviewer"
+    USER = "user"
 
     @property
     def is_assignable(self) -> bool:

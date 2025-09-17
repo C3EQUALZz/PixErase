@@ -7,3 +7,7 @@ class RoleChangeNotPermittedError(DomainError):
 
 class ActivationChangeNotPermittedError(DomainError):
     ...
+
+
+class AuthorizationError(DomainError):
+    ...

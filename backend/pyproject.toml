@@ -16,13 +16,11 @@ name = "pix_erase"
 dynamic = ["version"]
 description = "backend for pix erase"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     { name = "Danil Kovalev", email = "dan.kovalev2013@gmail.com" },
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
@@ -30,7 +28,11 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "asyncpg>=0.30.0",
     "bazario>=0.4.2",
+    "dishka>=1.7.1",
+    "fastapi>=0.116.2",
+    "sqlalchemy>=2.0.43",
 ]
 
 [project.optional-dependencies]
@@ -68,7 +70,7 @@ markers = ["value_objects"]
 [tool.basedpyright]
 include = ["src", "tests"]
 ignore = ["**/__pycache__", "**/alembic"]
-pythonVersion = "3.10"
+pythonVersion = "3.12"
 reportAny = false
 reportUnusedCallResult = false
 
@@ -76,7 +78,7 @@ reportUnusedCallResult = false
 mypy_path = "src"
 files = ["src"]
 exclude = ["src/pix_erase/setup/config/"]
-python_version = "3.10"
+python_version = "3.12"
 
 strict = true
 pretty = true
@@ -101,7 +103,7 @@ ignore_missing_imports = true
 src = ["src"]
 include = ["src/**.py", "tests/**.py"]
 exclude = ["src/pix_erase/setup/config/**.py"]
-target-version = "py310"
+target-version = "py312"
 line-length = 120
 fix = true
 
