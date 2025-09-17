@@ -1,7 +1,7 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 WORKDIR /app
 
-COPY ./pyproject.toml ./alembic.ini ./deploy/dev/automatic_responses/api_entrypoint.sh ./deploy/dev/automatic_responses/worker_entrypoint.sh ./
+COPY ./pyproject.toml ./alembic.ini ./deploy/dev/pix_erase/api_entrypoint.sh ./deploy/dev/pix_erase/worker_entrypoint.sh ./
 COPY ./src ./src
 
 RUN uv pip install --system --no-cache --target dependencies ".[dev]"
