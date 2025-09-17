@@ -1,0 +1,16 @@
+from pix_erase.domain.common.errors.base import DomainError, DomainFieldError
+
+
+class WrongUserAccountEmailFormatError(DomainFieldError): ...
+
+
+class PasswordCantBeEmptyError(DomainFieldError): ...
+
+
+class UserAccountNameCantBeEmptyError(DomainFieldError): ...
+
+
+class TooBigUserAccountNameError(DomainFieldError): ...
+
+
+class RoleAssignmentNotPermittedError(DomainError): ...
