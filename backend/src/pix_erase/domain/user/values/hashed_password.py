@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import override
 
-from automatic_responses.domain.common.values.base import BaseValueObject
-from automatic_responses.domain.user.errors.user import PasswordCantBeEmptyError
+from pix_erase.domain.common.values.base import BaseValueObject
+from pix_erase.domain.user.errors.user import PasswordCantBeEmptyError
 
 
 @dataclass(frozen=True, eq=True, unsafe_hash=True)
