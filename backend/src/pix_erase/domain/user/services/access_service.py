@@ -28,7 +28,7 @@ class AccessService(DomainService):
 
         old_role: str = user.role
 
-        user.role = UserRole.ADMIN if is_admin else UserRole.ANNOTATOR
+        user.role = UserRole.ADMIN if is_admin else UserRole.USER
 
         new_event: UserChangedRoleEvent = UserChangedRoleEvent(
             user_id=user.id,

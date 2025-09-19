@@ -61,7 +61,7 @@ class ActivateUserCommandHandler:
             CanManageRole(),
             context=RoleManagementContext(
                 subject=current_user,
-                target_role=UserRole.ANNOTATOR,
+                target_role=UserRole.USER,
             ),
         )
 
