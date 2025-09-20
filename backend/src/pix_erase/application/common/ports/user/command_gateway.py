@@ -11,9 +11,6 @@ class UserCommandGateway(Protocol):
     async def add(self, user: User) -> None: ...
 
     @abstractmethod
-    async def exists_with_email(self, email: UserEmail) -> bool: ...
-
-    @abstractmethod
     async def read_by_id(self, user_id: UserID) -> User | None: ...
 
     @abstractmethod

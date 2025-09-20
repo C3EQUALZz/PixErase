@@ -48,7 +48,7 @@ class AuthSessionService:
         )
 
         try:
-            self._auth_session_gateway.add(auth_session)
+            await self._auth_session_gateway.add(auth_session)
             await self._auth_transaction_manager.commit()
 
         except RepoError as error:

@@ -69,7 +69,7 @@ class SignUpHandler:
             role=data.role,
         )
 
-        if await self._user_command_gateway.exists_with_email(new_user.email):
+        if (await self._user_command_gateway.read_by_email(new_user.email)) is not None:
             msg: str = f"user with this email: {new_user.email} already exists"
             raise UserAlreadyExistsError(msg)
 

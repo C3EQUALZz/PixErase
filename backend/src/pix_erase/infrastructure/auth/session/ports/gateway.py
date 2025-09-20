@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from automatic_responses.domain.user.values.user_id import UserID
-from automatic_responses.infrastructure.auth.session.model import AuthSession
+from pix_erase.domain.user.values.user_id import UserID
+from pix_erase.infrastructure.auth.session.model import AuthSession
 
 
 class AuthSessionGateway(Protocol):
@@ -12,7 +12,7 @@ class AuthSessionGateway(Protocol):
     """
 
     @abstractmethod
-    def add(self, auth_session: AuthSession) -> None:
+    async def add(self, auth_session: AuthSession) -> None:
         """
         :raises DataMapperError:
         """
