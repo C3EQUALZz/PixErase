@@ -13,7 +13,7 @@ from pix_erase.application.commands.user.revoke_admin_by_id import (
 )
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 
-router: Final[APIRouter] = APIRouter(
+revoke_admin_router: Final[APIRouter] = APIRouter(
     prefix="/user",
     tags=["User"],
     route_class=DishkaRoute,
@@ -26,7 +26,7 @@ UserIDPathParameter = Path(
 )
 
 
-@router.patch(
+@revoke_admin_router.patch(
     "/id/{id}/revoke-admin/",
     dependencies=[Security(cookie_scheme)],
     status_code=status.HTTP_204_NO_CONTENT,

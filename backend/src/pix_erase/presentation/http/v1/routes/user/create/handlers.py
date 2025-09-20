@@ -14,14 +14,14 @@ from pix_erase.presentation.http.v1.routes.user.create.schemas import (
     CreateUserSchemaResponse
 )
 
-router: Final[APIRouter] = APIRouter(
+creater_user_router: Final[APIRouter] = APIRouter(
     prefix="/user",
     route_class=DishkaRoute,
     tags=["User"],
 )
 
 
-@router.post(
+@creater_user_router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
     dependencies=[Security(cookie_scheme)],

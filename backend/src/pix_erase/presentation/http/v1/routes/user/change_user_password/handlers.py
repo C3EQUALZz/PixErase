@@ -13,7 +13,7 @@ from pix_erase.application.commands.user.change_user_password import (
 )
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 
-router: Final[APIRouter] = APIRouter(
+change_user_password_router: Final[APIRouter] = APIRouter(
     prefix="/user",
     tags=["User"],
     route_class=DishkaRoute,
@@ -32,7 +32,7 @@ PasswordBodyParameter = Body(
 )
 
 
-@router.patch(
+@change_user_password_router.patch(
     "/id/{user_id}/password",
     summary="Changes user password",
     description=getdoc(ChangeUserPasswordCommandHandler),

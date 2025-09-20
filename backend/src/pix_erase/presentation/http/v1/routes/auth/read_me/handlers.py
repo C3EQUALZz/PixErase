@@ -8,19 +8,19 @@ from starlette import status
 
 from pix_erase.application.auth.read_current_user import ReadCurrentUserHandler
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
-from pix_erase.presentation.http.v1.routes.user.read_by_id.schemas import ReadUserByIDResponse
+from pix_erase.presentation.http.v1.routes.user.read.schemas import ReadUserByIDResponse
 
 if TYPE_CHECKING:
     from pix_erase.application.common.views.user.read_user_by_id import ReadUserByIDView
 
-router: Final[APIRouter] = APIRouter(
+read_me_router: Final[APIRouter] = APIRouter(
     prefix="/user",
     tags=["User"],
     route_class=DishkaRoute,
 )
 
 
-@router.get(
+@read_me_router.get(
     "/me/",
     status_code=status.HTTP_200_OK,
     dependencies=[Security(cookie_scheme)],

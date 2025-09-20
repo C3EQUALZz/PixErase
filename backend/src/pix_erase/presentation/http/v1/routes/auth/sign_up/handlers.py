@@ -14,14 +14,14 @@ from pix_erase.presentation.http.v1.routes.auth.sign_up.schemas import (
 if TYPE_CHECKING:
     from pix_erase.application.common.views.auth.sign_up import SignUpView
 
-router: Final[APIRouter] = APIRouter(
+sign_up_router: Final[APIRouter] = APIRouter(
     prefix="/auth",
     tags=["Auth"],
     route_class=DishkaRoute,
 )
 
 
-@router.post(
+@sign_up_router.post(
     path="/signup/",
     status_code=status.HTTP_201_CREATED,
     description=getdoc(SignUpHandler),

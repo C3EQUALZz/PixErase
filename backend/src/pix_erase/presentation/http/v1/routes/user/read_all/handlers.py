@@ -13,16 +13,16 @@ from pix_erase.presentation.http.v1.routes.user.read_all.schemas import (
     ReadAllUsersRequestSchema,
     ReadAllUsersResponseSchema,
 )
-from pix_erase.presentation.http.v1.routes.user.read_by_id.schemas import ReadUserByIDResponse
+from pix_erase.presentation.http.v1.routes.user.read.schemas import ReadUserByIDResponse
 
-router: Final[APIRouter] = APIRouter(
+read_all_router: Final[APIRouter] = APIRouter(
     prefix="/user",
     tags=["User"],
     route_class=DishkaRoute,
 )
 
 
-@router.get(
+@read_all_router.get(
     "/",
     status_code=status.HTTP_200_OK,
     dependencies=[Security(cookie_scheme)],

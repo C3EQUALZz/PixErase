@@ -8,19 +8,18 @@ from fastapi import APIRouter, status
 from pix_erase.application.auth.log_in import LogInData, LogInHandler
 from pix_erase.presentation.http.v1.routes.auth.log_in.schemas import LoginSchemaRequest
 
-router: Final[APIRouter] = APIRouter(
+log_in_router: Final[APIRouter] = APIRouter(
     prefix="/auth",
     tags=["Auth"],
     route_class=DishkaRoute,
 )
 
 
-@router.post(
+@log_in_router.post(
     path="/login/",
     status_code=status.HTTP_204_NO_CONTENT,
     description=getdoc(LogInHandler),
     summary="Logins user in system",
-    response_model=None
 )
 async def login_handler(request_schema: LoginSchemaRequest, interactor: FromDishka[LogInHandler]) -> None:
     """

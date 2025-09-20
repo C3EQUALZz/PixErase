@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from pix_erase.application.common.query_params.pagination import Pagination
 from pix_erase.application.common.query_params.sorting import SortingOrder
 from pix_erase.application.common.query_params.user_filters import UserQueryFilters
-from pix_erase.presentation.http.v1.routes.user.read_by_id.schemas import ReadUserByIDResponse
+from pix_erase.presentation.http.v1.routes.user.read.schemas import ReadUserByIDResponse
 
 
 class PaginationSchema(BaseModel):

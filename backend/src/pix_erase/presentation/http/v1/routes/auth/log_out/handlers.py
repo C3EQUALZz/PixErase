@@ -7,14 +7,14 @@ from fastapi import APIRouter, status
 
 from pix_erase.application.auth.log_out import LogOutHandler
 
-router: Final[APIRouter] = APIRouter(
+log_out_router: Final[APIRouter] = APIRouter(
     prefix="/auth",
     tags=["Auth"],
     route_class=DishkaRoute,
 )
 
 
-@router.delete(
+@log_out_router.delete(
     "/logout/",
     status_code=status.HTTP_204_NO_CONTENT,
     description=getdoc(LogOutHandler),

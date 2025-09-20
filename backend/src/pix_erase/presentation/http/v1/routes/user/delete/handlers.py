@@ -4,11 +4,12 @@ from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, status, Path
+from fastapi import APIRouter, status, Path, Security
 
 from pix_erase.application.commands.user.delete_user_by_id import DeleteUserByIDCommandHandler, DeleteUserByIDCommand
+from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 
-router: Final[APIRouter] = APIRouter(
+delete_router: Final[APIRouter] = APIRouter(
     prefix="/user",
     route_class=DishkaRoute,
     tags=["User"],
@@ -21,11 +22,12 @@ UserIDPathParameter = Path(
 )
 
 
-@router.delete(
+@delete_router.delete(
     "/id/{user_id}/",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Deletes user by id",
     description=getdoc(DeleteUserByIDCommandHandler),
+    dependencies=[Security(cookie_scheme)],
 )
 async def delete_user_by_id_handler(
         user_id: Annotated[UUID, UserIDPathParameter],

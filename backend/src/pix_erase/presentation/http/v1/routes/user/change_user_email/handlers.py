@@ -4,13 +4,14 @@ from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, Path, Body
+from fastapi import APIRouter, Path, Body, Security
 from pydantic import EmailStr
 from starlette import status
 
 from pix_erase.application.commands.user.change_user_email import ChangeUserEmailCommandHandler, ChangeUserEmailCommand
+from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 
-router: Final[APIRouter] = APIRouter(
+change_user_email_router: Final[APIRouter] = APIRouter(
     prefix="/user",
     tags=["User"],
     route_class=DishkaRoute
@@ -29,11 +30,12 @@ EmailBodyParameter = Body(
 )
 
 
-@router.patch(
+@change_user_email_router.patch(
     "/{user_id}/email/",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Change user email",
     description=getdoc(ChangeUserEmailCommandHandler),
+    dependencies=[Security(cookie_scheme)],
 )
 async def change_user_email_by_id(
         user_id: Annotated[UUID, UserIDPathParameter],
