@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 
-class CreateUserSchemaRequest(BaseModel):
+class SignUpUserSchemaRequest(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     email: EmailStr = Field(..., description="Email address of the user", examples=["john.smith@example.com"])
@@ -19,7 +19,7 @@ class CreateUserSchemaRequest(BaseModel):
     )
 
 
-class CreateUserSchemaResponse(BaseModel):
+class SignUpUserSchemaResponse(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     id: UUID = Field(..., description="UUID of the created user", examples=["0c8ba68a-299d-42d9-aca6-5b4056d3fd0f"])

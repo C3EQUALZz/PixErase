@@ -1,3 +1,4 @@
+from inspect import getdoc
 from typing import TYPE_CHECKING, Annotated, Final
 from uuid import UUID
 
@@ -30,6 +31,8 @@ UserIDPathParameter = Path(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(cookie_scheme)],
     response_model=ReadUserByIDResponse,
+    summary="Get user by id",
+    description=getdoc(ReadUserByIDQueryHandler)
 )
 async def read_user_by_id_handler(
         user_id: Annotated[UUID, UserIDPathParameter], interactor: FromDishka[ReadUserByIDQueryHandler]

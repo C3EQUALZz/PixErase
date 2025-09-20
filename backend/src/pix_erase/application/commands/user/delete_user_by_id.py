@@ -24,12 +24,12 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class DeleteUserCommand:
+class DeleteUserByIDCommand:
     user_id: UUID
 
 
 @final
-class DeleteUserCommandHandler:
+class DeleteUserByIDCommandHandler:
     """
     - Open to authenticated users.
     - Deletes users.
@@ -53,7 +53,7 @@ class DeleteUserCommandHandler:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._access_service: Final[AccessService] = access_service
 
-    async def __call__(self, data: DeleteUserCommand) -> None:
+    async def __call__(self, data: DeleteUserByIDCommand) -> None:
         logger.info("Delete user started.")
         current_user: User = await self._current_user_service.get_current_user()
         logger.info("Read current user identified. User ID: '%s'.", current_user.id)

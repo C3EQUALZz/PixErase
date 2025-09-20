@@ -7,8 +7,8 @@ from fastapi import APIRouter, status
 
 from pix_erase.application.auth.sign_up import SignUpData, SignUpHandler
 from pix_erase.presentation.http.v1.routes.auth.sign_up.schemas import (
-    CreateUserSchemaRequest,
-    CreateUserSchemaResponse,
+    SignUpUserSchemaRequest,
+    SignUpUserSchemaResponse,
 )
 
 if TYPE_CHECKING:
@@ -26,11 +26,11 @@ router: Final[APIRouter] = APIRouter(
     status_code=status.HTTP_201_CREATED,
     description=getdoc(SignUpHandler),
     summary="Sign up user in system",
-    response_model=CreateUserSchemaResponse
+    response_model=SignUpUserSchemaResponse
 )
 async def signup_handler(
-    request_schema: CreateUserSchemaRequest, interactor: FromDishka[SignUpHandler]
-) -> CreateUserSchemaResponse:
+    request_schema: SignUpUserSchemaRequest, interactor: FromDishka[SignUpHandler]
+) -> SignUpUserSchemaResponse:
     """
     Create a new user record in the system. This handler works for all roles.
 
@@ -60,6 +60,6 @@ async def signup_handler(
 
     view: SignUpView = await interactor(data=command)
 
-    return CreateUserSchemaResponse(
+    return SignUpUserSchemaResponse(
         id=view.user_id,
     )

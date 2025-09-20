@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Final
+from typing import final, Final
 from uuid import UUID
 
 from pix_erase.application.common.ports.event_bus import EventBus
@@ -19,15 +19,16 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class RevokeAdminCommand:
+class GrantAdminToUserByIDCommand:
     user_id: UUID
 
 
-class RevokeAdminCommandHandler:
+@final
+class GrantAdminToUserByIDCommandHandler:
     """
     - Open to super admins.
-    - Revokes admin rights from a specified user.
-    - Super admin rights can not be changed
+    - Grants admin rights to a specified user.
+    - Super admin rights can not be changed.
     """
 
     def __init__(
@@ -46,13 +47,13 @@ class RevokeAdminCommandHandler:
         self._access_service: Final[AccessService] = access_service
         self._event_bus: Final[EventBus] = event_bus
 
-    async def __call__(self, data: RevokeAdminCommand) -> None:
+    async def __call__(self, data: GrantAdminToUserByIDCommand) -> None:
         logger.info(
-            "Revoke admin: started. User id: '%s'.",
+            "Grant admin: started. User id: '%s'.",
             data.user_id,
         )
 
-        current_user: User = await self._current_user_service.get_current_user()
+        current_user = await self._current_user_service.get_current_user()
 
         self._access_service.authorize(
             CanManageRole(),
@@ -62,19 +63,16 @@ class RevokeAdminCommandHandler:
             ),
         )
 
-        user_for_revoke_admin: User | None = await self._user_command_gateway.read_by_id(
+        user_for_changing_role: User | None = await self._user_command_gateway.read_by_id(
             user_id=UserID(data.user_id),
         )
 
-        if user_for_revoke_admin is None:
+        if user_for_changing_role is None:
             msg: str = f"Cant find user by ID: {data.user_id}"
             raise UserNotFoundByIDError(msg)
 
-        self._access_service.toggle_user_admin_role(user_for_revoke_admin, is_admin=False)
+        self._access_service.toggle_user_admin_role(user_for_changing_role, is_admin=True)
         await self._event_bus.publish(self._access_service.pull_events())
         await self._transaction_manager.commit()
 
-        logger.info(
-            "Revoke admin: done. User id: '%s'.",
-            data.user_id,
-        )
+        logger.info("Grant admin: done. ID: '%s'.", user_for_changing_role.id)
