@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, final
 
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
+from pix_erase.application.common.services.auth_session import AuthSessionService
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.consts import (
     AUTH_ACCOUNT_INACTIVE,
@@ -10,13 +11,12 @@ from pix_erase.application.consts import (
     AUTH_INVALID_PASSWORD,
     USER_NOT_FOUND,
 )
-from pix_erase.application.errors.authorization import AlreadyAuthenticatedError
+from pix_erase.application.errors.auth import AlreadyAuthenticatedError
+from pix_erase.application.errors.auth import AuthenticationError
 from pix_erase.application.errors.user import UserNotFoundByEmailError
 from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.domain.user.values.raw_password import RawPassword
 from pix_erase.domain.user.values.user_email import UserEmail
-from pix_erase.infrastructure.auth.session.service import AuthSessionService
-from pix_erase.infrastructure.errors.auth import AuthenticationError
 
 if TYPE_CHECKING:
     from pix_erase.domain.user.entities.user import User
@@ -46,11 +46,11 @@ class LogInHandler:
     """
 
     def __init__(
-        self,
-        current_user_service: CurrentUserService,
-        user_command_gateway: UserCommandGateway,
-        user_service: UserService,
-        auth_session_service: AuthSessionService,
+            self,
+            current_user_service: CurrentUserService,
+            user_command_gateway: UserCommandGateway,
+            user_service: UserService,
+            auth_session_service: AuthSessionService,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway

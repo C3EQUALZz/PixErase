@@ -1,11 +1,11 @@
 import logging
 from typing import TYPE_CHECKING, Final, final
 
-from automatic_responses.application.common.services.current_user import CurrentUserService
-from automatic_responses.infrastructure.auth.session.service import AuthSessionService
+from pix_erase.application.common.services.auth_session import AuthSessionService
+from pix_erase.application.common.services.current_user import CurrentUserService
 
 if TYPE_CHECKING:
-    from automatic_responses.domain.user.entities.user import User
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -19,9 +19,9 @@ class LogOutHandler:
     """
 
     def __init__(
-        self,
-        current_user_service: CurrentUserService,
-        auth_session_service: AuthSessionService,
+            self,
+            current_user_service: CurrentUserService,
+            auth_session_service: AuthSessionService,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._auth_session_service: Final[AuthSessionService] = auth_session_service
