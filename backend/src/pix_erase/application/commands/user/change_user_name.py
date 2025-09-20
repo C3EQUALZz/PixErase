@@ -24,13 +24,13 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class ChangeUserNameCommand:
+class ChangeUserNameByIDCommand:
     user_id: UUID
     new_name: str
 
 
 @final
-class ChangeUserNameCommandHandler:
+class ChangeUserNameByIDCommandHandler:
     """
     - Open to authenticated users.
     - Changes username.
@@ -54,7 +54,7 @@ class ChangeUserNameCommandHandler:
         self._event_bus: Final[EventBus] = event_bus
         self._access_service: Final[AccessService] = access_service
 
-    async def __call__(self, data: ChangeUserNameCommand) -> None:
+    async def __call__(self, data: ChangeUserNameByIDCommand) -> None:
         logger.info("Change user name started.")
         current_user: User = await self._current_user_service.get_current_user()
         logger.info("Read current user identified. User ID: '%s'.", current_user.id)

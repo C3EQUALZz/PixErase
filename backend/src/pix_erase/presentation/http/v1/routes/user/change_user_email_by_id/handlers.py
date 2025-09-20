@@ -23,8 +23,8 @@ UserIDPathParameter = Path(
 )
 
 EmailBodyParameter = Body(
-    title="The password of the user to get",
-    description="The password of the user to get.",
+    title="User email",
+    description="The email of the user to get.",
     examples=["super-bagratus2013@gmail.com"]
 )
 
@@ -33,7 +33,7 @@ EmailBodyParameter = Body(
     "/{user_id}/email/",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Change user email",
-    description=getdoc(ChangeUserEmailCommandHandler)
+    description=getdoc(ChangeUserEmailCommandHandler),
 )
 async def change_user_email_by_id(
         user_id: Annotated[UUID, UserIDPathParameter],
