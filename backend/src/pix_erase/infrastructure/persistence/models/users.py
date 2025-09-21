@@ -40,7 +40,7 @@ def map_users_table() -> None:
         User,
         users_table,
         properties={
-            "id": users_table.c.user_id,
+            "id": users_table.c.id,
             "email": composite(UserEmail, users_table.c.email),
             "name": composite(Username, users_table.c.name),
             "hashed_password": composite(HashedPassword, users_table.c.hashed_password),
