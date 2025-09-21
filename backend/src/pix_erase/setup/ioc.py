@@ -178,4 +178,5 @@ def setup_providers() -> Iterable[Provider]:
         domain_ports_provider(),
         gateways_provider(),
         interactors_provider(),
+        event_bus_provider()
     )
