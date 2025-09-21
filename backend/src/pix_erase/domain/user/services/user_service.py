@@ -41,7 +41,7 @@ class UserService(DomainService):
         email: UserEmail,
         name: Username,
         raw_password: RawPassword,
-        role: UserRole = UserRole.ANNOTATOR,
+        role: UserRole = UserRole.USER,
     ) -> User:
         """
         Fabric method that creates a new user.
