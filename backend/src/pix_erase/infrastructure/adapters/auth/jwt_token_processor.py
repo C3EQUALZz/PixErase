@@ -3,7 +3,7 @@ from typing import Any, Final, Literal, NewType, TypedDict, cast
 
 import jwt
 
-from automatic_responses.infrastructure.auth.session.model import AuthSession
+from pix_erase.infrastructure.auth.session.model import AuthSession
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 

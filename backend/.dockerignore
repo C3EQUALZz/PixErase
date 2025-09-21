@@ -1,6 +1,8 @@
 /venv
+.venv
 /.venv
 /.idea
+.idea
 /.gitignore
 /.github
 LICENSE
