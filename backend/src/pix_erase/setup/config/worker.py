@@ -7,3 +7,6 @@ class TaskIQWorkerConfig(BaseModel):
     use_jitter: bool = Field(default=True, description="Use jitter for task fails")
     use_delay_exponent: bool = Field(default=True, description="Use exponent for task fails")
     max_delay_component: int = Field(default=120, description="Max delay component for task fails")
+    durable_queue: bool = Field(default=True, description="Create durable queue for tasks or not")
+    durable_exchange: bool = Field(default=True, description="Create exchange for tasks or not")
+    declare_exchange: bool = Field(default=True, description="Declare exchange for tasks or not")

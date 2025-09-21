@@ -2,11 +2,11 @@ import logging
 import sys
 from functools import lru_cache
 from types import TracebackType
-from typing import Any
+from typing import Any, Final
 
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from taskiq import AsyncBroker, TaskiqScheduler
+from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker
 from taskiq.middlewares import SmartRetryMiddleware
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
@@ -22,11 +22,13 @@ from pix_erase.presentation.http.v1.middlewares.logs import LoggingMiddleware
 from pix_erase.presentation.http.v1.routes.auth import auth_router
 from pix_erase.presentation.http.v1.routes.user import user_router
 from pix_erase.setup.config.asgi import ASGIConfig
+from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.logs import LoggingConfig, build_structlog_logger
 from pix_erase.setup.config.rabbit import RabbitConfig
-from pix_erase.setup.config.redis import RedisConfig
 from pix_erase.setup.config.settings import AppConfig
 from pix_erase.setup.config.worker import TaskIQWorkerConfig
+
+logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=1)
@@ -106,31 +108,42 @@ def setup_http_routes(app: FastAPI, /) -> None:
     app.include_router(router_v1)
 
 
-def setup_worker_broker(
-        rabbit_config: RabbitConfig, redis_config: RedisConfig, worker_config: TaskIQWorkerConfig
+def setup_task_manager(
+        taskiq_config: TaskIQWorkerConfig, rabbitmq_config: RabbitConfig, redis_config: RedisConfig
 ) -> AsyncBroker:
-    broker: AioPikaBroker = (
+    logger.debug("Creating taskiq broker for task management....")
+    broker: AsyncBroker = (
         AioPikaBroker(
-            url=rabbit_config.uri,
-            declare_exchange=True,
-            declare_queues_kwargs={"durable": True},
-            declare_exchange_kwargs={"durable": True},
+            url=rabbitmq_config.uri,
+            declare_exchange=taskiq_config.declare_exchange,
+            declare_queues_kwargs={"durable": taskiq_config.durable_queue},
+            declare_exchange_kwargs={"durable": taskiq_config.durable_exchange},
         )
-        .with_result_backend(RedisAsyncResultBackend(redis_url=redis_config.worker_uri))
         .with_middlewares(
             SmartRetryMiddleware(
-                default_retry_count=worker_config.default_retry_count,
-                default_delay=worker_config.default_delay,
-                use_jitter=worker_config.use_jitter,
-                use_delay_exponent=worker_config.use_delay_exponent,
-                max_delay_exponent=worker_config.max_delay_component,
-            )
+                default_retry_count=taskiq_config.default_retry_count,
+                default_delay=taskiq_config.default_delay,
+                use_jitter=taskiq_config.use_jitter,
+                use_delay_exponent=taskiq_config.use_delay_exponent,
+                max_delay_exponent=taskiq_config.max_delay_component,
+            ),
         )
+        .with_result_backend(RedisAsyncResultBackend(redis_url=redis_config.worker_uri))
     )
+    logger.debug("Set async shared broker")
+    async_shared_broker.default_broker(broker)
+
+    logger.debug("Returning taskiq broker")
     return broker
 
 
-def setup_worker_tasks(broker: AsyncBroker) -> None: ...
+def setup_scheduler(broker: AsyncBroker) -> TaskiqScheduler:
+    logger.debug("Creating taskiq scheduler for task management...")
+
+    return TaskiqScheduler(
+        broker=broker,
+        sources=[LabelScheduleSource(broker)],
+    )
 
 
 def setup_exc_handlers(app: FastAPI, /) -> None:

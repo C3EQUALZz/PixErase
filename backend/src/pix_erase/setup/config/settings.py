@@ -6,7 +6,7 @@ from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
 from pix_erase.setup.config.logs import LoggingConfig
 from pix_erase.setup.config.rabbit import RabbitConfig
-from pix_erase.setup.config.redis import RedisConfig
+from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.security import SecurityConfig, AuthSettings, CookiesSettings, PasswordSettings
 from pix_erase.setup.config.worker import TaskIQWorkerConfig
 

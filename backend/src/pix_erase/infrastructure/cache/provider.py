@@ -2,7 +2,7 @@ from collections.abc import AsyncIterator
 
 from redis.asyncio import ConnectionPool, Redis
 
-from pix_erase.setup.config.redis import RedisConfig
+from pix_erase.setup.config.cache import RedisConfig
 
 
 async def get_redis_pool(redis_config: RedisConfig) -> ConnectionPool:
