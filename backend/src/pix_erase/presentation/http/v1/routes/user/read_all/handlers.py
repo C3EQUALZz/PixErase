@@ -1,10 +1,10 @@
 from dataclasses import asdict
 from inspect import getdoc
-from typing import Final
+from typing import Final, Annotated
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, Security, status
+from fastapi import APIRouter, Security, status, Depends
 
 from pix_erase.application.common.views.user.read_user_by_id import ReadUserByIDView
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler, ReadAllUsersQuery
@@ -39,7 +39,7 @@ read_all_router: Final[APIRouter] = APIRouter(
     }
 )
 async def read_all_handler(
-        request_schema: ReadAllUsersRequestSchema,
+        request_schema: Annotated[ReadAllUsersRequestSchema, Depends()],
         interactor: FromDishka[ReadAllUsersQueryHandler],
 ) -> ReadAllUsersResponseSchema:
     query: ReadAllUsersQuery = ReadAllUsersQuery(
