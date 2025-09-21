@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Final
+from typing import Final, final
 from uuid import UUID
 
 from pix_erase.application.common.ports.event_bus import EventBus
@@ -23,6 +23,7 @@ class RevokeAdminByIDCommand:
     user_id: UUID
 
 
+@final
 class RevokeAdminByIDCommandHandler:
     """
     - Open to super admins.

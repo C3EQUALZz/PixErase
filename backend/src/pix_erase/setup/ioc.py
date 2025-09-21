@@ -7,6 +7,19 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
+from pix_erase.application.auth.log_in import LogInHandler
+from pix_erase.application.auth.log_out import LogOutHandler
+from pix_erase.application.auth.read_current_user import ReadCurrentUserHandler
+from pix_erase.application.auth.sign_up import SignUpHandler
+from pix_erase.application.commands.image.convert_image_to_grayscale import ConvertImageToGrayscaleCommandHandler
+from pix_erase.application.commands.user.activate_user import ActivateUserCommandHandler
+from pix_erase.application.commands.user.change_user_email import ChangeUserEmailCommandHandler
+from pix_erase.application.commands.user.change_user_name import ChangeUserNameByIDCommandHandler
+from pix_erase.application.commands.user.change_user_password import ChangeUserPasswordCommandHandler
+from pix_erase.application.commands.user.create_user import CreateUserCommandHandler
+from pix_erase.application.commands.user.delete_user_by_id import DeleteUserByIDCommandHandler
+from pix_erase.application.commands.user.grant_admin_by_id import GrantAdminToUserByIDCommandHandler
+from pix_erase.application.commands.user.revoke_admin_by_id import RevokeAdminByIDCommandHandler
 from pix_erase.application.common.ports.access_revoker import AccessRevoker
 from pix_erase.application.common.ports.event_bus import EventBus
 from pix_erase.application.common.ports.identity_provider import IdentityProvider
@@ -15,9 +28,12 @@ from pix_erase.application.common.ports.user.command_gateway import UserCommandG
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
 from pix_erase.application.common.services.auth_session import AuthSessionService
 from pix_erase.application.common.services.current_user import CurrentUserService
+from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler
+from pix_erase.application.queries.users.read_by_id import ReadUserByIDQueryHandler
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
 from pix_erase.domain.user.ports.password_hasher import PasswordHasher
+from pix_erase.domain.user.services.access_service import AccessService
 from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.infrastructure.adapters.auth.access_revoker import AuthSessionAccessRevoker
 from pix_erase.infrastructure.adapters.auth.identity_provider import AuthSessionIdentityProvider
@@ -87,7 +103,7 @@ def auth_ports_provider() -> Provider:
     provider.provide_all(
         CurrentUserService,
         JwtAccessTokenProcessor,
-        UtcAuthSessionTimer,
+        UtcAuthSessionTimer
     )
     provider.provide(source=SecretsAuthSessionIdGenerator, provides=AuthSessionIDGenerator)
     provider.provide(source=AuthSessionAccessRevoker, provides=AccessRevoker)
@@ -103,6 +119,7 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=UUID4UserIdGenerator, provides=UserIdGenerator)
     provider.provide(source=UUID4ImageIdGenerator, provides=ImageIdGenerator)
     provider.provide(source=UserService)
+    provider.provide(source=AccessService)
     return provider
 
 
@@ -132,6 +149,23 @@ def event_bus_provider() -> Provider:
 
 def interactors_provider() -> Provider:
     provider: Final[Provider] = Provider(scope=Scope.REQUEST)
+    provider.provide_all(
+        LogInHandler,
+        LogOutHandler,
+        ReadCurrentUserHandler,
+        SignUpHandler,
+        ActivateUserCommandHandler,
+        ChangeUserEmailCommandHandler,
+        ChangeUserNameByIDCommandHandler,
+        ChangeUserPasswordCommandHandler,
+        CreateUserCommandHandler,
+        DeleteUserByIDCommandHandler,
+        GrantAdminToUserByIDCommandHandler,
+        RevokeAdminByIDCommandHandler,
+        ConvertImageToGrayscaleCommandHandler,
+        ReadAllUsersQueryHandler,
+        ReadUserByIDQueryHandler
+    )
     return provider
 
 
