@@ -3,8 +3,7 @@ from collections.abc import Sequence
 from typing import override, Final
 from uuid import UUID
 
-from select import select
-from sqlalchemy import ColumnElement, Select, Result, Row
+from sqlalchemy import ColumnElement, Select, Result, Row, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +16,7 @@ from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.domain.user.values.user_role import UserRole
 from pix_erase.infrastructure.adapters.persistence.constants import DB_QUERY_FAILED
 from pix_erase.infrastructure.errors.transaction_manager import RepoError
+from pix_erase.infrastructure.persistence.models.users import users_table
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class SqlAlchemyUserQueryGateway(UserQueryGateway):
 
     @override
     async def read_all_users(self, user_list_params: UserListParams) -> list[UserQueryModel] | None:
-        table_sorting_field: ColumnElement[UUID | str | UserRole | bool] | None = (
+        table_sorting_field: ColumnElement[UUID | str | UserRole | bool] | None = ( # type: ignore
             users_table.c.get(user_list_params.sorting.sorting_field)
         )
         if table_sorting_field is None:
