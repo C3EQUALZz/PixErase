@@ -1,0 +1,229 @@
+x-default: &default
+  restart: unless-stopped
+  networks:
+    - overlay
+
+x-healthcheck-interval: &hc-interval
+  interval: 30s
+  timeout: 60s
+  retries: 5
+  start_period: 10s
+
+x-db-environment: &x-db-environment
+  POSTGRES_SSL_MODE: 'disable'
+  POSTGRES_HOST: ${POSTGRES_HOST}
+  POSTGRES_PORT: ${POSTGRES_PORT}
+  POSTGRES_DB: ${POSTGRES_DB}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_USER: ${POSTGRES_USER}
+
+x-redis-environment: &x-redis-environment
+  REDIS_PASSWORD: ${REDIS_PASSWORD}
+  REDIS_USER: ${REDIS_USER}
+  REDIS_USER_PASSWORD: ${REDIS_USER_PASSWORD}
+  REDIS_PORT: ${REDIS_PORT}
+  REDIS_CACHE_DB: ${REDIS_CACHE_DB}
+  REDIS_WORKER_DB: ${REDIS_WORKER_DB}
+  REDIS_MAX_CONNECTIONS: ${REDIS_MAX_CONNECTIONS}
+
+x-rabbit-environment: &x-rabbit-environment
+  RABBITMQ_HOST: ${RABBITMQ_HOST}
+  RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+  RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+  RABBITMQ_PORT: ${RABBITMQ_PORT}
+  RABBITMQ_UI_PORT: ${RABBITMQ_UI_PORT}
+
+x-sqlalchemy-environment: &x-sqlalchemy-environment
+  DB_POOL_PRE_PING: ${DB_POOL_PRE_PING}
+  DB_POOL_RECYCLE: ${DB_POOL_RECYCLE}
+  DB_ECHO: ${DB_ECHO}
+  DB_AUTO_FLUSH: ${DB_AUTO_FLUSH}
+  DB_EXPIRE_ON_COMMIT: ${DB_EXPIRE_ON_COMMIT}
+  DB_DEBUG: ${DB_DEBUG}
+  DB_FUTURE: ${DB_FUTURE}
+
+x-api-environment: &x-api-environment
+  ENVIRONMENT: local
+  UVICORN_HOST: ${UVICORN_HOST}
+  UVICORN_PORT: ${UVICORN_PORT}
+  LOGGING_LEVEL: INFO
+  RENDER_JSON_LOGS: False
+  FASTAPI_DEBUG: True
+  FASTAPI_ALLOW_CREDENTIALS: False
+  JWT_SECRET: ${JWT_SECRET}
+  JWT_ALGORITHM: ${JWT_ALGORITHM}
+  PEPPER: ${PEPPER}
+  SESSION_TTL_MIN: ${SESSION_TTL_MIN}
+  SESSION_REFRESH_THRESHOLD: ${SESSION_REFRESH_THRESHOLD}
+  SECURE: ${SECURE}
+
+services:
+  postgres:
+    <<: *default
+    profiles: [ "api" ]
+    container_name: pix_erase.postgres
+    hostname: pix_erase.postgres
+    image: postgres:alpine-16.3
+    environment:
+      <<: *x-db-environment
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    ports:
+      - 127.0.0.1:${POSTGRES_PORT}:${POSTGRES_PORT}
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U $POSTGRES_USER' ]
+      <<: *hc-interval
+    volumes:
+      - pix_erase.postgres.data:/var/lib/postgresql/data
+      - ./deploy/dev/postgres/postgresql.conf:/etc/postgresql.conf
+      - ./deploy/dev/postgres/pg_hba.conf:/etc/pg_hba.conf
+    env_file:
+      - .env
+
+  api:
+    <<: *default
+    profiles: [ "api" ]
+    container_name: pix_erase.api
+    hostname: pix_erase.api
+    build:
+      context: .
+      dockerfile: ./deploy/dev/pix_erase/Dockerfile
+    environment:
+      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment ]
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      RABBIT_HOST: rabbitmq
+    command: /bin/sh -cx "./api_entrypoint.sh"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    ports:
+      - 127.0.0.1:${UVICORN_PORT}:${UVICORN_PORT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -fsSL http://localhost:${UVICORN_PORT}/healthcheck/',
+        ]
+      <<: *hc-interval
+    env_file:
+      - .env
+
+  worker:
+    <<: *default
+    profiles: [ "api" ]
+    container_name: pix_erase.worker
+    hostname: pix_erase.worker
+    build:
+      context: .
+      dockerfile: ./deploy/dev/pix_erase/Dockerfile
+    environment:
+      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment ]
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      RABBIT_HOST: rabbitmq
+    command: /bin/sh -cx "./worker_entrypoint.sh"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  redis:
+    <<: *default
+    profiles: [ "api" ]
+    image: redis:8.0.2-alpine
+    container_name: pix_erase.redis
+    hostname: pix_erase.redis
+    environment:
+      <<: *x-redis-environment
+    command: /bin/sh -cx "/usr/local/bin/redis_entrypoint.sh"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping" ]
+      <<: *hc-interval
+    ports:
+      - "127.0.0.1:${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - pix_erase.redis.data:/data
+      - ./deploy/dev/redis/redis_entrypoint.sh:/usr/local/bin/redis_entrypoint.sh
+    env_file:
+      - .env
+
+  rabbitmq:
+    <<: *default
+    profiles: [ "api" ]
+    image: rabbitmq:4.0-management-alpine
+    container_name: pix_erase.rabbitmq
+    hostname: pix_erase.rabbitmq
+    expose:
+      # AMQP protocol port
+      - ${RABBITMQ_PORT}
+      # HTTP management UI
+      - ${RABBITMQ_UI_PORT}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    ports:
+      - "127.0.0.1:${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+      - "127.0.0.1:${RABBITMQ_UI_PORT}:${RABBITMQ_UI_PORT}"
+    environment:
+      <<: *x-rabbit-environment
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      <<: *hc-interval
+    volumes:
+      - pix_erase.rabbitmq.data:/var/lib/rabbitmq/:rw
+    env_file:
+      - .env
+
+volumes:
+  pix_erase.postgres.data: {}
+  pix_erase.redis.data: {}
+  pix_erase.rabbitmq.data: {}
+
+networks:
+  overlay:
+    driver: bridge
