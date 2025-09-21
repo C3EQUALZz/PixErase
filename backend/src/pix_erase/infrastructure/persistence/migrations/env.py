@@ -5,9 +5,15 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from pix_erase.infrastructure.persistence.models.base import metadata
+from pix_erase.setup.bootstrap import setup_map_tables, setup_configs
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
+setup_map_tables()
+db_uri = setup_configs().postgres.uri
 config = context.config
+config.set_main_option("sqlalchemy.url", db_uri + "?async_fallback=True")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -18,7 +24,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
