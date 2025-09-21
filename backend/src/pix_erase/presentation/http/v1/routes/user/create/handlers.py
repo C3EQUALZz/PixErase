@@ -8,25 +8,34 @@ from starlette import status
 
 from pix_erase.application.commands.user.create_user import CreateUserCommandHandler, CreateUserCommand
 from pix_erase.application.common.views.user.create_user import CreateUserView
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 from pix_erase.presentation.http.v1.routes.user.create.schemas import (
     CreateUserSchemaRequest,
     CreateUserSchemaResponse
 )
 
-creater_user_router: Final[APIRouter] = APIRouter(
+create_user_router: Final[APIRouter] = APIRouter(
     prefix="/user",
     route_class=DishkaRoute,
     tags=["User"],
 )
 
 
-@creater_user_router.post(
+@create_user_router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
     dependencies=[Security(cookie_scheme)],
     summary="Handler for creating user by admin",
-    description=getdoc(CreateUserCommandHandler)
+    description=getdoc(CreateUserCommandHandler),
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
+        status.HTTP_409_CONFLICT: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
 )
 async def create_user_handler(
         schemas: CreateUserSchemaRequest,

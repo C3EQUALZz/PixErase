@@ -7,6 +7,7 @@ from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Path, Security, status
 
 from pix_erase.application.queries.users.read_by_id import ReadUserByIDQuery, ReadUserByIDQueryHandler
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 from pix_erase.presentation.http.v1.routes.user.read.schemas import ReadUserByIDResponse
 
@@ -32,7 +33,15 @@ UserIDPathParameter = Path(
     dependencies=[Security(cookie_scheme)],
     response_model=ReadUserByIDResponse,
     summary="Get user by id",
-    description=getdoc(ReadUserByIDQueryHandler)
+    description=getdoc(ReadUserByIDQueryHandler),
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
+        status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
 )
 async def read_user_by_id_handler(
         user_id: Annotated[UUID, UserIDPathParameter], interactor: FromDishka[ReadUserByIDQueryHandler]

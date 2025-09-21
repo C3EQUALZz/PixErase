@@ -7,6 +7,7 @@ from fastapi import Security, APIRouter
 from starlette import status
 
 from pix_erase.application.auth.read_current_user import ReadCurrentUserHandler
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 from pix_erase.presentation.http.v1.routes.user.read.schemas import ReadUserByIDResponse
 
@@ -26,7 +27,12 @@ read_me_router: Final[APIRouter] = APIRouter(
     dependencies=[Security(cookie_scheme)],
     response_model=ReadUserByIDResponse,
     description=getdoc(ReadCurrentUserHandler),
-    summary="Gets current user in system, user must be authenticated"
+    summary="Gets current user in system, user must be authenticated",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+    }
 )
 async def read_user_by_id_handler(
         interactor: FromDishka[ReadCurrentUserHandler]

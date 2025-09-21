@@ -62,6 +62,7 @@ class ExceptionHandler:
             ActivationChangeNotPermittedError: status.HTTP_403_FORBIDDEN,
             RoleChangeNotPermittedError: status.HTTP_403_FORBIDDEN,
             RoleAssignmentNotPermittedError: status.HTTP_403_FORBIDDEN,
+            AlreadyAuthenticatedError: status.HTTP_403_FORBIDDEN,
             # 415
             ImageDecodingError: status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             # 404
@@ -70,7 +71,6 @@ class ExceptionHandler:
             # 409
             SortingError: status.HTTP_409_CONFLICT,
             EntityAddError: status.HTTP_409_CONFLICT,
-            AlreadyAuthenticatedError: status.HTTP_409_CONFLICT,
             UserAlreadyExistsError: status.HTTP_409_CONFLICT,
             # 422
             pydantic.ValidationError: status.HTTP_422_UNPROCESSABLE_ENTITY,

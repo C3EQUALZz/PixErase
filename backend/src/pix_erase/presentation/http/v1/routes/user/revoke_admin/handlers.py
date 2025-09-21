@@ -11,6 +11,7 @@ from pix_erase.application.commands.user.revoke_admin_by_id import (
     RevokeAdminByIDCommandHandler,
     RevokeAdminByIDCommand
 )
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 
 revoke_admin_router: Final[APIRouter] = APIRouter(
@@ -31,7 +32,15 @@ UserIDPathParameter = Path(
     dependencies=[Security(cookie_scheme)],
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Revoke Administrator access",
-    description=getdoc(RevokeAdminByIDCommandHandler)
+    description=getdoc(RevokeAdminByIDCommandHandler),
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
+        status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
 )
 async def revoke_admin_by_id_handler(
         user_id: Annotated[UUID, UserIDPathParameter],

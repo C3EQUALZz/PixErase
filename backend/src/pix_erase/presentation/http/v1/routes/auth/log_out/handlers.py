@@ -6,6 +6,7 @@ from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status
 
 from pix_erase.application.auth.log_out import LogOutHandler
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema
 
 log_out_router: Final[APIRouter] = APIRouter(
     prefix="/auth",
@@ -19,6 +20,11 @@ log_out_router: Final[APIRouter] = APIRouter(
     status_code=status.HTTP_204_NO_CONTENT,
     description=getdoc(LogOutHandler),
     summary="Log out user from system, removing data from cookie",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+    }
 )
 async def logout(interactor: FromDishka[LogOutHandler]) -> None:
     """

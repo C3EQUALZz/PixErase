@@ -8,6 +8,7 @@ from fastapi import APIRouter, Security, status
 
 from pix_erase.application.common.views.user.read_user_by_id import ReadUserByIDView
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler, ReadAllUsersQuery
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 from pix_erase.presentation.http.v1.routes.user.read_all.schemas import (
     ReadAllUsersRequestSchema,
@@ -29,6 +30,13 @@ read_all_router: Final[APIRouter] = APIRouter(
     response_model=ReadAllUsersResponseSchema,
     summary="Get all users",
     description=getdoc(ReadAllUsersQueryHandler),
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
 )
 async def read_all_handler(
         request_schema: ReadAllUsersRequestSchema,

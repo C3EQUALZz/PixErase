@@ -9,6 +9,7 @@ from pydantic import EmailStr
 from starlette import status
 
 from pix_erase.application.commands.user.change_user_email import ChangeUserEmailCommandHandler, ChangeUserEmailCommand
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 
 change_user_email_router: Final[APIRouter] = APIRouter(
@@ -36,6 +37,14 @@ EmailBodyParameter = Body(
     summary="Change user email",
     description=getdoc(ChangeUserEmailCommandHandler),
     dependencies=[Security(cookie_scheme)],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
+        status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
 )
 async def change_user_email_by_id(
         user_id: Annotated[UUID, UserIDPathParameter],
