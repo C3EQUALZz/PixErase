@@ -31,7 +31,8 @@ def upgrade() -> None:
     op.create_table(
         "users",
         sa.Column("id", sa.UUID(), nullable=False),
-        sa.Column("username", sa.String(length=20), nullable=False),
+        sa.Column("name", sa.String(length=20), nullable=False),
+        sa.Column("email", sa.String(length=50), nullable=False, unique=True),
         sa.Column("password_hash", sa.LargeBinary(), nullable=False),
         sa.Column(
             "role",
@@ -41,6 +42,8 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("is_active", sa.Boolean(), nullable=False),
+        sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+        sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_users")),
         sa.UniqueConstraint("username", name=op.f("uq_users_username")),
     )

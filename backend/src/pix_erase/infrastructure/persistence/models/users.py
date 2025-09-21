@@ -11,10 +11,10 @@ from pix_erase.infrastructure.persistence.models.base import mapper_registry
 users_table: sa.Table = sa.Table(
     "users",
     mapper_registry.metadata,
-    sa.Column("user_id", sa.UUID(as_uuid=True), primary_key=True),
-    sa.Column("email", sa.String(255), nullable=False, unique=True),
-    sa.Column("name", sa.String(255), nullable=False),
-    sa.Column("hashed_password", sa.String(255), nullable=False),
+    sa.Column("id", sa.UUID(as_uuid=True), primary_key=True),
+    sa.Column("email", sa.String(50), nullable=False, unique=True),
+    sa.Column("name", sa.String(20), nullable=False),
+    sa.Column("hashed_password", sa.LargeBinary(), nullable=False),
     sa.Column("role", sa.Enum(UserRole), nullable=False),
     sa.Column("is_active", sa.Boolean, nullable=False),
     sa.Column(

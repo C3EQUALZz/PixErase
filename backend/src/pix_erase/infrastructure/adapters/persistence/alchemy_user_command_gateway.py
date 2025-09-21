@@ -2,7 +2,7 @@ from sqlalchemy import Delete, delete, select, Select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import override
-
+from typing import Final
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.values.user_email import UserEmail
@@ -13,7 +13,7 @@ from pix_erase.infrastructure.errors.transaction_manager import RepoError
 
 class SqlAlchemyUserCommandGateway(UserCommandGateway):
     def __init__(self, session: AsyncSession) -> None:
-        self._session = session
+        self._session: Final[AsyncSession] = session
 
     @override
     async def add(self, user: User) -> None:
