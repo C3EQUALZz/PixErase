@@ -55,7 +55,7 @@ class UserService(DomainService):
         NOTE:
             - produces event that user was created.
         """
-        if role.is_assignable:
+        if not role.is_assignable:
             msg: str = f"Assignment of role: {role} not permitted."
             raise RoleAssignmentNotPermittedError(msg)
 
