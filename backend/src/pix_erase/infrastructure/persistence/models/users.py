@@ -4,7 +4,6 @@ from sqlalchemy.orm import composite
 from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.values.hashed_password import HashedPassword
 from pix_erase.domain.user.values.user_email import UserEmail
-from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.domain.user.values.user_name import Username
 from pix_erase.domain.user.values.user_role import UserRole
 from pix_erase.infrastructure.persistence.models.base import mapper_registry
@@ -41,7 +40,7 @@ def map_users_table() -> None:
         User,
         users_table,
         properties={
-            "id": composite(UserID, users_table.c.user_id),
+            "id": users_table.c.user_id,
             "email": composite(UserEmail, users_table.c.email),
             "name": composite(Username, users_table.c.name),
             "hashed_password": composite(HashedPassword, users_table.c.hashed_password),

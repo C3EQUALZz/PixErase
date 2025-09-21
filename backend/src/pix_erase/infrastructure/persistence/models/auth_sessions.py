@@ -1,7 +1,5 @@
 from sqlalchemy import UUID, Column, DateTime, String, Table
-from sqlalchemy.orm import composite
 
-from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.infrastructure.auth.session.model import AuthSession
 from pix_erase.infrastructure.persistence.models.base import mapper_registry
 
@@ -20,7 +18,7 @@ def map_auth_sessions_table() -> None:
         auth_sessions_table,
         properties={
             "id_": auth_sessions_table.c.id,
-            "user_id": composite(UserID, auth_sessions_table.c.user_id),
+            "user_id": auth_sessions_table.c.user_id,
             "expiration": auth_sessions_table.c.expiration,
         },
         column_prefix="_",
