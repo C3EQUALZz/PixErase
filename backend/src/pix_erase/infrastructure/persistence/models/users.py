@@ -19,14 +19,14 @@ users_table: sa.Table = sa.Table(
     sa.Column("is_active", sa.Boolean, nullable=False),
     sa.Column(
         "created_at",
-        sa.DateTime,
+        sa.DateTime(timezone=True),
         default=sa.func.now(),
         server_default=sa.func.now(),
         nullable=False,
     ),
     sa.Column(
         "updated_at",
-        sa.DateTime,
+        sa.DateTime(timezone=True),
         default=sa.func.now(),
         server_default=sa.func.now(),
         onupdate=sa.func.now(),

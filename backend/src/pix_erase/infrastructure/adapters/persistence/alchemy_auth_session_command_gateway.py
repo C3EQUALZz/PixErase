@@ -45,7 +45,7 @@ class SQLAlchemyAuthSessionCommandGateway(AuthSessionGateway):
     @override
     async def delete(self, auth_session_id: str) -> None:
         delete_stmt: Delete = delete(AuthSession).where(
-            AuthSession.user_id == user_id,  # type: ignore # noqa: PGH003
+            AuthSession.user_id == auth_session_id,  # type: ignore # noqa: PGH003
         )
 
         try:
