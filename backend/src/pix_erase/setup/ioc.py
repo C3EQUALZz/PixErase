@@ -15,6 +15,7 @@ from pix_erase.application.common.ports.user.command_gateway import UserCommandG
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
 from pix_erase.application.common.services.auth_session import AuthSessionService
 from pix_erase.application.common.services.current_user import CurrentUserService
+from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
 from pix_erase.domain.user.ports.password_hasher import PasswordHasher
 from pix_erase.domain.user.services.user_service import UserService
@@ -25,7 +26,8 @@ from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtSecret
 from pix_erase.infrastructure.adapters.auth.secrets_auth_session_generator import SecretsAuthSessionIdGenerator
 from pix_erase.infrastructure.adapters.common.bazario_event_bus import BazarioEventBus
 from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper, BcryptPasswordHasher
-from pix_erase.infrastructure.adapters.common.user_id_generator import UuidUserIdGenerator
+from pix_erase.infrastructure.adapters.common.uuid4_user_id_generator import UUID4UserIdGenerator
+from pix_erase.infrastructure.adapters.common.uuid4_image_id_generator import UUID4ImageIdGenerator
 from pix_erase.infrastructure.adapters.persistence.alchemy_auth_session_command_gateway import (
     SQLAlchemyAuthSessionCommandGateway
 )
@@ -98,7 +100,8 @@ def auth_ports_provider() -> Provider:
 def domain_ports_provider() -> Provider:
     provider: Final[Provider] = Provider(scope=Scope.REQUEST)
     provider.provide(source=BcryptPasswordHasher, provides=PasswordHasher)
-    provider.provide(source=UuidUserIdGenerator, provides=UserIdGenerator)
+    provider.provide(source=UUID4UserIdGenerator, provides=UserIdGenerator)
+    provider.provide(source=UUID4ImageIdGenerator, provides=ImageIdGenerator)
     provider.provide(source=UserService)
     return provider
 

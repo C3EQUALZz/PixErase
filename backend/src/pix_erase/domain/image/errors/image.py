@@ -1,5 +1,9 @@
 from pix_erase.domain.common.errors.base import DomainFieldError
 
 
-class NumberCannotBeNegativeError(DomainFieldError):
+class BadImageSizeError(DomainFieldError):
+    ...
+
+
+class BadImageNameError(DomainFieldError):
     ...
