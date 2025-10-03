@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 from pix_erase.domain.common.entities.base_aggregate import BaseAggregateRoot
+from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.user.values.hashed_password import HashedPassword
 from pix_erase.domain.user.values.user_email import UserEmail
 from pix_erase.domain.user.values.user_id import UserID
@@ -26,5 +27,6 @@ class User(BaseAggregateRoot[UserID]):
     email: UserEmail
     name: Username
     hashed_password: HashedPassword
-    role: UserRole = field(default_factory=lambda: UserRole.ANNOTATOR)
+    role: UserRole = field(default_factory=lambda: UserRole.USER)
     is_active: bool = field(default_factory=lambda: True)
+    images: list[ImageID] = field(default_factory=lambda: [])

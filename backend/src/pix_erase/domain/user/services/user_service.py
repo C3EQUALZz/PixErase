@@ -2,13 +2,14 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Final
 
 from pix_erase.domain.common.services.base import DomainService
+from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.errors.user import RoleAssignmentNotPermittedError
 from pix_erase.domain.user.events import (
     UserChangedEmailEvent,
     UserChangedNameEvent,
     UserChangedPasswordEvent,
-    UserCreatedEvent,
+    UserCreatedEvent, UserAddedPhotoEvent,
 )
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
 from pix_erase.domain.user.ports.password_hasher import PasswordHasher
@@ -28,20 +29,20 @@ class UserService(DomainService):
     """
 
     def __init__(
-        self,
-        password_hash_service: PasswordHasher,
-        user_id_generator: UserIdGenerator,
+            self,
+            password_hash_service: PasswordHasher,
+            user_id_generator: UserIdGenerator,
     ) -> None:
         super().__init__()
         self._password_hasher: Final[PasswordHasher] = password_hash_service
         self._user_id_generator: Final[UserIdGenerator] = user_id_generator
 
     def create(
-        self,
-        email: UserEmail,
-        name: Username,
-        raw_password: RawPassword,
-        role: UserRole = UserRole.USER,
+            self,
+            email: UserEmail,
+            name: Username,
+            raw_password: RawPassword,
+            role: UserRole = UserRole.USER,
     ) -> User:
         """
         Fabric method that creates a new user.
@@ -168,6 +169,17 @@ class UserService(DomainService):
             new_email=str(new_email),
             role=str(user.role),
             name=str(user.name),
+        )
+
+        self._record_event(new_event)
+
+    def add_image(self, user: User, image: Image) -> None:
+        user.images.append(image.id)
+        user.updated_at = datetime.now(UTC)
+
+        new_event: UserAddedPhotoEvent = UserAddedPhotoEvent(
+            user_id=user.id,
+            photo_id=image.id,
         )
 
         self._record_event(new_event)

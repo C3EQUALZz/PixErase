@@ -28,6 +28,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "aioboto3>=15.1.0",
     "alembic>=1.16.5",
     "asyncpg>=0.30.0",
     "bazario>=0.4.2",
@@ -36,6 +37,7 @@ dependencies = [
     "fastapi>=0.116.2",
     "opencv-python>=4.12.0.88",
     "orjson>=3.11.3",
+    "pillow>=11.3.0",
     "pydantic[email]>=2.11.9",
     "pyjwt>=2.10.1",
     "sqlalchemy>=2.0.43",

@@ -34,10 +34,9 @@ class ImageService(DomainService):
             image_name: ImageName,
             image_height: ImageSize,
             image_width: ImageSize,
-            data: bytes
+            data: bytes,
     ) -> Image:
         logger.debug("Started creating new image in service")
-
         id_for_image: ImageID = self._id_generator()
 
         new_image: Image = Image(
@@ -54,23 +53,17 @@ class ImageService(DomainService):
         image.name = new_image_name
         image.updated_at = datetime.now()
 
-    def convert_color_to_gray(self, image: Image) -> Image:
+    def convert_color_to_gray(self, image: Image) -> None:
         logger.debug("Started converting color to gray, image name: %s", image.name)
 
         converted_data: bytes = self._color_to_gray_converter.convert(
             data=image.data
         )
 
-        logger.debug("Successfully converted color to gray, image name: %s", image.name)
+        image.data = converted_data
+        image.updated_at = datetime.now()
 
-        return self.create(
-            image_name=image.name,
-            image_height=image.height,
-            image_width=image.width,
-            data=converted_data
-        )
-
-    def compress_image(self, image: Image, quality: int = 90) -> Image:
+    def compress_image(self, image: Image, quality: int = 90) -> None:
         logger.debug("Started compressing image, image name: %s", image.name)
 
         converted_data: bytes = self._compress_converter.convert(
@@ -80,14 +73,10 @@ class ImageService(DomainService):
 
         logger.debug("Successfully compressed image, image name: %s", image.name)
 
-        return self.create(
-            image_name=image.name,
-            image_height=image.height,
-            image_width=image.width,
-            data=converted_data
-        )
+        image.data = converted_data
+        image.updated_at = datetime.now()
 
-    def rotate_image(self, image: Image, angle: int = 90) -> Image:
+    def rotate_image(self, image: Image, angle: int = 90) -> None:
         logger.debug("Started rotating image, image name: %s", image.name)
 
         converted_data: bytes = self._rotation_converter.convert(
@@ -97,11 +86,7 @@ class ImageService(DomainService):
 
         logger.debug("Successfully rotated image, image name: %s", image.name)
 
-        return self.create(
-            image_name=image.name,
-            image_height=image.height,
-            image_width=image.width,
-            data=converted_data
-        )
+        image.data = converted_data
+        image.updated_at = datetime.now()
 
 

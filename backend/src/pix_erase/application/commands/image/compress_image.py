@@ -15,17 +15,12 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class ConvertImageToGrayscaleCommand:
+class CompressImageCommand:
     image_id: UUID
 
 
 @final
-class ConvertImageToGrayscaleCommandHandler:
-    """
-    - Opens to everyone.
-    - Async processing, non-blocking.
-    - Changes provided with current image.
-    """
+class CompressImageCommandHandler:
     def __init__(
             self,
             image_storage: ImageStorage,
@@ -36,10 +31,10 @@ class ConvertImageToGrayscaleCommandHandler:
         self._task_manager: Final[ImageTaskManager] = task_manager
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: ConvertImageToGrayscaleCommand) -> None:
+    async def __call__(self, data: CompressImageCommand) -> None:
         logger.info(
-            "Started converting image to grayscale, image_name: %s",
-            data.image_id
+            "Started compressing image with id: %s",
+            data.image_id,
         )
 
         logger.info("Getting current user id")
@@ -54,4 +49,9 @@ class ConvertImageToGrayscaleCommandHandler:
             msg = f"Failed to found image with id: {data.image_id}"
             raise ImageNotFoundError(msg)
 
-        await self._task_manager.convert_to_grayscale(image_id=image.id)
+        await self._task_manager.compress(image_id=typed_image_id)
+
+        logger.info(
+            "Successfully send image for compressing in task manager, image_id: %s",
+            image.id,
+        )

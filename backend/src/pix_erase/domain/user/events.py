@@ -54,3 +54,9 @@ class UserChangedRoleEvent(BaseDomainEvent):
 class UserToggleActivationEvent(BaseDomainEvent):
     user_id: UUID
     is_active: bool
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class UserAddedPhotoEvent(BaseDomainEvent):
+    user_id: UUID
+    photo_id: UUID

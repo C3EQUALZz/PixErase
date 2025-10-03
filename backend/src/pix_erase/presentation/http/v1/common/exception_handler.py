@@ -27,6 +27,7 @@ from pix_erase.domain.user.errors.user import WrongUserAccountEmailFormatError, 
 from pix_erase.infrastructure.errors.base import InfrastructureError
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
 from pix_erase.infrastructure.errors.transaction_manager import RepoError, EntityAddError, RollbackError
+from pix_erase.presentation.errors.image import BadFileFormatError
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ class ExceptionHandler:
             PasswordCantBeEmptyError: status.HTTP_400_BAD_REQUEST,
             UserAccountNameCantBeEmptyError: status.HTTP_400_BAD_REQUEST,
             TooBigUserAccountNameError: status.HTTP_400_BAD_REQUEST,
+            BadFileFormatError: status.HTTP_400_BAD_REQUEST,
             # 401
             AuthenticationError: status.HTTP_401_UNAUTHORIZED,
             # 403
