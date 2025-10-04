@@ -6,7 +6,7 @@ from uuid import UUID
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
 from pix_erase.application.common.services.current_user import CurrentUserService
-from pix_erase.application.errors.image import ImageNotFoundError, ImageDoesntBelongToThisUserError
+from pix_erase.application.errors.image import ImageNotFoundError
 from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.user.entities.user import User
@@ -15,19 +15,17 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class CompressImageCommand:
+class ConvertImageToGrayscaleCommand:
     image_id: UUID
-    quality: int
 
 
 @final
-class CompressImageCommandHandler:
+class GrayscaleImageCommandHandler:
     """
     - Opens to everyone.
     - Async processing, non-blocking.
     - Changes existing image.
     """
-
     def __init__(
             self,
             image_storage: ImageStorage,
@@ -38,10 +36,10 @@ class CompressImageCommandHandler:
         self._task_manager: Final[ImageTaskManager] = task_manager
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: CompressImageCommand) -> None:
+    async def __call__(self, data: ConvertImageToGrayscaleCommand) -> None:
         logger.info(
-            "Started compressing image with id: %s",
-            data.image_id,
+            "Started converting image to grayscale, image_name: %s",
+            data.image_id
         )
 
         logger.info("Getting current user id")
@@ -50,19 +48,10 @@ class CompressImageCommandHandler:
 
         typed_image_id: ImageID = cast(ImageID, data.image_id)
 
-        if typed_image_id not in current_user.images:
-            msg = f"Image with id: {data.image_id} doesnt belong to this user."
-            raise ImageDoesntBelongToThisUserError(msg)
-
         image: Image | None = await self._image_storage.read_by_id(image_id=typed_image_id)
 
         if image is None:
             msg = f"Failed to found image with id: {data.image_id}"
             raise ImageNotFoundError(msg)
 
-        await self._task_manager.compress(image_id=typed_image_id, quality=data.quality)
-
-        logger.info(
-            "Successfully send image for compressing in task manager, image_id: %s",
-            image.id,
-        )
+        await self._task_manager.convert_to_grayscale(image_id=image.id)

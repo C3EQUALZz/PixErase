@@ -114,3 +114,7 @@ class AiobotocoreS3ImageStorage(ImageStorage):
         except Exception as e:
             logger.exception(DELETE_FILE_FAILED)
             raise FileStorageError(DELETE_FILE_FAILED) from e
+
+    @override
+    async def update(self, image: Image) -> None:
+        ...

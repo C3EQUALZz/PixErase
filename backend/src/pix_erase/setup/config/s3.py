@@ -9,7 +9,7 @@ class S3Config(BaseModel):
     signature_version: str = "s3v4"
     region_name: str = "us-east-1"
 
-    images_bucket_name: str = Field(..., alias="IMAGES_BUCKET_NAME")
+    images_bucket_name: str = Field(..., alias="MINIO_IMAGES_BUCKET")
 
     @property
     def uri(self) -> str:

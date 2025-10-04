@@ -13,5 +13,9 @@ class ImageTaskManager(Protocol):
         ...
 
     @abstractmethod
-    async def compress(self, image_id: ImageID) -> TaskID:
+    async def compress(self, image_id: ImageID, quality: int) -> TaskID:
+        ...
+
+    @abstractmethod
+    async def rotate(self, image_id: ImageID, angle: int) -> TaskID:
         ...

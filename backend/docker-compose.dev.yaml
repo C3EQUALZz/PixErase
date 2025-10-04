@@ -57,10 +57,19 @@ x-api-environment: &x-api-environment
   SESSION_REFRESH_THRESHOLD: ${SESSION_REFRESH_THRESHOLD}
   SECURE: ${SECURE}
 
+x-minio-environment: &x-minio-environment
+  MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+  MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+  MINIO_DEFAULT_BUCKETS: ${MINIO_DEFAULT_BUCKETS}
+  MINIO_SCHEME: http
+  MINIO_PORT: ${MINIO_PORT}
+  MINIO_UI_PORT: ${MINIO_UI_PORT}
+  MINIO_SKIP_CLIENT: yes
+
 services:
   postgres:
     <<: *default
-    profiles: [ "api" ]
+    profiles: [ "api", "db" ]
     container_name: pix_erase.postgres
     hostname: pix_erase.postgres
     image: postgres:16.10-alpine3.22
@@ -95,7 +104,7 @@ services:
       context: .
       dockerfile: ./deploy/dev/pix_erase/Dockerfile
     environment:
-      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment ]
+      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment, *x-minio-environment ]
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
       RABBIT_HOST: rabbitmq
@@ -136,7 +145,7 @@ services:
       context: .
       dockerfile: ./deploy/dev/pix_erase/Dockerfile
     environment:
-      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment ]
+      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment, *x-minio-environment ]
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
       RABBIT_HOST: rabbitmq
@@ -161,7 +170,7 @@ services:
 
   redis:
     <<: *default
-    profiles: [ "api" ]
+    profiles: [ "api", "cache" ]
     image: redis:8.0.2-alpine
     container_name: pix_erase.redis
     hostname: pix_erase.redis
@@ -189,7 +198,7 @@ services:
 
   rabbitmq:
     <<: *default
-    profiles: [ "api" ]
+    profiles: [ "api", "rabbit" ]
     image: rabbitmq:4.0-management-alpine
     container_name: pix_erase.rabbitmq
     hostname: pix_erase.rabbitmq
@@ -219,10 +228,37 @@ services:
     env_file:
       - .env
 
+  minio:
+    <<: *default
+    profiles: [ "api", "s3" ]
+    image: bitnami/minio:2024.7.26
+    container_name: pix_erase.minio
+    hostname: pix_erase.minio
+    ports:
+      - 127.0.0.1:${MINIO_PORT}:${MINIO_PORT}
+      - 127.0.0.1:${MINIO_UI_PORT}:${MINIO_UI_PORT}
+    environment:
+      <<: *x-minio-environment
+    entrypoint: /bin/sh -cx "/usr/local/bin/minio_entrypoint.sh"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD", "curl", "-k", "http://localhost:$MINIO_PORT/minio/health/live" ]
+    volumes:
+      - pix_erase.minio.data:/data
+      - ./deploy/dev/minio/minio_entrypoint.sh:/usr/local/bin/minio_entrypoint.sh
+
 volumes:
   pix_erase.postgres.data: {}
   pix_erase.redis.data: {}
   pix_erase.rabbitmq.data: {}
+  pix_erase.minio.data: {}
 
 networks:
   overlay:

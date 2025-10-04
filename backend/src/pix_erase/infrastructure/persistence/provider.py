@@ -2,6 +2,8 @@ import logging
 from collections.abc import AsyncIterator
 from typing import Final
 
+from aioboto3 import Session
+from aiobotocore.client import AioBaseClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -13,13 +15,14 @@ from pix_erase.setup.config.database import (
     PostgresConfig,
     SQLAlchemyConfig,
 )
+from pix_erase.setup.config.s3 import S3Config
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 async def get_engine(
-    postgres_config: PostgresConfig,
-    alchemy_config: SQLAlchemyConfig,
+        postgres_config: PostgresConfig,
+        alchemy_config: SQLAlchemyConfig,
 ) -> AsyncIterator[AsyncEngine]:
     """Creates and manages the lifecycle of an async SQLAlchemy engine.
 
@@ -57,8 +60,8 @@ async def get_engine(
 
 
 async def get_sessionmaker(
-    engine: AsyncEngine,
-    alchemy_config: SQLAlchemyConfig,
+        engine: AsyncEngine,
+        alchemy_config: SQLAlchemyConfig,
 ) -> async_sessionmaker[AsyncSession]:
     """Creates an async session factory bound to an engine.
 
@@ -87,7 +90,7 @@ async def get_sessionmaker(
 
 
 async def get_session(
-    session_factory: async_sessionmaker[AsyncSession],
+        session_factory: async_sessionmaker[AsyncSession],
 ) -> AsyncIterator[AsyncSession]:
     """Provides an async database session context manager.
 
@@ -112,3 +115,16 @@ async def get_session(
         yield session
         logger.debug("Closing async session.")
     logger.debug("Async session closed.")
+
+
+async def get_s3_session(s3_config: S3Config) -> AsyncIterator[Session]:
+    yield Session(
+        aws_access_key_id=s3_config.aws_access_key_id,
+        aws_secret_access_key=s3_config.aws_secret_access_key,
+        region_name=s3_config.region_name,
+    )
+
+
+async def get_s3_client(session: Session, s3_config: S3Config) -> AsyncIterator[AioBaseClient]:
+    async with session.client("s3", endpoint_url=s3_config.uri) as s3:
+        yield s3
