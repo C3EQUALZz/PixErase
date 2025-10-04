@@ -65,6 +65,7 @@ class AiobotocoreS3ImageStorage(ImageStorage):
     @override
     async def read_by_id(self, image_id: ImageID) -> Image | None:
         s3_key: str = f"images/{image_id!s}"
+        logger.debug("Build s3 key for storage: %s", s3_key)
 
         try:
             response = await self._client.get_object(Bucket=self._bucket_name, Key=s3_key)
@@ -99,6 +100,7 @@ class AiobotocoreS3ImageStorage(ImageStorage):
     @override
     async def delete_by_id(self, image_id: ImageID) -> None:
         s3_key: str = f"images/{image_id}"
+        logger.debug("Build s3 key for storage: %s", s3_key)
 
         try:
             await self._client.delete_object(Bucket=self._bucket_name, Key=s3_key)
@@ -119,4 +121,34 @@ class AiobotocoreS3ImageStorage(ImageStorage):
 
     @override
     async def update(self, image: Image) -> None:
-        ...
+        try:
+            s3_key: str = f"images/{image.id}"
+            logger.debug("Build s3 key for storage: %s", s3_key)
+
+            await self._client.upload_fileobj(
+                io.BytesIO(image.data),
+                self._bucket_name,
+                s3_key,
+                ExtraArgs={
+                    "Metadata": {
+                        "original_filename": image.name.value,
+                        "height": str(image.height.value),
+                        "width": str(image.width.value),
+                        "created_at": image.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                        "updated_at": image.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                    },
+                    "ContentType": "application/octet-stream",
+                }
+            )
+
+        except EndpointConnectionError as e:
+            logger.exception(UPLOAD_FILE_FAILED)
+            raise FileStorageError(UPLOAD_FILE_FAILED) from e
+
+        except ClientError as e:
+            logger.exception(UPLOAD_FILE_FAILED)
+            raise FileStorageError(UPLOAD_FILE_FAILED) from e
+
+        except Exception as e:
+            logger.exception(UPLOAD_FILE_FAILED)
+            raise FileStorageError(UPLOAD_FILE_FAILED) from e

@@ -6,6 +6,7 @@ from pix_erase.presentation.http.v1.routes.image.compress_image.handlers import 
 from pix_erase.presentation.http.v1.routes.image.create_image.handlers import create_image_router
 from pix_erase.presentation.http.v1.routes.image.grayscale_image.handlers import grayscale_image_router
 from pix_erase.presentation.http.v1.routes.image.rotate_image.handlers import rotate_image_router
+from pix_erase.presentation.http.v1.routes.image.delete_image.handlers import delete_image_router
 
 image_router: Final[APIRouter] = APIRouter(
     prefix="/image",
@@ -17,6 +18,7 @@ sub_routers: Final[Iterable[APIRouter]] = (
     compress_image_router,
     create_image_router,
     grayscale_image_router,
+    delete_image_router,
 )
 
 for sub_router in sub_routers:
