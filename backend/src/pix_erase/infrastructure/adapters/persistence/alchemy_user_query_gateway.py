@@ -3,12 +3,11 @@ from collections.abc import Sequence
 from typing import override, Final
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, Select, Result, Row, select
+from sqlalchemy import ColumnElement, Select, Result, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
-from pix_erase.application.common.query_models.user import UserQueryModel
 from pix_erase.application.common.query_params.sorting import SortingOrder
 from pix_erase.application.common.query_params.user_filters import UserListParams
 from pix_erase.domain.user.entities.user import User
@@ -40,7 +39,7 @@ class SqlAlchemyUserQueryGateway(UserQueryGateway):
             raise RepoError(DB_QUERY_FAILED) from error
 
     @override
-    async def read_all_users(self, user_list_params: UserListParams) -> list[UserQueryModel] | None:
+    async def read_all_users(self, user_list_params: UserListParams) -> list[User] | None:
         table_sorting_field: ColumnElement[UUID | str | UserRole | bool] | None = ( # type: ignore
             users_table.c.get(user_list_params.sorting.sorting_field)
         )
@@ -57,12 +56,9 @@ class SqlAlchemyUserQueryGateway(UserQueryGateway):
             else table_sorting_field.desc()
         )
 
-        select_stmt: Select[tuple[UUID, str, UserRole, bool]] = (
+        select_stmt: Select[tuple[User]] = (
             select(
-                users_table.c.id,
-                users_table.c.username,
-                users_table.c.role,
-                users_table.c.is_active,
+                User
             )
             .order_by(order_by)
             .limit(user_list_params.pagination.limit)
@@ -71,19 +67,11 @@ class SqlAlchemyUserQueryGateway(UserQueryGateway):
 
         try:
             result: Result[
-                tuple[UUID, str, UserRole, bool]
+                tuple[User]
             ] = await self._session.execute(select_stmt)
-            rows: Sequence[Row[tuple[UUID, str, UserRole, bool]]] = result.all()
+            rows: Sequence[User] = result.scalars().fetchall()
 
-            return [
-                UserQueryModel(
-                    id=row.id,
-                    username=row.username,
-                    role=row.role,
-                    is_active=row.is_active,
-                )
-                for row in rows
-            ]
+            return list(rows)
 
         except SQLAlchemyError as error:
             raise RepoError(DB_QUERY_FAILED) from error

@@ -42,8 +42,8 @@ async def read_all_handler(
         interactor: FromDishka[ReadAllUsersQueryHandler],
 ) -> ReadAllUsersResponseSchema:
     query: ReadAllUsersQuery = ReadAllUsersQuery(
-        limit=request_schema.pagination.limit,
-        offset=request_schema.pagination.offset,
+        limit=request_schema.limit,
+        offset=request_schema.offset,
         sorting_field=request_schema.sorting_field,
         sorting_order=request_schema.sorting_order
     )

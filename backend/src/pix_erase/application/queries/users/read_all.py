@@ -74,7 +74,7 @@ class ReadAllUsersQueryHandler:
 
         response: list[ReadUserByIDView] = [
             ReadUserByIDView(
-                user_id=user.id,
+                id=user.id,
                 email=str(user.email),
                 name=str(user.name),
                 role=user.role
