@@ -58,7 +58,7 @@ class CreateImageCommandHandler:
         metadata_from_image: ImageInfo = await self._image_extractor.extract(
             data=data.data
         )
-        logger.info("Successfully got metadata from image with name: %s", metadata_from_image.name)
+        logger.info("Successfully got metadata from image with name: %s", data.filename)
 
         logger.info("Creating a new image entity with name: %s", data.filename)
         new_image: Image = self._image_service.create(

@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from pix_erase.application.common.views.auth.sign_up import SignUpView
 
 sign_up_router: Final[APIRouter] = APIRouter(
-    prefix="/auth",
     tags=["Auth"],
     route_class=DishkaRoute,
 )

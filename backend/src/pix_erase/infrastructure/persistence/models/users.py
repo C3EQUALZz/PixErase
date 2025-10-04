@@ -34,6 +34,20 @@ users_table: sa.Table = sa.Table(
     ),
 )
 
+user_images_table: sa.Table = sa.Table(
+    "user_images",
+    mapper_registry.metadata,
+    sa.Column("user_id", sa.UUID(as_uuid=True), sa.ForeignKey("users.id"), primary_key=True),
+    sa.Column("image_id", sa.UUID(as_uuid=True), primary_key=True),
+    sa.Column(
+        "created_at",
+        sa.DateTime(timezone=True),
+        default=sa.func.now(),
+        server_default=sa.func.now(),
+        nullable=False,
+    ),
+)
+
 
 def map_users_table() -> None:
     mapper_registry.map_imperatively(
@@ -48,6 +62,14 @@ def map_users_table() -> None:
             "is_active": users_table.c.is_active,
             "created_at": users_table.c.created_at,
             "updated_at": users_table.c.updated_at,
+            "images": sa.orm.relationship(
+                "ImageID",
+                secondary=user_images_table,
+                primaryjoin=users_table.c.id == user_images_table.c.user_id,
+                secondaryjoin=user_images_table.c.image_id == sa.text("image_id"),
+                collection_class=list,
+                lazy="select",  # или "joined" если всегда нужны image_ids
+            ),
         },
         column_prefix="_"
     )

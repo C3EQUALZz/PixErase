@@ -27,7 +27,9 @@ from pix_erase.application.commands.user.revoke_admin_by_id import RevokeAdminBy
 from pix_erase.application.common.ports.access_revoker import AccessRevoker
 from pix_erase.application.common.ports.event_bus import EventBus
 from pix_erase.application.common.ports.identity_provider import IdentityProvider
+from pix_erase.application.common.ports.image.extractor import ImageInfoExtractor
 from pix_erase.application.common.ports.image.storage import ImageStorage
+from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
@@ -60,6 +62,7 @@ from pix_erase.infrastructure.adapters.image_converters.cv2_image_color_to_gray_
     Cv2ImageColorToCrayScaleConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_compress_converter import Cv2ImageCompressConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_crop_converter import Cv2ImageCropConverter
+from pix_erase.infrastructure.adapters.image_converters.exif_image_extractor import ExifImageInfoExtractor
 from pix_erase.infrastructure.adapters.image_converters.сv2_image_rotation_converter import Cv2ImageRotationConverter
 from pix_erase.infrastructure.adapters.persistence.aiobotocore_file_storage import AiobotocoreS3ImageStorage
 from pix_erase.infrastructure.adapters.persistence.alchemy_auth_session_command_gateway import (
@@ -89,8 +92,10 @@ from pix_erase.infrastructure.persistence.provider import (
     get_s3_session,
     get_s3_client
 )
+from pix_erase.infrastructure.task_manager.task_iq_image_task_manager import TaskIQImageTaskManager
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.database import PostgresConfig
+from pix_erase.setup.config.s3 import S3Config
 
 
 def configs_provider() -> Provider:
@@ -103,6 +108,7 @@ def configs_provider() -> Provider:
     provider.from_context(provides=AuthSessionTtlMin)
     provider.from_context(provides=AuthSessionRefreshThreshold)
     provider.from_context(provides=CookieParams)
+    provider.from_context(provides=S3Config)
     return provider
 
 
@@ -175,6 +181,13 @@ def registry_provider() -> Registry:
     return registry
 
 
+def application_ports_provider() -> Provider:
+    provider: Final[Provider] = Provider(scope=Scope.REQUEST)
+    provider.provide(source=TaskIQImageTaskManager, provides=ImageTaskManager)
+    provider.provide(source=ExifImageInfoExtractor, provides=ImageInfoExtractor)
+    return provider
+
+
 def event_bus_provider() -> Provider:
     provider: Final[Provider] = Provider(scope=Scope.REQUEST)
     provider.provide(registry_provider)
@@ -228,5 +241,6 @@ def setup_providers() -> Iterable[Provider]:
         gateways_provider(),
         interactors_provider(),
         event_bus_provider(),
-        s3_provider()
+        s3_provider(),
+        application_ports_provider()
     )

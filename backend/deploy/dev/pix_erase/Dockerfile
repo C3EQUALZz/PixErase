@@ -4,7 +4,7 @@ WORKDIR /app
 COPY ./pyproject.toml ./alembic.ini ./deploy/dev/pix_erase/api_entrypoint.sh ./deploy/dev/pix_erase/worker_entrypoint.sh ./
 COPY ./src ./src
 
-RUN uv pip install --system --no-cache --target dependencies ".[dev]"
+RUN uv pip install --system --no-cache --target dependencies "."
 
 
 FROM python:3.12-slim AS production

@@ -16,7 +16,6 @@ from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie
 
 grant_admin_router: Final[APIRouter] = APIRouter(
     tags=["User"],
-    prefix="/user",
     route_class=DishkaRoute,
 )
 

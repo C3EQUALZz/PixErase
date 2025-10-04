@@ -11,6 +11,7 @@ from pix_erase.setup.bootstrap import setup_map_tables, setup_task_manager
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
+from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.settings import AppConfig
 from pix_erase.setup.ioc import setup_providers
 
@@ -24,25 +25,26 @@ async def shutdown(state: TaskiqState) -> None:  # noqa: ARG001
 
 
 def create_taskiq_app() -> AsyncBroker:
-    config: AppConfig = AppConfig()
+    configs: AppConfig = AppConfig()
     task_manager: AsyncBroker = setup_task_manager(
-        taskiq_config=config.worker, rabbitmq_config=config.rabbitmq, redis_config=config.redis
+        taskiq_config=configs.worker, rabbitmq_config=configs.rabbitmq, redis_config=configs.redis
     )
 
     task_manager.on_event(TaskiqEvents.WORKER_STARTUP)(startup)
     task_manager.on_event(TaskiqEvents.CLIENT_SHUTDOWN)(shutdown)
 
     context = {
-        ASGIConfig: config.asgi,
-        RedisConfig: config.redis,
-        SQLAlchemyConfig: config.alchemy,
-        PostgresConfig: config.postgres,
-        JwtSecret: config.security.auth.jwt_secret,
-        PasswordPepper: config.security.password.pepper,
-        JwtAlgorithm: config.security.auth.jwt_algorithm,
-        AuthSessionTtlMin: config.security.auth.session_ttl_min,
-        AuthSessionRefreshThreshold: config.security.auth.session_refresh_threshold,
-        CookieParams: CookieParams(secure=config.security.cookies.secure),
+        ASGIConfig: configs.asgi,
+        RedisConfig: configs.redis,
+        SQLAlchemyConfig: configs.alchemy,
+        PostgresConfig: configs.postgres,
+        JwtSecret: configs.security.auth.jwt_secret,
+        PasswordPepper: configs.security.password.pepper,
+        JwtAlgorithm: configs.security.auth.jwt_algorithm,
+        AuthSessionTtlMin: configs.security.auth.session_ttl_min,
+        AuthSessionRefreshThreshold: configs.security.auth.session_refresh_threshold,
+        CookieParams: CookieParams(secure=configs.security.cookies.secure),
+        S3Config: configs.s3
     }
 
     container: AsyncContainer = make_async_container(*setup_providers(), context=context)

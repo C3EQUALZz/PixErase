@@ -17,7 +17,6 @@ from pix_erase.presentation.http.v1.routes.user.read_all.schemas import (
 from pix_erase.presentation.http.v1.routes.user.read.schemas import ReadUserByIDResponse
 
 read_all_router: Final[APIRouter] = APIRouter(
-    prefix="/user",
     tags=["User"],
     route_class=DishkaRoute,
 )

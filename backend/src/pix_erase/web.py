@@ -24,6 +24,7 @@ from pix_erase.setup.bootstrap import (
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.database import SQLAlchemyConfig, PostgresConfig
+from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.settings import AppConfig
 from pix_erase.setup.ioc import setup_providers
 
@@ -99,6 +100,7 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
         AuthSessionTtlMin: configs.security.auth.session_ttl_min,
         AuthSessionRefreshThreshold: configs.security.auth.session_refresh_threshold,
         CookieParams: CookieParams(secure=configs.security.cookies.secure),
+        S3Config: configs.s3
     }
 
     container: AsyncContainer = make_async_container(*setup_providers(), context=context)

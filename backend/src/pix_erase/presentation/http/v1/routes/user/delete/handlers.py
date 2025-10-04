@@ -11,7 +11,6 @@ from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSch
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 
 delete_router: Final[APIRouter] = APIRouter(
-    prefix="/user",
     route_class=DishkaRoute,
     tags=["User"],
 )

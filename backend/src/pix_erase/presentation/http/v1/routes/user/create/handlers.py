@@ -16,7 +16,6 @@ from pix_erase.presentation.http.v1.routes.user.create.schemas import (
 )
 
 create_user_router: Final[APIRouter] = APIRouter(
-    prefix="/user",
     route_class=DishkaRoute,
     tags=["User"],
 )

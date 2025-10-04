@@ -12,7 +12,7 @@ from pix_erase.application.commands.image.grayscale_image import (
 )
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 
-router: Final[APIRouter] = APIRouter(
+grayscale_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["Image"]
 )
@@ -24,7 +24,7 @@ ImageIDPathParameter = Path(
 )
 
 
-@router.patch(
+@grayscale_image_router.patch(
     "/id/{image_id}/grayscale/",
     status_code=status.HTTP_202_ACCEPTED,
     summary="Convert to grayscale image that user uploaded in system",

@@ -15,7 +15,6 @@ from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSch
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 
 change_user_password_router: Final[APIRouter] = APIRouter(
-    prefix="/user",
     tags=["User"],
     route_class=DishkaRoute,
 )

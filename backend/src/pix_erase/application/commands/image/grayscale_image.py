@@ -6,7 +6,7 @@ from uuid import UUID
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
 from pix_erase.application.common.services.current_user import CurrentUserService
-from pix_erase.application.errors.image import ImageNotFoundError
+from pix_erase.application.errors.image import ImageNotFoundError, ImageDoesntBelongToThisUserError
 from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.user.entities.user import User
@@ -47,6 +47,10 @@ class GrayscaleImageCommandHandler:
         logger.info("Successfully got current user id: %s", current_user.id)
 
         typed_image_id: ImageID = cast(ImageID, data.image_id)
+
+        if typed_image_id not in current_user.images:
+            msg = f"Image with id: {data.image_id} doesnt belong to this user."
+            raise ImageDoesntBelongToThisUserError(msg)
 
         image: Image | None = await self._image_storage.read_by_id(image_id=typed_image_id)
 

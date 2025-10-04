@@ -20,6 +20,7 @@ from pix_erase.presentation.http.v1.middlewares.asgi_auth import ASGIAuthMiddlew
 from pix_erase.presentation.http.v1.middlewares.client_cache import ClientCacheMiddleware
 from pix_erase.presentation.http.v1.middlewares.logs import LoggingMiddleware
 from pix_erase.presentation.http.v1.routes.auth import auth_router
+from pix_erase.presentation.http.v1.routes.image import image_router
 from pix_erase.presentation.http.v1.routes.user import user_router
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
@@ -104,6 +105,7 @@ def setup_http_routes(app: FastAPI, /) -> None:
     router_v1: APIRouter = APIRouter(prefix="/v1")
     router_v1.include_router(auth_router)
     router_v1.include_router(user_router)
+    router_v1.include_router(image_router)
 
     app.include_router(router_v1)
 

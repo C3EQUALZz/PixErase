@@ -10,7 +10,6 @@ from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSch
 from pix_erase.presentation.http.v1.routes.auth.log_in.schemas import LoginSchemaRequest
 
 log_in_router: Final[APIRouter] = APIRouter(
-    prefix="/auth",
     tags=["Auth"],
     route_class=DishkaRoute,
 )

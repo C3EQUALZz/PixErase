@@ -31,7 +31,7 @@ default:
 [doc("Run all containers except web-backend")]
 [group("infra")]
 @infra:
-    docker compose -f {{ DOCKER_COMPOSE_DEV }} up -d db --wait
+    docker compose -f {{ DOCKER_COMPOSE_DEV }} up -d postgres redis rabbitmq minio --wait
 
 [doc("Stop all containers")]
 [group("infra")]

@@ -12,13 +12,13 @@ from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSch
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 from pix_erase.presentation.http.v1.routes.image.create_image.schemas import CreateImageSchemaResponse
 
-router: Final[APIRouter] = APIRouter(
+create_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["Image"],
 )
 
 
-@router.post(
+@create_image_router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
     response_model=CreateImageSchemaResponse,

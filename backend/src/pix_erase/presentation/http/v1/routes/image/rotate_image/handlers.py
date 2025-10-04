@@ -9,7 +9,7 @@ from fastapi import APIRouter, status, Path, Body
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler, RotateImageCommand
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 
-router: Final[APIRouter] = APIRouter(
+rotate_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["Image"]
 )
@@ -23,11 +23,11 @@ ImageIDPathParameter = Path(
 AngleBodyParameter = Body(
     title="Angle for rotating",
     description="The angle value for rotating image",
-    examples=[0, 360, 120, 180]
+    examples=[0, 360, 120, 180, -120],
 )
 
 
-@router.patch(
+@rotate_image_router.patch(
     "/id/{image_id}/rotate/",
     status_code=status.HTTP_202_ACCEPTED,
     summary="Rotates image that user uploaded in system",
