@@ -1,4 +1,4 @@
-from sqlalchemy import Delete, delete, select, Select
+from sqlalchemy import Delete, delete, select, Select, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import override
@@ -59,3 +59,23 @@ class SqlAlchemyUserCommandGateway(UserCommandGateway):
         except SQLAlchemyError as error:
             raise RepoError(DB_QUERY_FAILED) from error
 
+    @override
+    async def update(self, user: User) -> None:
+        update_stmt = (
+            update(User)
+            .where(User.id == user.id) # type: ignore
+            .values(
+                email=user.email,
+                name=user.name,
+                hashed_password=user.hashed_password,
+                role=user.role,
+                is_active=user.is_active,
+                images=user.images,
+                updated_at=user.updated_at
+            )
+        )
+
+        try:
+            await self._session.execute(update_stmt)
+        except SQLAlchemyError as error:
+            raise RepoError(DB_QUERY_FAILED) from error

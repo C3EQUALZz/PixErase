@@ -36,7 +36,7 @@ class ReadCurrentUserHandler:
         logger.info("Read current user identified. User ID: '%s'.", current_user.id)
 
         view: ReadUserByIDView = ReadUserByIDView(
-            user_id=current_user.id,
+            id=current_user.id,
             email=str(current_user.email),
             name=str(current_user.name),
             role=current_user.role,

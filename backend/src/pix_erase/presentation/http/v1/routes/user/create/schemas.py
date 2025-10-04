@@ -34,7 +34,7 @@ class CreateUserSchemaRequest(BaseModel):
         ),
         Field(
             description="User password",
-            examples=["123456789", "SuperBobratus", "Denis Morozov"]
+            examples=["SuperBobratus", "Denis Morozov"]
         )
     ]
     role: Annotated[

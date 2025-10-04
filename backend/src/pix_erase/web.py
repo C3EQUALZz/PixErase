@@ -8,6 +8,7 @@ from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.orm import clear_mappers
+from taskiq import AsyncBroker
 
 from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtSecret, JwtAlgorithm
 from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper
@@ -27,6 +28,7 @@ from pix_erase.setup.config.database import SQLAlchemyConfig, PostgresConfig
 from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.settings import AppConfig
 from pix_erase.setup.ioc import setup_providers
+from pix_erase.worker import create_taskiq_app
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -50,7 +52,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             happens after yield, during the application shutdown phase.
     """
     setup_map_tables()
+    task_manager: AsyncBroker = create_taskiq_app()
+
+    if not task_manager.is_worker_process:
+        logger.info("Setting up taskiq")
+        await task_manager.startup()
+
     yield
+
+    if not task_manager.is_worker_process:
+        logger.info("Shutting down taskiq")
+        await task_manager.shutdown()
+
     clear_mappers()
     await cast("AsyncContainer", app.state.dishka_container).close()
 

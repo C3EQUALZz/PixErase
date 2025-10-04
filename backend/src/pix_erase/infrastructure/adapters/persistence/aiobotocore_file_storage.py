@@ -1,4 +1,6 @@
+import io
 import logging
+from datetime import datetime
 from typing import Final, Any
 
 from aiobotocore.client import AioBaseClient
@@ -33,16 +35,16 @@ class AiobotocoreS3ImageStorage(ImageStorage):
             logger.debug("Build s3 key for storage: %s", s3_key)
 
             await self._client.upload_fileobj(
-                image.data,
+                io.BytesIO(image.data),
                 self._bucket_name,
                 s3_key,
                 ExtraArgs={
                     "Metadata": {
                         "original_filename": image.name.value,
-                        "height": image.height.value,
-                        "width": image.width.value,
-                        "created_at": image.created_at,
-                        "updated_at": image.updated_at,
+                        "height": str(image.height.value),
+                        "width": str(image.width.value),
+                        "created_at": image.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                        "updated_at": image.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                     },
                     "ContentType": "application/octet-stream",
                 }
@@ -88,10 +90,10 @@ class AiobotocoreS3ImageStorage(ImageStorage):
                 id=image_id,
                 name=ImageName(original_filename),
                 data=file_data,
-                created_at=metadata.get("created_at"),
-                updated_at=metadata.get("updated_at"),
-                width=ImageSize(metadata.get("width")),
-                height=ImageSize(metadata.get("height")),
+                created_at=datetime.strptime(metadata.get("created_at"), "%Y-%m-%dT%H:%M:%S.%fZ"),
+                updated_at=datetime.strptime(metadata.get("updated_at"), "%Y-%m-%dT%H:%M:%S.%fZ"),
+                width=ImageSize(int(metadata.get("width"))),
+                height=ImageSize(int(metadata.get("height"))),
             )
 
     @override

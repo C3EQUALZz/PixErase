@@ -126,5 +126,5 @@ async def get_s3_session(s3_config: S3Config) -> AsyncIterator[Session]:
 
 
 async def get_s3_client(session: Session, s3_config: S3Config) -> AsyncIterator[AioBaseClient]:
-    async with session.client("s3", endpoint_url=s3_config.uri) as s3:
+    async with session.client("s3", endpoint_url=s3_config.uri, use_ssl=False) as s3:
         yield s3

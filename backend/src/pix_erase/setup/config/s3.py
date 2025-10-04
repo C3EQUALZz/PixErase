@@ -13,4 +13,4 @@ class S3Config(BaseModel):
 
     @property
     def uri(self) -> str:
-        return f"http://{self.host}/{self.port}"
+        return f"http://{self.host}:{self.port}"

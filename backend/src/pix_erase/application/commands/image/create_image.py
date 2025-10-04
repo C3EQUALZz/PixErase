@@ -5,6 +5,7 @@ from typing import final, Final
 from pix_erase.application.common.ports.image.extractor import ImageInfoExtractor, ImageInfo
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
+from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.image.create_image import CreateImageView
 from pix_erase.domain.image.entities.image import Image
@@ -39,6 +40,7 @@ class CreateImageCommandHandler:
             image_service: ImageService,
             user_service: UserService,
             transaction_manager: TransactionManager,
+            user_command_gateway: UserCommandGateway,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._image_storage: Final[ImageStorage] = image_storage
@@ -46,6 +48,7 @@ class CreateImageCommandHandler:
         self._image_service: Final[ImageService] = image_service
         self._user_service: Final[UserService] = user_service
         self._transaction_manager: Final[TransactionManager] = transaction_manager
+        self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway
 
     async def __call__(self, data: CreateImageCommand) -> CreateImageView:
         logger.info("Started creating new image in system with filename: %s", data.filename)
@@ -75,6 +78,14 @@ class CreateImageCommandHandler:
 
         self._user_service.add_image(user=current_user, image=new_image)
 
+        logger.info(
+            "Added image to user: %s, images from this user: %s",
+            current_user.id,
+            current_user.images
+        )
+
+        await self._user_command_gateway.update(user=current_user)
+        await self._transaction_manager.flush()
         await self._transaction_manager.commit()
 
         view: CreateImageView = CreateImageView(image_id=new_image.id)
