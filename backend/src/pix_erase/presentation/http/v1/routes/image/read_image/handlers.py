@@ -9,6 +9,7 @@ from starlette.responses import StreamingResponse
 
 from pix_erase.application.common.views.image.read_image import ReadImageByIDView
 from pix_erase.application.queries.images.read_by_id import ReadImageByIDQueryHandler, ReadImageByIDQuery
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 
 read_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
@@ -27,7 +28,15 @@ ImageIDPathParameter = Path(
     status_code=status.HTTP_200_OK,
     response_class=StreamingResponse,
     summary="Streaming image by image id",
-    description=getdoc(ReadImageByIDQueryHandler)
+    description=getdoc(ReadImageByIDQueryHandler),
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
 )
 async def read_image_by_id_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],

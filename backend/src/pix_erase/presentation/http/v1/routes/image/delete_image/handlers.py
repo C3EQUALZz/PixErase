@@ -30,6 +30,7 @@ ImageIDPathParameter = Path(
         status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
         status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
         status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
     }
