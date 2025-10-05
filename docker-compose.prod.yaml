@@ -92,8 +92,8 @@ services:
       <<: *hc-interval
     volumes:
       - pix_erase.postgres.data:/var/lib/postgresql/data
-      - ./deploy/dev/postgres/postgresql.conf:/etc/postgresql.conf
-      - ./deploy/dev/postgres/pg_hba.conf:/etc/pg_hba.conf
+      - ./deploy/prod/postgres/postgresql.conf:/etc/postgresql.conf
+      - ./deploy/prod/postgres/pg_hba.conf:/etc/pg_hba.conf
 
   api:
     <<: *default
@@ -188,7 +188,7 @@ services:
       - "127.0.0.1:${REDIS_PORT}:${REDIS_PORT}"
     volumes:
       - pix_erase.redis.data:/data
-      - ./deploy/dev/redis/redis_entrypoint.sh:/usr/local/bin/redis_entrypoint.sh
+      - ./deploy/prod/redis/redis_entrypoint.sh:/usr/local/bin/redis_entrypoint.sh
 
   rabbitmq:
     <<: *default
@@ -227,8 +227,8 @@ services:
     container_name: pix_erase.minio
     hostname: pix_erase.minio
     ports:
-      - 127.0.0.1:${MINIO_PORT}:${MINIO_PORT}
-      - 127.0.0.1:${MINIO_UI_PORT}:${MINIO_UI_PORT}
+      - "127.0.0.1:${MINIO_PORT}:${MINIO_PORT}"
+      - "127.0.0.1:${MINIO_UI_PORT}:${MINIO_UI_PORT}"
     environment:
       <<: *x-minio-environment
     entrypoint: >
@@ -257,6 +257,29 @@ services:
       <<: *hc-interval
     volumes:
       - pix_erase.minio.data:/data
+
+  loki:
+    <<: *default
+    profiles: [ "api", "grafana" ]
+    image: grafana/loki:3.5.2
+    container_name: pix_erase.loki
+    hostname: pix_erase.loki
+    expose:
+      - 3100
+    environment:
+      TZ: ${SYSTEM_TIMEZONE:-Europe/Moscow}
+    command: -config.file=/etc/loki/config.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    volumes:
+      - ./deploy/prod/loki/config.yaml:/etc/loki/config.yaml:ro
+      - pix_erase.loki.data:/tmp/:rw
 
   vector:
     <<: *default
@@ -310,19 +333,88 @@ services:
 
   prometheus:
     <<: *default
-    profiles: [ "grafana" ]
+    profiles: [ "api", "grafana" ]
     image: prom/prometheus:latest
     container_name: pix_erase.prometheus
     hostname: pix_erase.prometheus
     volumes:
-      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/prod/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - pix_erase.prometheus.data:/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --enable-feature=exemplar-storage
-    expose:
-      - 9090
+    environment:
+      TZ: "Europe/Moscow"
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    depends_on:
+      node-exporter:
+        condition: service_healthy
+      cadvisor:
+        condition: service_healthy
 
+  node-exporter:
+    <<: *default
+    profiles: [ "api", "grafana" ]
+    image: prom/node-exporter:v.1.9.1
+    container_name: pix_erase.node_exporter
+    hostname: pix_erase.node_exporter
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "127.0.0.1:${NODE_EXPORTER_PORT}:${NODE_EXPORTER_PORT}"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9100/metrics || exit 1" ]
+      <<: *hc-interval
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: pix_erase.cadvisor
+    hostname: pix_erase.cadvisor
+    ports:
+      - "127.0.0.1:${CADVISOR_PORT}:${CADVISOR_PORT}"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    command:
+      - --port=${CADVISOR_PORT}
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080"]
+      <<: *hc-interval
 
 volumes:
   pix_erase.postgres.data: {}
