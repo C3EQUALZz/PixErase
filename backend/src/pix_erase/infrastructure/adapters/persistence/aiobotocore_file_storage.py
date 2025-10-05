@@ -1,13 +1,14 @@
 import io
 import logging
 from datetime import datetime
-from typing import Final, Any
+from typing import Final, Any, AsyncGenerator
 
 from aiobotocore.client import AioBaseClient
 from botocore.exceptions import EndpointConnectionError, ClientError
 from typing_extensions import override
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
+from pix_erase.application.common.query_models.image import ImageStreamQueryModel
 from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.image.values.image_name import ImageName
@@ -15,7 +16,7 @@ from pix_erase.domain.image.values.image_size import ImageSize
 from pix_erase.infrastructure.adapters.persistence.constants import (
     UPLOAD_FILE_FAILED,
     DOWNLOAD_FILE_FAILED,
-    DELETE_FILE_FAILED
+    DELETE_FILE_FAILED, STREAM_FILE_FAILED
 )
 from pix_erase.infrastructure.errors.file_storage import FileStorageError
 from pix_erase.setup.config.s3 import S3Config
@@ -121,10 +122,10 @@ class AiobotocoreS3ImageStorage(ImageStorage):
 
     @override
     async def update(self, image: Image) -> None:
-        try:
-            s3_key: str = f"images/{image.id}"
-            logger.debug("Build s3 key for storage: %s", s3_key)
+        s3_key: str = f"images/{image.id}"
+        logger.debug("Build s3 key for storage: %s", s3_key)
 
+        try:
             await self._client.upload_fileobj(
                 io.BytesIO(image.data),
                 self._bucket_name,
@@ -146,9 +147,83 @@ class AiobotocoreS3ImageStorage(ImageStorage):
             raise FileStorageError(UPLOAD_FILE_FAILED) from e
 
         except ClientError as e:
+            if e.response["Error"]["Code"] == "NoSuchKey":
+                logger.warning("File not found in S3: %s", s3_key)
+                return
             logger.exception(UPLOAD_FILE_FAILED)
             raise FileStorageError(UPLOAD_FILE_FAILED) from e
 
         except Exception as e:
             logger.exception(UPLOAD_FILE_FAILED)
             raise FileStorageError(UPLOAD_FILE_FAILED) from e
+
+    @override
+    async def stream_by_id(self, image_id: ImageID) -> ImageStreamQueryModel | None:
+        """
+        Получает изображение из S3 в виде стрима
+        Возвращает DTO с генератором байтов и метаданными
+        """
+        s3_key: str = f"images/{image_id!s}"
+        logger.debug("Build s3 key for storage: %s", s3_key)
+
+        try:
+            # Получаем объект из S3
+            response = await self._client.get_object(
+                Bucket=self._bucket_name,
+                Key=s3_key
+            )
+
+            # Извлекаем метаданные
+            metadata: dict[str, Any] = response.get("Metadata", {})
+            original_filename: ImageName = ImageName(metadata.get("original_filename", str(image_id)))
+            content_length = response['ContentLength']
+            content_type = response.get('ContentType', 'application/octet-stream')
+            etag = response.get('ETag')
+            width = ImageSize(int(metadata.get("width")))
+            height = ImageSize(int(metadata.get("height")))
+            created_at = datetime.strptime(metadata.get("created_at"), "%Y-%m-%dT%H:%M:%S.%fZ")
+            updated_at = datetime.strptime(metadata.get("updated_at"), "%Y-%m-%dT%H:%M:%S.%fZ")
+
+            # Создаем асинхронный генератор для стриминга
+            async def chunk_generator() -> AsyncGenerator[bytes, None]:
+                """Генератор, отдающий файл по частям"""
+                stream = response["Body"]
+                try:
+                    # Читаем файл chunks по 64KB (оптимально для сетевой передачи)
+                    chunk_size = 64 * 1024
+                    while True:
+                        chunk = await stream.read(chunk_size)
+                        if not chunk:
+                            break
+                        yield chunk
+                except Exception as e:
+                    logger.error("Error during streaming chunk: %s", e)
+                    raise
+                finally:
+                    await stream.close()
+
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "NoSuchKey":
+                logger.warning("File not found in S3 for streaming: %s", s3_key)
+                return None
+            logger.exception(STREAM_FILE_FAILED)
+            raise FileStorageError(STREAM_FILE_FAILED) from e
+        except EndpointConnectionError as e:
+            logger.exception(STREAM_FILE_FAILED)
+            raise FileStorageError(STREAM_FILE_FAILED) from e
+        except Exception as e:
+            logger.exception(STREAM_FILE_FAILED)
+            raise FileStorageError(STREAM_FILE_FAILED) from e
+
+        else:
+            return ImageStreamQueryModel(
+                stream=chunk_generator(),
+                content_type=content_type,
+                content_length=content_length,
+                filename=original_filename,
+                etag=etag,
+                created_at=created_at,
+                updated_at=updated_at,
+                width=width,
+                height=height,
+            )
