@@ -89,4 +89,5 @@ class ImageService(DomainService):
         image.data = converted_data
         image.updated_at = datetime.now()
 
-
+    def remove_watermark(self, image: Image) -> None:
+        ...
