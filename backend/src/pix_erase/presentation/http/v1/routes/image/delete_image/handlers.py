@@ -7,6 +7,7 @@ from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Path
 
 from pix_erase.application.commands.image.delete_image import DeleteImageCommandHandler, DeleteImageCommand
+from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 
 delete_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
@@ -26,7 +27,11 @@ ImageIDPathParameter = Path(
     summary="Deletes image from system. Only current user can delete his images",
     description=getdoc(DeleteImageCommandHandler),
     responses={
-
+        status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
+        status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
+        status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
     }
 )
 async def delete_image_handler(

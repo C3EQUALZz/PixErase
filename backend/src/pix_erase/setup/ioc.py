@@ -13,6 +13,7 @@ from pix_erase.application.auth.read_current_user import ReadCurrentUserHandler
 from pix_erase.application.auth.sign_up import SignUpHandler
 from pix_erase.application.commands.image.compress_image import CompressImageCommandHandler
 from pix_erase.application.commands.image.create_image import CreateImageCommandHandler
+from pix_erase.application.commands.image.delete_image import DeleteImageCommandHandler
 from pix_erase.application.commands.image.grayscale_image import GrayscaleImageCommandHandler
 from pix_erase.application.commands.image.remove_watermark_from_image import RemoveWatermarkFromImageCommandHandler
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler
@@ -219,7 +220,8 @@ def interactors_provider() -> Provider:
         CompressImageCommandHandler,
         CreateImageCommandHandler,
         RemoveWatermarkFromImageCommandHandler,
-        RotateImageCommandHandler
+        RotateImageCommandHandler,
+        DeleteImageCommandHandler
     )
 
     # application services

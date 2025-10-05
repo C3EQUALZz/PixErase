@@ -11,6 +11,7 @@ from fastapi.responses import ORJSONResponse
 
 from pix_erase.application.errors.auth import AuthenticationError, AlreadyAuthenticatedError
 from pix_erase.application.errors.base import ApplicationError
+from pix_erase.application.errors.image import ImageNotFoundError, ImageDoesntBelongToThisUserError
 from pix_erase.application.errors.user import UserNotFoundByIDError, UserNotFoundByEmailError, UserAlreadyExistsError
 from pix_erase.application.errors.query_params import PaginationError, SortingError
 from pix_erase.domain.common.errors.base import (
@@ -65,11 +66,13 @@ class ExceptionHandler:
             RoleChangeNotPermittedError: status.HTTP_403_FORBIDDEN,
             RoleAssignmentNotPermittedError: status.HTTP_403_FORBIDDEN,
             AlreadyAuthenticatedError: status.HTTP_403_FORBIDDEN,
+            ImageDoesntBelongToThisUserError: status.HTTP_403_FORBIDDEN,
             # 415
             ImageDecodingError: status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             # 404
             UserNotFoundByIDError: status.HTTP_404_NOT_FOUND,
             UserNotFoundByEmailError: status.HTTP_404_NOT_FOUND,
+            ImageNotFoundError: status.HTTP_404_NOT_FOUND,
             # 409
             SortingError: status.HTTP_409_CONFLICT,
             EntityAddError: status.HTTP_409_CONFLICT,
