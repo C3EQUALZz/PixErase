@@ -79,6 +79,8 @@ def setup_http_middlewares(app: FastAPI, /, api_config: ASGIConfig) -> None:
         allow_origins=[
             f"http://localhost:{api_config.port}",
             f"https://{api_config.host}:{api_config.port}",
+            f"http://127.0.0.1:{api_config.port}",
+            f"http://127.0.0.1"
         ],
         allow_credentials=api_config.allow_credentials,
         allow_methods=api_config.allow_methods,
@@ -157,13 +159,6 @@ def setup_exc_handlers(app: FastAPI, /) -> None:
     """
     exception_handler: ExceptionHandler = ExceptionHandler(app)
     exception_handler.setup_handlers()
-
-
-def setup_scheduler(broker: AsyncBroker) -> TaskiqScheduler:
-    return TaskiqScheduler(
-        broker=broker,
-        sources=[LabelScheduleSource(broker)],
-    )
 
 
 def setup_logging(logger_config: LoggingConfig) -> None:

@@ -1,0 +1,338 @@
+x-default: &default
+  restart: unless-stopped
+  networks:
+    - overlay
+  env-file:
+    .env
+
+x-healthcheck-interval: &hc-interval
+  interval: 30s
+  timeout: 60s
+  retries: 5
+  start_period: 10s
+
+x-db-environment: &x-db-environment
+  POSTGRES_SSL_MODE: 'disable'
+  POSTGRES_HOST: ${POSTGRES_HOST}
+  POSTGRES_PORT: ${POSTGRES_PORT}
+  POSTGRES_DB: ${POSTGRES_DB}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_USER: ${POSTGRES_USER}
+
+x-redis-environment: &x-redis-environment
+  REDIS_PASSWORD: ${REDIS_PASSWORD}
+  REDIS_USER: ${REDIS_USER}
+  REDIS_USER_PASSWORD: ${REDIS_USER_PASSWORD}
+  REDIS_PORT: ${REDIS_PORT}
+  REDIS_CACHE_DB: ${REDIS_CACHE_DB}
+  REDIS_WORKER_DB: ${REDIS_WORKER_DB}
+  REDIS_MAX_CONNECTIONS: ${REDIS_MAX_CONNECTIONS}
+
+x-rabbit-environment: &x-rabbit-environment
+  RABBITMQ_HOST: ${RABBITMQ_HOST}
+  RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+  RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+  RABBITMQ_PORT: ${RABBITMQ_PORT}
+  RABBITMQ_UI_PORT: ${RABBITMQ_UI_PORT}
+
+x-sqlalchemy-environment: &x-sqlalchemy-environment
+  DB_POOL_PRE_PING: ${DB_POOL_PRE_PING}
+  DB_POOL_RECYCLE: ${DB_POOL_RECYCLE}
+  DB_ECHO: ${DB_ECHO}
+  DB_AUTO_FLUSH: ${DB_AUTO_FLUSH}
+  DB_EXPIRE_ON_COMMIT: ${DB_EXPIRE_ON_COMMIT}
+  DB_DEBUG: ${DB_DEBUG}
+  DB_FUTURE: ${DB_FUTURE}
+
+x-api-environment: &x-api-environment
+  ENVIRONMENT: local
+  UVICORN_HOST: ${UVICORN_HOST}
+  UVICORN_PORT: ${UVICORN_PORT}
+  LOGGING_LEVEL: INFO
+  RENDER_JSON_LOGS: False
+  FASTAPI_DEBUG: True
+  FASTAPI_ALLOW_CREDENTIALS: False
+  JWT_SECRET: ${JWT_SECRET}
+  JWT_ALGORITHM: ${JWT_ALGORITHM}
+  PEPPER: ${PEPPER}
+  SESSION_TTL_MIN: ${SESSION_TTL_MIN}
+  SESSION_REFRESH_THRESHOLD: ${SESSION_REFRESH_THRESHOLD}
+  SECURE: ${SECURE}
+
+x-minio-environment: &x-minio-environment
+  MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+  MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+  MINIO_IMAGES_BUCKET: ${MINIO_IMAGES_BUCKET}
+  MINIO_SCHEME: http
+  MINIO_PORT: ${MINIO_PORT}
+  MINIO_UI_PORT: ${MINIO_UI_PORT}
+  MINIO_SKIP_CLIENT: yes
+
+services:
+  postgres:
+    <<: *default
+    profiles: [ "api", "db" ]
+    container_name: pix_erase.postgres
+    hostname: pix_erase.postgres
+    image: postgres:16.10-alpine3.22
+    environment:
+      <<: *x-db-environment
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    ports:
+      - 127.0.0.1:${POSTGRES_PORT}:${POSTGRES_PORT}
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U $POSTGRES_USER' ]
+      <<: *hc-interval
+    volumes:
+      - pix_erase.postgres.data:/var/lib/postgresql/data
+      - ./deploy/dev/postgres/postgresql.conf:/etc/postgresql.conf
+      - ./deploy/dev/postgres/pg_hba.conf:/etc/pg_hba.conf
+
+  api:
+    <<: *default
+    profiles: [ "api" ]
+    container_name: pix_erase.api
+    hostname: pix_erase.api
+    build:
+      context: .
+      dockerfile: ./deploy/dev/pix_erase/Dockerfile
+    environment:
+      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment, *x-minio-environment ]
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      RABBIT_HOST: rabbitmq
+    command: /bin/sh -cx "./api_entrypoint.sh"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    ports:
+      - 127.0.0.1:${UVICORN_PORT}:${UVICORN_PORT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -fsSL http://localhost:${UVICORN_PORT}/healthcheck/',
+        ]
+      <<: *hc-interval
+
+  worker:
+    <<: *default
+    profiles: [ "api" ]
+    container_name: pix_erase.worker
+    hostname: pix_erase.worker
+    build:
+      context: .
+      dockerfile: ./deploy/dev/pix_erase/Dockerfile
+    environment:
+      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment, *x-minio-environment ]
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      RABBIT_HOST: rabbitmq
+    command: /bin/sh -cx "./worker_entrypoint.sh"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  redis:
+    <<: *default
+    profiles: [ "api", "cache" ]
+    image: redis:8.0.2-alpine
+    container_name: pix_erase.redis
+    hostname: pix_erase.redis
+    environment:
+      <<: *x-redis-environment
+    command: /bin/sh -cx "/usr/local/bin/redis_entrypoint.sh"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping" ]
+      <<: *hc-interval
+    ports:
+      - "127.0.0.1:${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - pix_erase.redis.data:/data
+      - ./deploy/dev/redis/redis_entrypoint.sh:/usr/local/bin/redis_entrypoint.sh
+
+  rabbitmq:
+    <<: *default
+    profiles: [ "api", "rabbit" ]
+    image: rabbitmq:4.0-management-alpine
+    container_name: pix_erase.rabbitmq
+    hostname: pix_erase.rabbitmq
+    expose:
+      # AMQP protocol port
+      - ${RABBITMQ_PORT}
+      # HTTP management UI
+      - ${RABBITMQ_UI_PORT}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    ports:
+      - "127.0.0.1:${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+      - "127.0.0.1:${RABBITMQ_UI_PORT}:${RABBITMQ_UI_PORT}"
+    environment:
+      <<: *x-rabbit-environment
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      <<: *hc-interval
+    volumes:
+      - pix_erase.rabbitmq.data:/var/lib/rabbitmq/:rw
+
+  minio:
+    <<: *default
+    profiles: [ "api", "s3" ]
+    image: quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z
+    container_name: pix_erase.minio
+    hostname: pix_erase.minio
+    ports:
+      - 127.0.0.1:${MINIO_PORT}:${MINIO_PORT}
+      - 127.0.0.1:${MINIO_UI_PORT}:${MINIO_UI_PORT}
+    environment:
+      <<: *x-minio-environment
+    entrypoint: >
+      /bin/sh -c '
+        isAlive() { curl -sf http://127.0.0.1:${MINIO_PORT}/minio/health/live; }    # check if Minio is alive
+        minio $0 "$@" --quiet & echo $! > /tmp/minio.pid                   # start Minio in the background
+        while ! isAlive; do sleep 0.1; done                                # wait until Minio is alive
+        mc alias set minio http://127.0.0.1:${MINIO_PORT} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} # setup Minio client
+        mc mb minio/${MINIO_IMAGES_BUCKET} || true                                    # create a test bucket
+        mc anonymous set public minio/${MINIO_IMAGES_BUCKET}                          # make the test bucket public
+        kill -s INT $(cat /tmp/minio.pid) && rm /tmp/minio.pid             # stop Minio
+        while isAlive; do sleep 0.1; done                                  # wait until Minio is stopped
+        exec minio $0 "$@"                                                 # start Minio in the foreground
+      '
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    command: server /data --console-address :${MINIO_UI_PORT}
+    healthcheck:
+      test: "curl -k -f http://127.0.0.1:${MINIO_PORT}/minio/health/live || exit 1"
+      <<: *hc-interval
+    volumes:
+      - pix_erase.minio.data:/data
+
+  vector:
+    <<: *default
+    profiles: [ "api", "grafana" ]
+    image: timberio/vector:0.48.0-alpine
+    container_name: pix_erase.vector
+    hostname: pix_erase.vector
+    expose:
+      - 8383
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./deploy/prod/vector/vector.toml:/etc/vector/vector.toml:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+
+  tempo:
+    <<: *default
+    profiles: [ "api", "grafana" ]
+    image: grafana/tempo:2.8.1
+    container_name: pix_erase.tempo
+    hostname: pix_erase.tempo
+    command:
+      [
+        "--target=all",
+        "--storage.trace.backend=local",
+        "--storage.trace.local.path=/var/tempo",
+        "--auth.enabled=false",
+      ]
+    expose:
+      - 14250
+    depends_on:
+      - loki
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+
+  prometheus:
+    <<: *default
+    profiles: [ "grafana" ]
+    image: prom/prometheus:latest
+    container_name: pix_erase.prometheus
+    hostname: pix_erase.prometheus
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - pix_erase.prometheus.data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --enable-feature=exemplar-storage
+    expose:
+      - 9090
+
+
+volumes:
+  pix_erase.postgres.data: {}
+  pix_erase.redis.data: {}
+  pix_erase.rabbitmq.data: {}
+  pix_erase.minio.data: {}
+  pix_erase.grafana.data: {}
+  pix_erase.loki.data: {}
+  pix_erase.prometheus.data: {}
+
+networks:
+  overlay:
+    driver: bridge
