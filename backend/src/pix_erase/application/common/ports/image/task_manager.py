@@ -19,3 +19,7 @@ class ImageTaskManager(Protocol):
     @abstractmethod
     async def rotate(self, image_id: ImageID, angle: int) -> TaskID:
         ...
+
+    @abstractmethod
+    async def upscale(self, image_id: ImageID) -> TaskID:
+        ...
