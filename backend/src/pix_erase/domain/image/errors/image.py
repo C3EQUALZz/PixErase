@@ -11,3 +11,11 @@ class BadImageNameError(DomainFieldError):
 
 class BadImageScaleError(DomainError):
     ...
+
+
+class UnknownImageUpscalerError(DomainError):
+    ...
+
+
+class BadImageUpscaleAlgorithmError(DomainError):
+    ...

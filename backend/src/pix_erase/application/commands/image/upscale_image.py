@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final, cast
+from typing import final, Final, cast, Literal
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
@@ -9,6 +9,7 @@ from pix_erase.application.common.services.current_user import CurrentUserServic
 from pix_erase.application.errors.image import ImageDoesntBelongToThisUserError, ImageNotFoundError
 from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.values.image_id import ImageID
+from pix_erase.domain.image.values.image_scale import ImageScale
 from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
@@ -17,6 +18,8 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 @dataclass(frozen=True, slots=True, kw_only=True)
 class UpscaleImageCommand:
     image_id: UUID
+    algorithm: Literal["AI", "NearestNeighbour"]
+    scale: int
 
 
 @final
@@ -25,6 +28,7 @@ class UpscaleImageCommandHandler:
     - Opens to everyone.
     - Async processing photo that user uploaded before.
     """
+
     def __init__(
             self,
             image_storage: ImageStorage,
@@ -58,5 +62,11 @@ class UpscaleImageCommandHandler:
             raise ImageNotFoundError(msg)
 
         logger.info("Sending task for upscaling image with id: %s", data.image_id)
-        await self._task_manager.upscale(image_id=typed_image_id)
+
+        await self._task_manager.upscale(
+            image_id=typed_image_id,
+            algorithm=data.algorithm,
+            scale=ImageScale(data.scale),
+        )
+
         logger.info("Successfully send task for upscaling image with id: %s", data.image_id)

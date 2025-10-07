@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated, Final
+from typing import Annotated, Final, Literal
 
 from dishka import FromDishka
 from dishka.integrations.taskiq import inject
@@ -9,6 +9,7 @@ from taskiq.brokers.shared_broker import shared_task
 from pix_erase.application.common.services.colorization_service import ColorizationService
 from pix_erase.application.common.services.image_transformation_service import ImageTransformationService
 from pix_erase.domain.image.values.image_id import ImageID
+from pix_erase.domain.image.values.image_scale import ImageScale
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -78,6 +79,34 @@ async def compress_image_task(
     await image_transformation_service.compress_image(
         id_for_image=image_id,
         quality=quality,
+    )
+
+    logger.info(
+        "Finished task: %s with id: %s",
+        context.message.task_name,
+        context.message.task_id,
+    )
+
+
+@shared_task(retry_on_error=True, max_retries=3, delay=15)
+@inject(patch_module=True)
+async def upscale_image_task(
+        image_id: ImageID,
+        algorithm: Literal["AI", "NearestNeighbour"],
+        scale: ImageScale,
+        image_transformation_service: FromDishka[ImageTransformationService],
+        context: Annotated[Context, TaskiqDepends()]
+) -> None:
+    logger.info(
+        "Running task: %s with id: %s",
+        context.message.task_name,
+        context.message.task_id,
+    )
+
+    await image_transformation_service.upscale_image(
+        id_for_image=image_id,
+        algorithm=algorithm,
+        scale=scale,
     )
 
     logger.info(

@@ -1,5 +1,5 @@
 import logging
-from typing import Final
+from typing import Final, Literal
 from typing import cast
 
 from taskiq import AsyncTaskiqTask
@@ -8,10 +8,12 @@ from typing_extensions import override
 from pix_erase.application.common.ports.image.task_manager import ImageTaskManager, TaskID
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
 from pix_erase.domain.image.values.image_id import ImageID
+from pix_erase.domain.image.values.image_scale import ImageScale
+from pix_erase.domain.image.values.image_upscale_algorithm import ImageUpscaleAlgorithm
 from pix_erase.infrastructure.task_manager.tasks.images_tasks import (
     convert_to_grayscale_task,
     rotate_image_task,
-    compress_image_task
+    compress_image_task, upscale_image_task
 )
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
@@ -34,4 +36,18 @@ class TaskIQImageTaskManager(ImageTaskManager):
     @override
     async def rotate(self, image_id: ImageID, angle: int) -> TaskID:
         task: AsyncTaskiqTask = await rotate_image_task.kiq(image_id=image_id, angle=angle)
+        return cast(TaskID, task.task_id)
+
+    @override
+    async def upscale(
+            self,
+            image_id: ImageID,
+            algorithm: Literal["AI", "NearestNeighbour"],
+            scale: ImageScale,
+    ) -> TaskID:
+        task: AsyncTaskiqTask = await upscale_image_task.kiq(
+            image_id=image_id,
+            algorithm=algorithm,
+            scale=scale
+        )
         return cast(TaskID, task.task_id)

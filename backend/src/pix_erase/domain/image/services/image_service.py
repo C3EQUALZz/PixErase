@@ -4,13 +4,19 @@ from typing import Final, Literal
 
 from pix_erase.domain.common.services.base import DomainService
 from pix_erase.domain.image.entities.image import Image
+from pix_erase.domain.image.errors.image import UnknownImageUpscalerError
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
+from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
 from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
 from pix_erase.domain.image.ports.image_compress_converter import ImageCompressConverter
+from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import (
+    ImageNearestNeighbourUpscalerConverter
+)
 from pix_erase.domain.image.ports.image_rotation_converter import ImageRotationConverter
 from pix_erase.domain.image.ports.image_watermark_remover_converter import ImageWatermarkRemoverConverter
 from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.image.values.image_name import ImageName
+from pix_erase.domain.image.values.image_scale import ImageScale
 from pix_erase.domain.image.values.image_size import ImageSize
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
@@ -24,6 +30,8 @@ class ImageService(DomainService):
             rotation_converter: ImageRotationConverter,
             watermark_converter: ImageWatermarkRemoverConverter,
             image_id_generator: ImageIdGenerator,
+            image_nearest_upscale_converter: ImageNearestNeighbourUpscalerConverter,
+            image_ai_upscale_converter: ImageAIUpscaleConverter,
     ) -> None:
         super().__init__()
         self._color_to_gray_converter: Final[ImageColorToCrayScaleConverter] = color_to_gray_converter
@@ -31,6 +39,8 @@ class ImageService(DomainService):
         self._rotation_converter: Final[ImageRotationConverter] = rotation_converter
         self._id_generator: Final[ImageIdGenerator] = image_id_generator
         self._watermark_converter: Final[ImageWatermarkRemoverConverter] = watermark_converter
+        self._image_nearest_upscale_converter: Final[ImageNearestNeighbourUpscalerConverter] = image_nearest_upscale_converter
+        self._image_ai_upscale_converter: Final[ImageAIUpscaleConverter] = image_ai_upscale_converter
 
     def create(
             self,
@@ -104,15 +114,32 @@ class ImageService(DomainService):
         image.data = converted_data
         image.updated_at = datetime.now()
 
-    def upscale(self, image: Image, algorithm: Literal["AI", "Linear", "Bilinear"]) -> None:
+    def upscale(
+            self,
+            image: Image,
+            algorithm: Literal["AI", "NearestNeighbour"],
+            scale: ImageScale = ImageScale(2)
+    ) -> None:
         logger.debug("Started upscaling, image name: %s, algorithm: %s", image.name, algorithm)
         converted_data: bytes
 
-        if algorithm == "Linear":
-            ...
-        elif algorithm == "Bilinear":
-            ...
+        if algorithm == "NearestNeighbour":
+            converted_data = self._image_nearest_upscale_converter.convert(
+                data=image.data,
+                width=image.width.value,
+                height=image.height.value,
+                scale=scale
+            )
         elif algorithm == "AI":
-            ...
+            converted_data = self._image_ai_upscale_converter.convert(
+                data=image.data,
+                width=image.width.value,
+                height=image.height.value,
+                scale=scale
+            )
         else:
-            ...
+            msg = "Unknown algorithm for upscaling."
+            raise UnknownImageUpscalerError(msg)
+
+        image.data = converted_data
+        image.updated_at = datetime.now()
