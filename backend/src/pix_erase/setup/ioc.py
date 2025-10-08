@@ -40,6 +40,7 @@ from pix_erase.application.common.services.colorization_service import Colorizat
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.services.image_transformation_service import ImageTransformationService
 from pix_erase.application.queries.images.read_by_id import ReadImageByIDQueryHandler
+from pix_erase.application.queries.images.read_exif_from_image_by_id import ReadExifFromImageByIDQueryHandler
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler
 from pix_erase.application.queries.users.read_by_id import ReadUserByIDQueryHandler
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
@@ -236,7 +237,8 @@ def interactors_provider() -> Provider:
         RotateImageCommandHandler,
         DeleteImageCommandHandler,
         ReadImageByIDQueryHandler,
-        UpscaleImageCommandHandler
+        UpscaleImageCommandHandler,
+        ReadExifFromImageByIDQueryHandler
     )
 
     # application services

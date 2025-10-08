@@ -4,10 +4,11 @@ from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, status, Path, Body
+from fastapi import APIRouter, status, Path
 
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler, RotateImageCommand
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
+from pix_erase.presentation.http.v1.routes.image.rotate_image.schemas import RotateImageSchemaRequest
 
 rotate_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
@@ -19,13 +20,6 @@ ImageIDPathParameter = Path(
     description="The ID of the image. We using UUID id's",
     examples=["19178bf6-8f84-406e-b213-102ec84fab9f", "75079971-fb0e-4e04-bf07-ceb57faebe84"],
 )
-
-AngleBodyParameter = Body(
-    title="Angle for rotating",
-    description="The angle value for rotating image",
-    examples=[0, 360, 120, 180, -120],
-)
-
 
 @rotate_image_router.patch(
     "/id/{image_id}/rotate/",
@@ -43,12 +37,12 @@ AngleBodyParameter = Body(
 )
 async def rotate_image_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],
-        angle: Annotated[int, AngleBodyParameter],
+        request_schema: RotateImageSchemaRequest,
         interactor: FromDishka[RotateImageCommandHandler],
 ) -> None:
     command: RotateImageCommand = RotateImageCommand(
         image_id=image_id,
-        angle=angle,
+        angle=request_schema.angle,
     )
 
     await interactor(command)

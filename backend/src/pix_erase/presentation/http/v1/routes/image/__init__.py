@@ -8,6 +8,7 @@ from pix_erase.presentation.http.v1.routes.image.delete_image.handlers import de
 from pix_erase.presentation.http.v1.routes.image.grayscale_image.handlers import grayscale_image_router
 from pix_erase.presentation.http.v1.routes.image.read_image.handlers import read_image_router
 from pix_erase.presentation.http.v1.routes.image.rotate_image.handlers import rotate_image_router
+from pix_erase.presentation.http.v1.routes.image.exif_image.handlers import exif_image_router
 
 image_router: Final[APIRouter] = APIRouter(
     prefix="/image",
@@ -21,6 +22,7 @@ sub_routers: Final[Iterable[APIRouter]] = (
     grayscale_image_router,
     delete_image_router,
     read_image_router,
+    exif_image_router
 )
 
 for sub_router in sub_routers:
