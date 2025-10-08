@@ -7,6 +7,7 @@ from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.errors.image import UnknownImageUpscalerError
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
 from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
+from pix_erase.domain.image.ports.image_background_remove_converter import ImageRemoveBackgroundConverter
 from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
 from pix_erase.domain.image.ports.image_compress_converter import ImageCompressConverter
 from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import (
@@ -32,6 +33,7 @@ class ImageService(DomainService):
             image_id_generator: ImageIdGenerator,
             image_nearest_upscale_converter: ImageNearestNeighbourUpscalerConverter,
             image_ai_upscale_converter: ImageAIUpscaleConverter,
+            image_background_remove_converter: ImageRemoveBackgroundConverter
     ) -> None:
         super().__init__()
         self._color_to_gray_converter: Final[ImageColorToCrayScaleConverter] = color_to_gray_converter
@@ -39,8 +41,11 @@ class ImageService(DomainService):
         self._rotation_converter: Final[ImageRotationConverter] = rotation_converter
         self._id_generator: Final[ImageIdGenerator] = image_id_generator
         self._watermark_converter: Final[ImageWatermarkRemoverConverter] = watermark_converter
-        self._image_nearest_upscale_converter: Final[ImageNearestNeighbourUpscalerConverter] = image_nearest_upscale_converter
+        self._image_nearest_upscale_converter: Final[
+            ImageNearestNeighbourUpscalerConverter] = image_nearest_upscale_converter
         self._image_ai_upscale_converter: Final[ImageAIUpscaleConverter] = image_ai_upscale_converter
+        self._image_background_remove_converter: Final[
+            ImageRemoveBackgroundConverter] = image_background_remove_converter
 
     def create(
             self,
@@ -141,5 +146,19 @@ class ImageService(DomainService):
             msg = "Unknown algorithm for upscaling."
             raise UnknownImageUpscalerError(msg)
 
+        image.data = converted_data
+        image.updated_at = datetime.now()
+
+    def remove_background(self, image: Image) -> None:
+        logger.debug(
+            "Started removing background, image name: %s",
+            image.name,
+        )
+
+        converted_data: bytes = self._image_background_remove_converter.convert(
+            data=image.data,
+        )
+
+        logger.debug("Successfully removed background, image name: %s", image.name)
         image.data = converted_data
         image.updated_at = datetime.now()

@@ -43,6 +43,7 @@ dependencies = [
     "pyjwt>=2.10.1",
     "python-dotenv>=1.1.1",
     "python-multipart>=0.0.20",
+    "rembg>=2.0.67",
     "sqlalchemy>=2.0.43",
     "structlog>=25.4.0",
     "taskiq-aio-pika>=0.4.3",
