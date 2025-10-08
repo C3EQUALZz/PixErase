@@ -4,7 +4,7 @@ from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, status, Path, Body, Security
+from fastapi import APIRouter, status, Path, Security
 
 from pix_erase.application.commands.user.change_user_name import (
     ChangeUserNameByIDCommandHandler,
@@ -12,6 +12,7 @@ from pix_erase.application.commands.user.change_user_name import (
 )
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
+from pix_erase.presentation.http.v1.routes.user.change_user_name.schemas import ChangeUserNameRequestSchema
 
 change_user_name_router: Final[APIRouter] = APIRouter(
     tags=["User"],
@@ -22,13 +23,6 @@ UserIDPathParameter = Path(
     title="The ID of the user to get",
     description="The ID of the user to get. We using UUID id's",
     examples=["19178bf6-8f84-406e-b213-102ec84fab9f", "75079971-fb0e-4e04-bf07-ceb57faebe84"],
-)
-
-NameBodyParameter = Body(
-    title="User name",
-    description="The name of the user to get.",
-    examples=["super-bagratus"],
-    min_length=5,
 )
 
 
@@ -49,12 +43,12 @@ NameBodyParameter = Body(
 )
 async def change_user_name_by_id_handler(
         user_id: Annotated[UUID, UserIDPathParameter],
-        name: Annotated[str, NameBodyParameter],
+        request_schema: ChangeUserNameRequestSchema,
         interactor: FromDishka[ChangeUserNameByIDCommandHandler]
 ) -> None:
     command: ChangeUserNameByIDCommand = ChangeUserNameByIDCommand(
         user_id=user_id,
-        new_name=name
+        new_name=request_schema.name
     )
 
     await interactor(command)

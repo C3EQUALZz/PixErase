@@ -199,8 +199,6 @@ class AiobotocoreS3ImageStorage(ImageStorage):
                 except Exception as e:
                     logger.error("Error during streaming chunk: %s", e)
                     raise
-                finally:
-                    await stream.close()
 
         except ClientError as e:
             if e.response["Error"]["Code"] == "NoSuchKey":

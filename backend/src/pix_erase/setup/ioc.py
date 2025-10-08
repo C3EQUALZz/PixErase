@@ -17,6 +17,7 @@ from pix_erase.application.commands.image.delete_image import DeleteImageCommand
 from pix_erase.application.commands.image.grayscale_image import GrayscaleImageCommandHandler
 from pix_erase.application.commands.image.remove_watermark_from_image import RemoveWatermarkFromImageCommandHandler
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler
+from pix_erase.application.commands.image.upscale_image import UpscaleImageCommandHandler
 from pix_erase.application.commands.user.activate_user import ActivateUserCommandHandler
 from pix_erase.application.commands.user.change_user_email import ChangeUserEmailCommandHandler
 from pix_erase.application.commands.user.change_user_name import ChangeUserNameByIDCommandHandler
@@ -38,13 +39,18 @@ from pix_erase.application.common.services.auth_session import AuthSessionServic
 from pix_erase.application.common.services.colorization_service import ColorizationService
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.services.image_transformation_service import ImageTransformationService
+from pix_erase.application.queries.images.read_by_id import ReadImageByIDQueryHandler
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler
 from pix_erase.application.queries.users.read_by_id import ReadUserByIDQueryHandler
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
+from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
 from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
 from pix_erase.domain.image.ports.image_compress_converter import ImageCompressConverter
 from pix_erase.domain.image.ports.image_crop_converter import ImageCropConverter
+from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import \
+    ImageNearestNeighbourUpscalerConverter
 from pix_erase.domain.image.ports.image_rotation_converter import ImageRotationConverter
+from pix_erase.domain.image.ports.image_watermark_remover_converter import ImageWatermarkRemoverConverter
 from pix_erase.domain.image.services.image_service import ImageService
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
 from pix_erase.domain.user.ports.password_hasher import PasswordHasher
@@ -59,10 +65,14 @@ from pix_erase.infrastructure.adapters.common.bazario_event_bus import BazarioEv
 from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper, BcryptPasswordHasher
 from pix_erase.infrastructure.adapters.common.uuid4_image_id_generator import UUID4ImageIdGenerator
 from pix_erase.infrastructure.adapters.common.uuid4_user_id_generator import UUID4UserIdGenerator
+from pix_erase.infrastructure.adapters.image_converters.cv2_edsr_upscale_converter import Cv2EDSRImageUpscaleConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_color_to_gray_converter import \
     Cv2ImageColorToCrayScaleConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_compress_converter import Cv2ImageCompressConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_crop_converter import Cv2ImageCropConverter
+from pix_erase.infrastructure.adapters.image_converters.cv2_image_nearest_neighbour_upscale_converter import \
+    Cv2ImageNearestNeighbourUpscalerConverter
+from pix_erase.infrastructure.adapters.image_converters.cv2_watermark_remover import Cv2ImageWatermarkRemover
 from pix_erase.infrastructure.adapters.image_converters.exif_image_extractor import ExifImageInfoExtractor
 from pix_erase.infrastructure.adapters.image_converters.сv2_image_rotation_converter import Cv2ImageRotationConverter
 from pix_erase.infrastructure.adapters.persistence.aiobotocore_file_storage import AiobotocoreS3ImageStorage
@@ -160,6 +170,9 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=Cv2ImageCompressConverter, provides=ImageCompressConverter)
     provider.provide(source=Cv2ImageCropConverter, provides=ImageCropConverter)
     provider.provide(source=Cv2ImageRotationConverter, provides=ImageRotationConverter)
+    provider.provide(source=Cv2ImageWatermarkRemover, provides=ImageWatermarkRemoverConverter)
+    provider.provide(source=Cv2ImageNearestNeighbourUpscalerConverter, provides=ImageNearestNeighbourUpscalerConverter)
+    provider.provide(source=Cv2EDSRImageUpscaleConverter, provides=ImageAIUpscaleConverter)
     provider.provide(source=UserService)
     provider.provide(source=AccessService)
     provider.provide(source=ImageService)
@@ -221,7 +234,9 @@ def interactors_provider() -> Provider:
         CreateImageCommandHandler,
         RemoveWatermarkFromImageCommandHandler,
         RotateImageCommandHandler,
-        DeleteImageCommandHandler
+        DeleteImageCommandHandler,
+        ReadImageByIDQueryHandler,
+        UpscaleImageCommandHandler
     )
 
     # application services

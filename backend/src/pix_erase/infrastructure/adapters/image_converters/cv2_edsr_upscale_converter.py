@@ -1,9 +1,9 @@
 import logging
-from abc import abstractmethod
 from typing import Final
 
 import cv2
 import numpy as np
+from typing_extensions import override
 
 from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
 from pix_erase.domain.image.values.image_scale import ImageScale
@@ -17,7 +17,7 @@ class Cv2EDSRImageUpscaleConverter(ImageAIUpscaleConverter):
         self._model_path: str = "./models/EDSR_x2.pb"
         self._model_name: str = "edsr"
 
-    @abstractmethod
+    @override
     def convert(self, data: bytes, width: int, height: int, scale: ImageScale) -> bytes:
         cv2_image: cv2.typing.MatLike = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
 

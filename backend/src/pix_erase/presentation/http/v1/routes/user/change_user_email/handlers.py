@@ -4,13 +4,13 @@ from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, Path, Body, Security
-from pydantic import EmailStr
+from fastapi import APIRouter, Path, Security
 from starlette import status
 
 from pix_erase.application.commands.user.change_user_email import ChangeUserEmailCommandHandler, ChangeUserEmailCommand
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
+from pix_erase.presentation.http.v1.routes.user.change_user_email.schemas import ChangeUserEmailSchemaRequest
 
 change_user_email_router: Final[APIRouter] = APIRouter(
     tags=["User"],
@@ -21,12 +21,6 @@ UserIDPathParameter = Path(
     title="The ID of the user to get",
     description="The ID of the user to get. We using UUID id's",
     examples=["19178bf6-8f84-406e-b213-102ec84fab9f", "75079971-fb0e-4e04-bf07-ceb57faebe84"],
-)
-
-EmailBodyParameter = Body(
-    title="User email",
-    description="The email of the user to get.",
-    examples=["super-bagratus2013@gmail.com"]
 )
 
 
@@ -47,12 +41,12 @@ EmailBodyParameter = Body(
 )
 async def change_user_email_by_id(
         user_id: Annotated[UUID, UserIDPathParameter],
-        email: Annotated[EmailStr, EmailBodyParameter],
+        request_schema: ChangeUserEmailSchemaRequest,
         interactor: FromDishka[ChangeUserEmailCommandHandler]
 ) -> None:
     command: ChangeUserEmailCommand = ChangeUserEmailCommand(
         user_id=user_id,
-        new_email=cast(str, email),
+        new_email=cast(str, request_schema.email),
     )
 
     await interactor(command)

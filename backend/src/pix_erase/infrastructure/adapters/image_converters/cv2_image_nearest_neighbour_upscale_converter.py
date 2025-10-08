@@ -1,5 +1,5 @@
 import math
-from abc import abstractmethod
+from typing_extensions import override
 
 import cv2
 import numpy as np
@@ -12,7 +12,7 @@ from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
 
 
 class Cv2ImageNearestNeighbourUpscalerConverter(ImageNearestNeighbourUpscalerConverter):
-    @abstractmethod
+    @override
     def convert(self, data: bytes, width: int, height: int, scale: ImageScale) -> bytes:
         np_arr: np.ndarray = np.frombuffer(data, np.uint8)
         # Декодируем изображение

@@ -16,7 +16,6 @@
 - `structlog`
 - `sqlalchemy`
 - `opencv-python`
-- `pytorch`
 
 ## Деплой
 

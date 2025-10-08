@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from pix_erase.application.common.views.user.read_user_by_id import ReadUserByIDView
 
 read_me_router: Final[APIRouter] = APIRouter(
-    tags=["User"],
+    tags=["Auth"],
     route_class=DishkaRoute,
 )
 

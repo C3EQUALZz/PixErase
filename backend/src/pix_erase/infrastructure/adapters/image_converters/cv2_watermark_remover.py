@@ -26,7 +26,7 @@ def create_adaptive_mask(img_rgb: np.ndarray) -> np.ndarray:
     return combined_mask
 
 
-class Cv2WatermarkRemover(ImageWatermarkRemoverConverter):
+class Cv2ImageWatermarkRemover(ImageWatermarkRemoverConverter):
     @override
     def convert(self, data: bytes) -> bytes:
         img_bgr = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
