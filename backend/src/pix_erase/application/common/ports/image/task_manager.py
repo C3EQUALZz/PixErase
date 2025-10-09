@@ -29,3 +29,7 @@ class ImageTaskManager(Protocol):
             scale: ImageScale
     ) -> TaskID:
         ...
+
+    @abstractmethod
+    async def remove_background(self, image_id: ImageID) -> TaskID:
+        ...

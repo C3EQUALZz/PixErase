@@ -6,11 +6,14 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Path
 
-from pix_erase.application.commands.image.remove_background_image import RemoveBackgroundImageCommandHandler
+from pix_erase.application.commands.image.remove_background_image import (
+    RemoveBackgroundImageCommandHandler,
+    RemoveBackgroundImageCommand
+)
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 
 remove_background_router: Final[APIRouter] = APIRouter(
-    tags=["Images"],
+    tags=["Image"],
     route_class=DishkaRoute,
 )
 
@@ -39,4 +42,7 @@ async def remove_background_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],
         interactor: FromDishka[RemoveBackgroundImageCommandHandler]
 ) -> None:
-    ...
+    command: RemoveBackgroundImageCommand = RemoveBackgroundImageCommand(
+        image_id=image_id,
+    )
+    await interactor(command)

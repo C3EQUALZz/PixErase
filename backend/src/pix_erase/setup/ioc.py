@@ -15,6 +15,7 @@ from pix_erase.application.commands.image.compress_image import CompressImageCom
 from pix_erase.application.commands.image.create_image import CreateImageCommandHandler
 from pix_erase.application.commands.image.delete_image import DeleteImageCommandHandler
 from pix_erase.application.commands.image.grayscale_image import GrayscaleImageCommandHandler
+from pix_erase.application.commands.image.remove_background_image import RemoveBackgroundImageCommandHandler
 from pix_erase.application.commands.image.remove_watermark_from_image import RemoveWatermarkFromImageCommandHandler
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler
 from pix_erase.application.commands.image.upscale_image import UpscaleImageCommandHandler
@@ -45,6 +46,7 @@ from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandle
 from pix_erase.application.queries.users.read_by_id import ReadUserByIDQueryHandler
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
 from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
+from pix_erase.domain.image.ports.image_background_remove_converter import ImageRemoveBackgroundConverter
 from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
 from pix_erase.domain.image.ports.image_compress_converter import ImageCompressConverter
 from pix_erase.domain.image.ports.image_crop_converter import ImageCropConverter
@@ -75,6 +77,8 @@ from pix_erase.infrastructure.adapters.image_converters.cv2_image_nearest_neighb
     Cv2ImageNearestNeighbourUpscalerConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_watermark_remover import Cv2ImageWatermarkRemover
 from pix_erase.infrastructure.adapters.image_converters.exif_image_extractor import ExifImageInfoExtractor
+from pix_erase.infrastructure.adapters.image_converters.rembg_image_remove_background_converter import \
+    RembgImageRemoveBackgroundConverter
 from pix_erase.infrastructure.adapters.image_converters.сv2_image_rotation_converter import Cv2ImageRotationConverter
 from pix_erase.infrastructure.adapters.persistence.aiobotocore_file_storage import AiobotocoreS3ImageStorage
 from pix_erase.infrastructure.adapters.persistence.alchemy_auth_session_command_gateway import (
@@ -174,6 +178,7 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=Cv2ImageWatermarkRemover, provides=ImageWatermarkRemoverConverter)
     provider.provide(source=Cv2ImageNearestNeighbourUpscalerConverter, provides=ImageNearestNeighbourUpscalerConverter)
     provider.provide(source=Cv2EDSRImageUpscaleConverter, provides=ImageAIUpscaleConverter)
+    provider.provide(source=RembgImageRemoveBackgroundConverter, provides=ImageRemoveBackgroundConverter)
     provider.provide(source=UserService)
     provider.provide(source=AccessService)
     provider.provide(source=ImageService)
@@ -238,7 +243,8 @@ def interactors_provider() -> Provider:
         DeleteImageCommandHandler,
         ReadImageByIDQueryHandler,
         UpscaleImageCommandHandler,
-        ReadExifFromImageByIDQueryHandler
+        ReadExifFromImageByIDQueryHandler,
+        RemoveBackgroundImageCommandHandler
     )
 
     # application services

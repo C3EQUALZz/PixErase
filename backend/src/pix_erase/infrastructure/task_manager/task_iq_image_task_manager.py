@@ -9,11 +9,12 @@ from pix_erase.application.common.ports.image.task_manager import ImageTaskManag
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
 from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.image.values.image_scale import ImageScale
-from pix_erase.domain.image.values.image_upscale_algorithm import ImageUpscaleAlgorithm
 from pix_erase.infrastructure.task_manager.tasks.images_tasks import (
     convert_to_grayscale_task,
     rotate_image_task,
-    compress_image_task, upscale_image_task
+    compress_image_task,
+    upscale_image_task,
+    remove_background_task
 )
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
@@ -50,4 +51,12 @@ class TaskIQImageTaskManager(ImageTaskManager):
             algorithm=algorithm,
             scale=scale
         )
+        return cast(TaskID, task.task_id)
+
+    @override
+    async def remove_background(self, image_id: ImageID) -> TaskID:
+        task: AsyncTaskiqTask = await remove_background_task.kiq(
+            image_id=image_id,
+        )
+
         return cast(TaskID, task.task_id)

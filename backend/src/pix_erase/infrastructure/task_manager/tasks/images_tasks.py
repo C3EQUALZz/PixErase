@@ -114,3 +114,25 @@ async def upscale_image_task(
         context.message.task_name,
         context.message.task_id,
     )
+
+
+@shared_task(retry_on_error=True, max_retries=3, delay=15)
+@inject(patch_module=True)
+async def remove_background_task(
+        image_id: ImageID,
+        colorization_service: FromDishka[ColorizationService],
+        context: Annotated[Context, TaskiqDepends()]
+) -> None:
+    logger.info(
+        "Running task: %s with id: %s",
+        context.message.task_name,
+        context.message.task_id,
+    )
+
+    await colorization_service.remove_to_background(image_id)
+
+    logger.info(
+        "Finished task: %s with id: %s",
+        context.message.task_name,
+        context.message.task_id,
+    )
