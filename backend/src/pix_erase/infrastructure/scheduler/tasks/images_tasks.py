@@ -8,7 +8,6 @@ from taskiq.brokers.shared_broker import shared_task
 from taskiq.depends.progress_tracker import ProgressTracker, TaskState
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
-from pix_erase.application.errors.image import ImageNotFoundError
 from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.services.colorization_service import ImageColorizationService
 from pix_erase.domain.image.services.transformation_service import ImageTransformationService
@@ -38,7 +37,10 @@ async def convert_to_grayscale_task(
         context: Annotated[Context, TaskiqDepends()],
         progress_tracker: Annotated[ProgressTracker, TaskiqDepends()]
 ) -> None:
-    await progress_tracker.set_progress(state=TaskState.STARTED)
+    await progress_tracker.set_progress(
+        state=TaskState.STARTED,
+        meta=f"Started converting image to grayscale with id {request_schema.image_id}"
+    )
 
     logger.info(
         "Running task: %s with id: %s",
@@ -87,7 +89,10 @@ async def rotate_image_task(
         context: Annotated[Context, TaskiqDepends()],
         progress_tracker: Annotated[ProgressTracker, TaskiqDepends()]
 ) -> None:
-    await progress_tracker.set_progress(state=TaskState.STARTED)
+    await progress_tracker.set_progress(
+        state=TaskState.STARTED,
+        meta=f"Started converting image to grayscale with id {request_schema.image_id}"
+    )
 
     logger.info(
         "Running task: %s with id: %s",
@@ -101,8 +106,14 @@ async def rotate_image_task(
 
     if image is None:
         msg = f"image with id: {request_schema.image_id} not found"
+        logger.error(msg)
+
+        await progress_tracker.set_progress(
+            state=TaskState.FAILURE,
+            meta=msg
+        )
+
         context.reject()
-        raise ImageNotFoundError(msg)
 
     image_transformation_service.rotate_image(
         image=image,
@@ -111,13 +122,15 @@ async def rotate_image_task(
 
     await file_storage.update(image=image)
 
+    await progress_tracker.set_progress(
+        state=TaskState.SUCCESS,
+        meta=f"Converted image to grayscale with id {request_schema.image_id}"
+    )
     logger.info(
         "Finished task: %s with id: %s",
         context.message.task_name,
         context.message.task_id,
     )
-
-    await progress_tracker.set_progress(state=TaskState.SUCCESS)
 
 
 @shared_task(
@@ -131,8 +144,14 @@ async def compress_image_task(
         request_schema: CompressImageSchemaRequestTask,
         image_transformation_service: FromDishka[ImageTransformationService],
         file_storage: FromDishka[ImageStorage],
-        context: Annotated[Context, TaskiqDepends()]
+        context: Annotated[Context, TaskiqDepends()],
+        progress_tracker: Annotated[ProgressTracker, TaskiqDepends()]
 ) -> None:
+    await progress_tracker.set_progress(
+        state=TaskState.STARTED,
+        meta=f"Started compressing image to grayscale with id {request_schema.image_id}"
+    )
+
     logger.info(
         "Running task: %s with id: %s",
         context.message.task_name,
@@ -145,7 +164,14 @@ async def compress_image_task(
 
     if image is None:
         msg = f"image with id: {request_schema.image_id} not found"
-        raise ImageNotFoundError(msg)
+        logger.error(msg)
+
+        await progress_tracker.set_progress(
+            state=TaskState.FAILURE,
+            meta=msg
+        )
+
+        context.reject()
 
     image_transformation_service.compress_image(
         image=image,
@@ -153,6 +179,11 @@ async def compress_image_task(
     )
 
     await file_storage.update(image=image)
+
+    await progress_tracker.set_progress(
+        state=TaskState.SUCCESS,
+        meta=f"Compressed image with id {request_schema.image_id}"
+    )
 
     logger.info(
         "Finished task: %s with id: %s",
@@ -175,6 +206,11 @@ async def upscale_image_task(
         context: Annotated[Context, TaskiqDepends()],
         progress_tracker: Annotated[ProgressTracker, TaskiqDepends()]
 ) -> None:
+    await progress_tracker.set_progress(
+        state=TaskState.STARTED,
+        meta=f"Started upscaling image with id: {request_schema.image_id}"
+    )
+
     logger.info(
         "Running task: %s with id: %s",
         context.message.task_name,
@@ -187,6 +223,7 @@ async def upscale_image_task(
 
     if image is None:
         msg = f"image with id: {request_schema.image_id} not found"
+        logger.error(msg)
 
         await progress_tracker.set_progress(
             state=TaskState.FAILURE,
@@ -195,8 +232,6 @@ async def upscale_image_task(
 
         context.reject()
 
-        raise ImageNotFoundError(msg)
-
     image_colorization_service.upscale(
         image=image,
         algorithm=request_schema.algorithm,
@@ -204,6 +239,11 @@ async def upscale_image_task(
     )
 
     await file_storage.update(image=image)
+
+    await progress_tracker.set_progress(
+        state=TaskState.SUCCESS,
+        meta=f"Successfully upscaled image with id: {request_schema.image_id}"
+    )
 
     logger.info(
         "Finished task: %s with id: %s",
@@ -223,7 +263,8 @@ async def remove_background_task(
         request_schema: RemoveBackgroundImageSchemaRequestTask,
         colorization_service: FromDishka[ImageColorizationService],
         file_storage: FromDishka[ImageStorage],
-        context: Annotated[Context, TaskiqDepends()]
+        context: Annotated[Context, TaskiqDepends()],
+        progress_tracker: Annotated[ProgressTracker, TaskiqDepends()]
 ) -> None:
     logger.info(
         "Running task: %s with id: %s",
@@ -237,11 +278,22 @@ async def remove_background_task(
 
     if image is None:
         msg = f"image with id: {request_schema.image_id} not found"
-        raise ImageNotFoundError(msg)
+        logger.error(msg)
+
+        await progress_tracker.set_progress(
+            state=TaskState.FAILURE,
+            meta=msg
+        )
+
+        context.reject()
 
     colorization_service.remove_background(image=image)
-
     await file_storage.update(image=image)
+
+    await progress_tracker.set_progress(
+        state=TaskState.SUCCESS,
+        meta=f"Successfully removed background image with id: {request_schema.image_id}"
+    )
 
     logger.info(
         "Finished task: %s with id: %s",

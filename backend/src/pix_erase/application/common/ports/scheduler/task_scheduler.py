@@ -2,7 +2,7 @@ from typing import Protocol, Any
 from datetime import datetime
 from abc import abstractmethod
 from pix_erase.application.common.ports.scheduler.payloads.base import TaskPayload
-from pix_erase.application.common.ports.scheduler.task_id import TaskID, TaskKey
+from pix_erase.application.common.ports.scheduler.task_id import TaskID, TaskKey, TaskInfo
 
 
 class TaskScheduler(Protocol):
@@ -24,4 +24,8 @@ class TaskScheduler(Protocol):
 
     @abstractmethod
     def make_task_id(self, key: TaskKey, value: Any) -> TaskID:
+        ...
+
+    @abstractmethod
+    async def read_task_info(self, task_id: TaskID) -> TaskInfo | None:
         ...
