@@ -11,3 +11,16 @@ class RotateImageSchemaRequest(BaseModel):
             examples=[0, 360, 120, 180, -120],
         )
     ]
+
+
+class RotateImageSchemaResponse(BaseModel):
+    task_id: Annotated[
+        str,
+        Field(
+            title="Task ID",
+            description="The unique task id that process request from user",
+            examples=["remove_background:75079971-fb0e-4e04-bf07-ceb57faebe84"],
+            min_length=1,
+            pattern=r"^rotate_image+:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        )
+    ]

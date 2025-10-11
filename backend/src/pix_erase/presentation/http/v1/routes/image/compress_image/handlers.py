@@ -8,7 +8,10 @@ from fastapi import APIRouter, status, Path
 
 from pix_erase.application.commands.image.compress_image import CompressImageCommandHandler, CompressImageCommand
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
-from pix_erase.presentation.http.v1.routes.image.compress_image.schema import CompressImageRequestSchema
+from pix_erase.presentation.http.v1.routes.image.compress_image.schema import (
+    CompressImageRequestSchema,
+    CompressImageResponseSchema
+)
 
 compress_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
@@ -24,7 +27,7 @@ ImageIDPathParameter = Path(
 
 @compress_image_router.patch(
     "/id/{image_id}/compress/",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_202_ACCEPTED,
     summary="Compress image",
     description=getdoc(CompressImageCommandHandler),
     responses={
@@ -34,16 +37,17 @@ ImageIDPathParameter = Path(
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+    },
+    response_model=CompressImageResponseSchema
 )
 async def compress_image_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],
         request_schema: CompressImageRequestSchema,
         interactor: FromDishka[CompressImageCommandHandler]
-) -> None:
+) -> CompressImageResponseSchema:
     command: CompressImageCommand = CompressImageCommand(
         image_id=image_id,
         quality=request_schema.quality
     )
-
-    await interactor(command)
+    task_id: str = await interactor(command)
+    return CompressImageResponseSchema(task_id=task_id)

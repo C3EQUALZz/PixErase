@@ -11,6 +11,7 @@ from pix_erase.application.commands.image.remove_background_image import (
     RemoveBackgroundImageCommand
 )
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
+from pix_erase.presentation.http.v1.routes.image.remove_background.schemas import RemoveBackgroundSchemaResponse
 
 remove_background_router: Final[APIRouter] = APIRouter(
     tags=["Image"],
@@ -36,13 +37,17 @@ ImageIDPathParameter = Path(
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+    },
+    response_model=RemoveBackgroundSchemaResponse
 )
 async def remove_background_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],
         interactor: FromDishka[RemoveBackgroundImageCommandHandler]
-) -> None:
+) -> RemoveBackgroundSchemaResponse:
     command: RemoveBackgroundImageCommand = RemoveBackgroundImageCommand(
         image_id=image_id,
     )
-    await interactor(command)
+
+    task_id: str = await interactor(command)
+
+    return RemoveBackgroundSchemaResponse(task_id=task_id)

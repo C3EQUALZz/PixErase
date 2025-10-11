@@ -11,6 +11,7 @@ from pix_erase.application.commands.image.grayscale_image import (
     ConvertImageToGrayscaleCommand
 )
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
+from pix_erase.presentation.http.v1.routes.image.grayscale_image.schemas import GrayScaleImageSchemaResponse
 
 grayscale_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
@@ -36,14 +37,19 @@ ImageIDPathParameter = Path(
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+    },
+    response_model=GrayScaleImageSchemaResponse,
 )
 async def grayscale_image_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],
         interactor: FromDishka[GrayscaleImageCommandHandler],
-) -> None:
+) -> GrayScaleImageSchemaResponse:
     command: ConvertImageToGrayscaleCommand = ConvertImageToGrayscaleCommand(
         image_id=image_id,
     )
 
-    await interactor(command)
+    task_id: str = await interactor(command)
+
+    return GrayScaleImageSchemaResponse(
+        task_id=task_id,
+    )

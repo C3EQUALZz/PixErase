@@ -41,6 +41,7 @@ from pix_erase.application.common.services.auth_session import AuthSessionServic
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.queries.images.read_by_id import ReadImageByIDQueryHandler
 from pix_erase.application.queries.images.read_exif_from_image_by_id import ReadExifFromImageByIDQueryHandler
+from pix_erase.application.queries.tasks.read_task_by_id import ReadTaskByIDQueryHandler
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler
 from pix_erase.application.queries.users.read_by_id import ReadUserByIDQueryHandler
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
@@ -250,7 +251,8 @@ def interactors_provider() -> Provider:
         ReadImageByIDQueryHandler,
         UpscaleImageCommandHandler,
         ReadExifFromImageByIDQueryHandler,
-        RemoveBackgroundImageCommandHandler
+        RemoveBackgroundImageCommandHandler,
+        ReadTaskByIDQueryHandler
     )
 
     return provider

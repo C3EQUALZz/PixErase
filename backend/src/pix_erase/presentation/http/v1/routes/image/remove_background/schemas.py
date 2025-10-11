@@ -1,14 +1,9 @@
-from typing import Literal, Annotated
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
 
-class UpscaleImageRequestSchema(BaseModel):
-    algorithm: Literal["AI", "NearestNeighbour"]
-    scale: Annotated[int, Field(ge=2, le=8)]
-
-
-class UpscaleImageSchemeResponse(BaseModel):
+class RemoveBackgroundSchemaResponse(BaseModel):
     task_id: Annotated[
         str,
         Field(
