@@ -10,7 +10,6 @@ from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.services.colorization_service import ImageColorizationService
 from pix_erase.domain.image.services.transformation_service import ImageTransformationService
-from pix_erase.domain.image.values.image_scale import ImageScale
 from pix_erase.infrastructure.scheduler.tasks.schemas import (
     GrayscaleImageSchemaRequestTask,
     RotateImageSchemaRequestTask,
@@ -210,7 +209,7 @@ async def upscale_image_task(
     image_colorization_service.upscale(
         image=image,
         algorithm=request_schema.algorithm,
-        scale=ImageScale(request_schema.scale),
+        scale=request_schema.scale,
     )
 
     await file_storage.update(image=image)

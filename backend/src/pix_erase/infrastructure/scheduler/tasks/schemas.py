@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from pix_erase.domain.image.values.image_id import ImageID
+from pix_erase.domain.image.values.image_scale import ImageScale
 
 
 class GrayscaleImageSchemaRequestTask(BaseModel):
@@ -22,7 +23,7 @@ class CompressImageSchemaRequestTask(BaseModel):
 class UpscaleImageSchemaRequestTask(BaseModel):
     image_id: ImageID
     algorithm: Literal["AI", "NearestNeighbour"]
-    scale: int
+    scale: ImageScale
 
 
 class RemoveBackgroundImageSchemaRequestTask(BaseModel):
