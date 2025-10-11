@@ -61,12 +61,18 @@ just infra
 > [!IMPORTANT]
 > Ожидается, что `.env` был удачно создан заранее. 
 
-#### Запуск `worker`
+#### Запуск `scheduler`
 
 Для запуска `worker` используем команду, которая представлена ниже: 
 
 ```bash
 taskiq worker -fsd --ack-type when_saved pix_erase.worker:create_taskiq_app -tp pix_erase.infrastructure.task_manager.tasks
+```
+
+Теперь запускаем сам `scheduler` в отдельном процессе: 
+
+```bash
+taskiq scheduler -fsd pix_erase.worker:create_scheduler_taskiq_app -tp pix_erase.infrastructure.task_manager.tasks
 ```
 
 > [!IMPORTANT]

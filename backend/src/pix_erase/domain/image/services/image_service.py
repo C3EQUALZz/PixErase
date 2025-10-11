@@ -1,23 +1,13 @@
 import logging
 from datetime import datetime
-from typing import Final, Literal
+from typing import Final
 
 from pix_erase.domain.common.services.base import DomainService
 from pix_erase.domain.image.entities.image import Image
-from pix_erase.domain.image.errors.image import UnknownImageUpscalerError
 from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
-from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
-from pix_erase.domain.image.ports.image_background_remove_converter import ImageRemoveBackgroundConverter
-from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
-from pix_erase.domain.image.ports.image_compress_converter import ImageCompressConverter
-from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import (
-    ImageNearestNeighbourUpscalerConverter
-)
-from pix_erase.domain.image.ports.image_rotation_converter import ImageRotationConverter
-from pix_erase.domain.image.ports.image_watermark_remover_converter import ImageWatermarkRemoverConverter
+from pix_erase.domain.image.ports.image_resizer import ImageResizerConverter
 from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.image.values.image_name import ImageName
-from pix_erase.domain.image.values.image_scale import ImageScale
 from pix_erase.domain.image.values.image_size import ImageSize
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
@@ -26,26 +16,12 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 class ImageService(DomainService):
     def __init__(
             self,
-            color_to_gray_converter: ImageColorToCrayScaleConverter,
-            compress_converter: ImageCompressConverter,
-            rotation_converter: ImageRotationConverter,
-            watermark_converter: ImageWatermarkRemoverConverter,
             image_id_generator: ImageIdGenerator,
-            image_nearest_upscale_converter: ImageNearestNeighbourUpscalerConverter,
-            image_ai_upscale_converter: ImageAIUpscaleConverter,
-            image_background_remove_converter: ImageRemoveBackgroundConverter
+            image_resizer: ImageResizerConverter,
     ) -> None:
         super().__init__()
-        self._color_to_gray_converter: Final[ImageColorToCrayScaleConverter] = color_to_gray_converter
-        self._compress_converter: Final[ImageCompressConverter] = compress_converter
-        self._rotation_converter: Final[ImageRotationConverter] = rotation_converter
         self._id_generator: Final[ImageIdGenerator] = image_id_generator
-        self._watermark_converter: Final[ImageWatermarkRemoverConverter] = watermark_converter
-        self._image_nearest_upscale_converter: Final[
-            ImageNearestNeighbourUpscalerConverter] = image_nearest_upscale_converter
-        self._image_ai_upscale_converter: Final[ImageAIUpscaleConverter] = image_ai_upscale_converter
-        self._image_background_remove_converter: Final[
-            ImageRemoveBackgroundConverter] = image_background_remove_converter
+        self._image_resizer: Final[ImageResizerConverter] = image_resizer
 
     def create(
             self,
@@ -71,94 +47,24 @@ class ImageService(DomainService):
         image.name = new_image_name
         image.updated_at = datetime.now()
 
-    def convert_color_to_gray(self, image: Image) -> None:
-        logger.debug("Started converting color to gray, image name: %s", image.name)
-
-        converted_data: bytes = self._color_to_gray_converter.convert(
-            data=image.data
+    def change_image_width(self, image: Image, new_image_width: ImageSize) -> None:
+        new_data: bytes = self._image_resizer.resize(
+            image.data,
+            image_width=new_image_width.value,
+            image_height=image.height.value
         )
 
-        image.data = converted_data
+        image.data = new_data
+        image.width = new_image_width
         image.updated_at = datetime.now()
 
-    def compress_image(self, image: Image, quality: int = 90) -> None:
-        logger.debug("Started compressing image, image name: %s", image.name)
-
-        converted_data: bytes = self._compress_converter.convert(
-            data=image.data,
-            quality=quality
+    def change_image_height(self, image: Image, new_image_height: ImageSize) -> None:
+        new_data: bytes = self._image_resizer.resize(
+            image.data,
+            image_width=new_image_height.value,
+            image_height=image.height.value
         )
 
-        logger.debug("Successfully compressed image, image name: %s", image.name)
-
-        image.data = converted_data
-        image.updated_at = datetime.now()
-
-    def rotate_image(self, image: Image, angle: int = 90) -> None:
-        logger.debug("Started rotating image, image name: %s", image.name)
-
-        converted_data: bytes = self._rotation_converter.convert(
-            data=image.data,
-            angle=angle
-        )
-
-        logger.debug("Successfully rotated image, image name: %s", image.name)
-
-        image.data = converted_data
-        image.updated_at = datetime.now()
-
-    def remove_watermark(self, image: Image) -> None:
-        logger.debug("Started removing watermark, image name: %s", image.name)
-
-        converted_data: bytes = self._watermark_converter.convert(
-            data=image.data,
-        )
-
-        logger.debug("Successfully removed watermark, image name: %s", image.name)
-
-        image.data = converted_data
-        image.updated_at = datetime.now()
-
-    def upscale(
-            self,
-            image: Image,
-            algorithm: Literal["AI", "NearestNeighbour"],
-            scale: ImageScale = ImageScale(2)
-    ) -> None:
-        logger.debug("Started upscaling, image name: %s, algorithm: %s", image.name, algorithm)
-        converted_data: bytes
-
-        if algorithm == "NearestNeighbour":
-            converted_data = self._image_nearest_upscale_converter.convert(
-                data=image.data,
-                width=image.width.value,
-                height=image.height.value,
-                scale=scale
-            )
-        elif algorithm == "AI":
-            converted_data = self._image_ai_upscale_converter.convert(
-                data=image.data,
-                width=image.width.value,
-                height=image.height.value,
-                scale=scale
-            )
-        else:
-            msg = "Unknown algorithm for upscaling."
-            raise UnknownImageUpscalerError(msg)
-
-        image.data = converted_data
-        image.updated_at = datetime.now()
-
-    def remove_background(self, image: Image) -> None:
-        logger.debug(
-            "Started removing background, image name: %s",
-            image.name,
-        )
-
-        converted_data: bytes = self._image_background_remove_converter.convert(
-            data=image.data,
-        )
-
-        logger.debug("Successfully removed background, image name: %s", image.name)
-        image.data = converted_data
+        image.data = new_data
+        image.height = new_image_height
         image.updated_at = datetime.now()

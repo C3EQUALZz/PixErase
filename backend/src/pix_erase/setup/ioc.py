@@ -6,6 +6,7 @@ from dishka import Provider, Scope, WithParents
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
+from taskiq import AsyncBroker
 
 from pix_erase.application.auth.log_in import LogInHandler
 from pix_erase.application.auth.log_out import LogOutHandler
@@ -32,14 +33,12 @@ from pix_erase.application.common.ports.event_bus import EventBus
 from pix_erase.application.common.ports.identity_provider import IdentityProvider
 from pix_erase.application.common.ports.image.extractor import ImageInfoExtractor
 from pix_erase.application.common.ports.image.storage import ImageStorage
-from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
+from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
 from pix_erase.application.common.services.auth_session import AuthSessionService
-from pix_erase.application.common.services.colorization_service import ColorizationService
 from pix_erase.application.common.services.current_user import CurrentUserService
-from pix_erase.application.common.services.image_transformation_service import ImageTransformationService
 from pix_erase.application.queries.images.read_by_id import ReadImageByIDQueryHandler
 from pix_erase.application.queries.images.read_exif_from_image_by_id import ReadExifFromImageByIDQueryHandler
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler
@@ -54,7 +53,9 @@ from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter impo
     ImageNearestNeighbourUpscalerConverter
 from pix_erase.domain.image.ports.image_rotation_converter import ImageRotationConverter
 from pix_erase.domain.image.ports.image_watermark_remover_converter import ImageWatermarkRemoverConverter
+from pix_erase.domain.image.services.colorization_service import ImageColorizationService
 from pix_erase.domain.image.services.image_service import ImageService
+from pix_erase.domain.image.services.transformation_service import ImageTransformationService
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
 from pix_erase.domain.user.ports.password_hasher import PasswordHasher
 from pix_erase.domain.user.services.access_service import AccessService
@@ -108,7 +109,8 @@ from pix_erase.infrastructure.persistence.provider import (
     get_s3_session,
     get_s3_client
 )
-from pix_erase.infrastructure.task_manager.task_iq_image_task_manager import TaskIQImageTaskManager
+from pix_erase.infrastructure.scheduler.task_iq_task_scheduler import TaskIQTaskScheduler
+from pix_erase.setup.bootstrap import setup_schedule_source
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.database import PostgresConfig
 from pix_erase.setup.config.s3 import S3Config
@@ -125,6 +127,7 @@ def configs_provider() -> Provider:
     provider.from_context(provides=AuthSessionRefreshThreshold)
     provider.from_context(provides=CookieParams)
     provider.from_context(provides=S3Config)
+    provider.from_context(provides=AsyncBroker)
     return provider
 
 
@@ -182,6 +185,8 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=UserService)
     provider.provide(source=AccessService)
     provider.provide(source=ImageService)
+    provider.provide(source=ImageTransformationService)
+    provider.provide(source=ImageColorizationService)
     return provider
 
 
@@ -203,7 +208,8 @@ def registry_provider() -> Registry:
 
 def application_ports_provider() -> Provider:
     provider: Final[Provider] = Provider(scope=Scope.REQUEST)
-    provider.provide(source=TaskIQImageTaskManager, provides=ImageTaskManager)
+    provider.provide(source=setup_schedule_source, scope=Scope.APP)
+    provider.provide(source=TaskIQTaskScheduler, provides=TaskScheduler)
     provider.provide(source=ExifImageInfoExtractor, provides=ImageInfoExtractor)
     return provider
 
@@ -245,12 +251,6 @@ def interactors_provider() -> Provider:
         UpscaleImageCommandHandler,
         ReadExifFromImageByIDQueryHandler,
         RemoveBackgroundImageCommandHandler
-    )
-
-    # application services
-    provider.provide_all(
-        ImageTransformationService,
-        ColorizationService
     )
 
     return provider

@@ -1,10 +1,15 @@
+import asyncio
 import logging
+from asyncio import Task
 from dataclasses import dataclass
-from typing import final, Final, cast
+from datetime import timedelta, datetime, UTC
+from typing import final, Final, cast, Coroutine, Any
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
-from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
+from pix_erase.application.common.ports.scheduler.payloads.images import RemoveImageBackgroundPayload
+from pix_erase.application.common.ports.scheduler.task_id import TaskID, TaskKey
+from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.image import ImageDoesntBelongToThisUserError, ImageNotFoundError
 from pix_erase.domain.image.entities.image import Image
@@ -29,15 +34,15 @@ class RemoveBackgroundImageCommandHandler:
 
     def __init__(
             self,
-            task_manager: ImageTaskManager,
+            scheduler: TaskScheduler,
             image_storage: ImageStorage,
             current_user_service: CurrentUserService,
     ) -> None:
         self._image_storage: Final[ImageStorage] = image_storage
-        self._task_manager: Final[ImageTaskManager] = task_manager
+        self._scheduler: Final[TaskScheduler] = scheduler
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: RemoveBackgroundImageCommand) -> None:
+    async def __call__(self, data: RemoveBackgroundImageCommand) -> TaskID:
         logger.info(
             "Started converting image to grayscale, image_name: %s",
             data.image_id
@@ -59,6 +64,29 @@ class RemoveBackgroundImageCommandHandler:
             msg = f"Failed to found image with id: {data.image_id}"
             raise ImageNotFoundError(msg)
 
-        logger.info("Started sending image id: %s", data.image_id)
-        await self._task_manager.remove_background(image_id=typed_image_id)
-        logger.info("Successfully sent image id: %s", data.image_id)
+        task_id: TaskID = self._scheduler.make_task_id(
+            key=TaskKey("remove_background_image"),
+            value=typed_image_id,
+        )
+
+        background_tasks: set[Task] = set()
+
+        coroutine: Coroutine[Any, Any, None] = self._scheduler.schedule_by_time(
+            task_id=task_id,
+            payload=RemoveImageBackgroundPayload(
+                image_id=typed_image_id,
+            ),
+            run_at=datetime.now(UTC) + timedelta(seconds=5)
+        )
+
+        task: Task = asyncio.create_task(coroutine)
+        background_tasks.add(task)
+        task.add_done_callback(background_tasks.discard)
+
+        logger.info(
+            "Successfully send image for grayscaling in task manager, image_id: %s, task_id: %s",
+            image.id,
+            task_id
+        )
+
+        return task_id

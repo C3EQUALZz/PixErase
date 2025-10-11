@@ -1,10 +1,15 @@
+import asyncio
 import logging
+from asyncio import Task
 from dataclasses import dataclass
-from typing import final, Final, cast, Literal
+from datetime import datetime, UTC, timedelta
+from typing import final, Final, cast, Literal, Any, Coroutine
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
-from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
+from pix_erase.application.common.ports.scheduler.payloads.images import UpscaleImagePayload
+from pix_erase.application.common.ports.scheduler.task_id import TaskID, TaskKey
+from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.image import ImageDoesntBelongToThisUserError, ImageNotFoundError
 from pix_erase.domain.image.entities.image import Image
@@ -32,14 +37,14 @@ class UpscaleImageCommandHandler:
     def __init__(
             self,
             image_storage: ImageStorage,
-            task_manager: ImageTaskManager,
+            task_scheduler: TaskScheduler,
             current_user_service: CurrentUserService,
     ) -> None:
         self._image_storage: Final[ImageStorage] = image_storage
-        self._task_manager: Final[ImageTaskManager] = task_manager
+        self._scheduler: Final[TaskScheduler] = task_scheduler
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: UpscaleImageCommand) -> None:
+    async def __call__(self, data: UpscaleImageCommand) -> TaskID:
         logger.info(
             "Started upscaling image with id: %s",
             data.image_id,
@@ -63,10 +68,31 @@ class UpscaleImageCommandHandler:
 
         logger.info("Sending task for upscaling image with id: %s", data.image_id)
 
-        await self._task_manager.upscale(
-            image_id=typed_image_id,
-            algorithm=data.algorithm,
-            scale=ImageScale(data.scale),
+        task_id: TaskID = self._scheduler.make_task_id(
+            key=TaskKey("upscale_image"),
+            value=typed_image_id,
         )
 
-        logger.info("Successfully send task for upscaling image with id: %s", data.image_id)
+        background_tasks: set[Task] = set()
+
+        coroutine: Coroutine[Any, Any, None] = self._scheduler.schedule_by_time(
+            task_id=task_id,
+            payload=UpscaleImagePayload(
+                image_id=typed_image_id,
+                algorithm=data.algorithm,
+                scale=ImageScale(data.scale),
+            ),
+            run_at=datetime.now(UTC) + timedelta(seconds=5)
+        )
+
+        task: Task = asyncio.create_task(coroutine)
+        background_tasks.add(task)
+        task.add_done_callback(background_tasks.discard)
+
+        logger.info(
+            "Successfully send image for upscaling in task manager, image_id: %s, task_id: %s",
+            image.id,
+            task_id
+        )
+
+        return task_id

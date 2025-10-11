@@ -1,10 +1,15 @@
+import asyncio
 import logging
+from asyncio import Task
 from dataclasses import dataclass
-from typing import final, Final, cast
+from datetime import datetime, timedelta, UTC
+from typing import final, Final, cast, Coroutine, Any
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
-from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
+from pix_erase.application.common.ports.scheduler.payloads.images import GrayScaleImagePayload
+from pix_erase.application.common.ports.scheduler.task_id import TaskID, TaskKey
+from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.image import ImageNotFoundError, ImageDoesntBelongToThisUserError
 from pix_erase.domain.image.entities.image import Image
@@ -26,17 +31,18 @@ class GrayscaleImageCommandHandler:
     - Async processing, non-blocking.
     - Changes existing image.
     """
+
     def __init__(
             self,
             image_storage: ImageStorage,
-            task_manager: ImageTaskManager,
+            scheduler: TaskScheduler,
             current_user_service: CurrentUserService,
     ) -> None:
         self._image_storage: Final[ImageStorage] = image_storage
-        self._task_manager: Final[ImageTaskManager] = task_manager
+        self._scheduler: Final[TaskScheduler] = scheduler
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: ConvertImageToGrayscaleCommand) -> None:
+    async def __call__(self, data: ConvertImageToGrayscaleCommand) -> TaskID:
         logger.info(
             "Started converting image to grayscale, image_name: %s",
             data.image_id
@@ -58,4 +64,29 @@ class GrayscaleImageCommandHandler:
             msg = f"Failed to found image with id: {data.image_id}"
             raise ImageNotFoundError(msg)
 
-        await self._task_manager.convert_to_grayscale(image_id=image.id)
+        task_id: TaskID = self._scheduler.make_task_id(
+            key=TaskKey("grayscale_image"),
+            value=typed_image_id,
+        )
+
+        background_tasks: set[Task] = set()
+
+        coroutine: Coroutine[Any, Any, None] = self._scheduler.schedule_by_time(
+            task_id=task_id,
+            payload=GrayScaleImagePayload(
+                image_id=typed_image_id,
+            ),
+            run_at=datetime.now(UTC) + timedelta(seconds=5)
+        )
+
+        task: Task = asyncio.create_task(coroutine)
+        background_tasks.add(task)
+        task.add_done_callback(background_tasks.discard)
+
+        logger.info(
+            "Successfully send image for grayscaling in task manager, image_id: %s, task_id: %s",
+            image.id,
+            task_id
+        )
+
+        return task_id

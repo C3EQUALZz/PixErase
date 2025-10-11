@@ -26,6 +26,10 @@ class RedisConfig(BaseModel):
         alias="REDIS_WORKER_DB",
         description="Redis db for worker results",
     )
+    schedule_source_db: int = Field(
+        alias="REDIS_SCHEDULE_SOURCE_DB",
+        description="Redis db for schedule results",
+    )
     max_connections: int = Field(
         default=20,
         alias="REDIS_MAX_CONNECTIONS",
@@ -56,5 +60,18 @@ class RedisConfig(BaseModel):
                 username=self.user,
                 password=self.password,
                 path=f"/{self.worker_db}"
+            )
+        )
+
+    @property
+    def schedule_source_uri(self) -> str:
+        return str(
+            RedisDsn.build(
+                scheme="redis",
+                host=self.host,
+                port=self.port,
+                username=self.user,
+                password=self.password,
+                path=f"/{self.schedule_source_db}"
             )
         )

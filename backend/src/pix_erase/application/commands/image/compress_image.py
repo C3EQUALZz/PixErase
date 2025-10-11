@@ -1,10 +1,16 @@
+import asyncio
 import logging
+from asyncio import Task
 from dataclasses import dataclass
-from typing import final, Final, cast
+from typing import final, Final, cast, Coroutine, Any
 from uuid import UUID
+from datetime import datetime, UTC, timedelta
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
-from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
+from pix_erase.application.common.ports.scheduler.payloads.images import CompressImagePayload
+
+from pix_erase.application.common.ports.scheduler.task_id import TaskKey, TaskID
+from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.image import ImageNotFoundError, ImageDoesntBelongToThisUserError
 from pix_erase.domain.image.entities.image import Image
@@ -31,14 +37,14 @@ class CompressImageCommandHandler:
     def __init__(
             self,
             image_storage: ImageStorage,
-            task_manager: ImageTaskManager,
+            scheduler: TaskScheduler,
             current_user_service: CurrentUserService,
     ) -> None:
         self._image_storage: Final[ImageStorage] = image_storage
-        self._task_manager: Final[ImageTaskManager] = task_manager
+        self._task_scheduler: Final[TaskScheduler] = scheduler
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: CompressImageCommand) -> None:
+    async def __call__(self, data: CompressImageCommand) -> TaskID:
         logger.info(
             "Started compressing image with id: %s",
             data.image_id,
@@ -60,9 +66,30 @@ class CompressImageCommandHandler:
             msg = f"Failed to found image with id: {data.image_id}"
             raise ImageNotFoundError(msg)
 
-        await self._task_manager.compress(image_id=typed_image_id, quality=data.quality)
+        task_id: TaskID = self._task_scheduler.make_task_id(
+            key=TaskKey("compress_image"),
+            value=typed_image_id,
+        )
+
+        background_tasks: set[Task] = set()
+
+        coroutine: Coroutine[Any, Any, None] = self._task_scheduler.schedule_by_time(
+            task_id=task_id,
+            payload=CompressImagePayload(
+                image_id=typed_image_id,
+                quality=data.quality,
+            ),
+            run_at=datetime.now(UTC) + timedelta(seconds=5)
+        )
+
+        task: Task = asyncio.create_task(coroutine)
+        background_tasks.add(task)
+        task.add_done_callback(background_tasks.discard)
 
         logger.info(
-            "Successfully send image for compressing in task manager, image_id: %s",
+            "Successfully send image for compressing in task manager, image_id: %s, task_id: %s",
             image.id,
+            task_id
         )
+
+        return task_id

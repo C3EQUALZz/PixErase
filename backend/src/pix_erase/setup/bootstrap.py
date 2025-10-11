@@ -6,11 +6,11 @@ from typing import Any, Final
 
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker
+from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker, ScheduleSource
 from taskiq.middlewares import SmartRetryMiddleware
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
-from taskiq_redis import RedisAsyncResultBackend
+from taskiq_redis import RedisAsyncResultBackend, RedisScheduleSource
 
 from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_sessions_table
 from pix_erase.infrastructure.persistence.models.users import map_users_table
@@ -141,12 +141,19 @@ def setup_task_manager(
     return broker
 
 
-def setup_scheduler(broker: AsyncBroker) -> TaskiqScheduler:
+def setup_schedule_source(redis_config: RedisConfig) -> ScheduleSource:
+    return RedisScheduleSource(url=redis_config.schedule_source_uri)
+
+
+def setup_scheduler(broker: AsyncBroker, schedule_source: ScheduleSource) -> TaskiqScheduler:
     logger.debug("Creating taskiq scheduler for task management...")
 
     return TaskiqScheduler(
         broker=broker,
-        sources=[LabelScheduleSource(broker)],
+        sources=[
+            LabelScheduleSource(broker),
+            schedule_source,
+        ],
     )
 
 

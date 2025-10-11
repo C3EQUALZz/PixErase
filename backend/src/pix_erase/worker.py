@@ -24,7 +24,7 @@ async def shutdown(state: TaskiqState) -> None:  # noqa: ARG001
     clear_mappers()
 
 
-def create_taskiq_app() -> AsyncBroker:
+def create_worker_taskiq_app() -> AsyncBroker:
     configs: AppConfig = AppConfig()
     task_manager: AsyncBroker = setup_task_manager(
         taskiq_config=configs.worker, rabbitmq_config=configs.rabbitmq, redis_config=configs.redis
@@ -44,7 +44,8 @@ def create_taskiq_app() -> AsyncBroker:
         AuthSessionTtlMin: configs.security.auth.session_ttl_min,
         AuthSessionRefreshThreshold: configs.security.auth.session_refresh_threshold,
         CookieParams: CookieParams(secure=configs.security.cookies.secure),
-        S3Config: configs.s3
+        S3Config: configs.s3,
+        AsyncBroker: task_manager,
     }
 
     container: AsyncContainer = make_async_container(*setup_providers(), context=context)

@@ -92,8 +92,6 @@ services:
       - pix_erase.postgres.data:/var/lib/postgresql/data
       - ./deploy/dev/postgres/postgresql.conf:/etc/postgresql.conf
       - ./deploy/dev/postgres/pg_hba.conf:/etc/pg_hba.conf
-    env_file:
-      - .env
 
   api:
     <<: *default
@@ -133,12 +131,10 @@ services:
           'curl -fsSL http://localhost:${UVICORN_PORT}/healthcheck/',
         ]
       <<: *hc-interval
-    env_file:
-      - .env
 
   worker:
     <<: *default
-    profiles: [ "api" ]
+    profiles: [ "api", "scheduler" ]
     container_name: pix_erase.worker
     hostname: pix_erase.worker
     build:
@@ -165,8 +161,36 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    env_file:
-      - .env
+
+  scheduler:
+    <<: *default
+    profiles: [ "api", "scheduler" ]
+    container_name: pix_erase.scheduler
+    hostname: pix_erase.scheduler
+    build:
+      context: .
+      dockerfile: ./deploy/dev/pix_erase/Dockerfile
+    environment:
+      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment, *x-minio-environment ]
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      RABBIT_HOST: rabbitmq
+    command: /bin/sh -cx "./scheduler_entrypoint.sh"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   redis:
     <<: *default
@@ -193,8 +217,6 @@ services:
     volumes:
       - pix_erase.redis.data:/data
       - ./deploy/dev/redis/redis_entrypoint.sh:/usr/local/bin/redis_entrypoint.sh
-    env_file:
-      - .env
 
   rabbitmq:
     <<: *default
@@ -225,8 +247,6 @@ services:
       <<: *hc-interval
     volumes:
       - pix_erase.rabbitmq.data:/var/lib/rabbitmq/:rw
-    env_file:
-      - .env
 
   minio:
     <<: *default

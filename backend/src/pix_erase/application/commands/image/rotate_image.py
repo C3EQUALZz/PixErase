@@ -1,10 +1,15 @@
+import asyncio
 import logging
+from asyncio import Task
 from dataclasses import dataclass
-from typing import final, Final, cast
+from datetime import datetime, UTC, timedelta
+from typing import final, Final, cast, Coroutine, Any
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
-from pix_erase.application.common.ports.image.task_manager import ImageTaskManager
+from pix_erase.application.common.ports.scheduler.payloads.images import RotateImagePayload
+from pix_erase.application.common.ports.scheduler.task_id import TaskID, TaskKey
+from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.image import ImageDoesntBelongToThisUserError, ImageNotFoundError
 from pix_erase.domain.image.entities.image import Image
@@ -30,14 +35,14 @@ class RotateImageCommandHandler:
     def __init__(
             self,
             image_storage: ImageStorage,
-            task_manager: ImageTaskManager,
+            task_scheduler: TaskScheduler,
             current_user_service: CurrentUserService,
     ) -> None:
         self._image_storage: Final[ImageStorage] = image_storage
-        self._task_manager: Final[ImageTaskManager] = task_manager
+        self._scheduler: Final[TaskScheduler] = task_scheduler
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: RotateImageCommand) -> None:
+    async def __call__(self, data: RotateImageCommand) -> TaskID:
         logger.info(
             "Started rotating image with id: %s and angle: %d",
             data.image_id,
@@ -66,10 +71,30 @@ class RotateImageCommandHandler:
             data.angle
         )
 
-        await self._task_manager.rotate(image_id=typed_image_id, angle=data.angle)
+        task_id: TaskID = self._scheduler.make_task_id(
+            key=TaskKey("rotate_image"),
+            value=typed_image_id,
+        )
+
+        background_tasks: set[Task] = set()
+
+        coroutine: Coroutine[Any, Any, None] = self._scheduler.schedule_by_time(
+            task_id=task_id,
+            payload=RotateImagePayload(
+                image_id=typed_image_id,
+                angle=data.angle,
+            ),
+            run_at=datetime.now(UTC) + timedelta(seconds=5)
+        )
+
+        task: Task = asyncio.create_task(coroutine)
+        background_tasks.add(task)
+        task.add_done_callback(background_tasks.discard)
 
         logger.info(
-            "Successfully sent task to task manager for rotate image with id: %s and angle: %d",
-            data.image_id,
-            data.angle
+            "Successfully send image for rotating in task manager, image_id: %s, task_id: %s",
+            image.id,
+            task_id
         )
+
+        return task_id

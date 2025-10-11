@@ -28,7 +28,7 @@ from pix_erase.setup.config.database import SQLAlchemyConfig, PostgresConfig
 from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.settings import AppConfig
 from pix_erase.setup.ioc import setup_providers
-from pix_erase.worker import create_taskiq_app
+from pix_erase.worker import create_worker_taskiq_app
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             happens after yield, during the application shutdown phase.
     """
     setup_map_tables()
-    task_manager: AsyncBroker = create_taskiq_app()
+    task_manager: AsyncBroker = cast("AsyncBroker", app.state.task_manager)
 
     if not task_manager.is_worker_process:
         logger.info("Setting up taskiq")
@@ -102,6 +102,9 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
         debug=configs.asgi.fastapi_debug,
     )
 
+    task_manager: AsyncBroker = create_worker_taskiq_app()
+    app.state.task_manager = task_manager
+
     context = {
         ASGIConfig: configs.asgi,
         RedisConfig: configs.redis,
@@ -113,7 +116,8 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
         AuthSessionTtlMin: configs.security.auth.session_ttl_min,
         AuthSessionRefreshThreshold: configs.security.auth.session_refresh_threshold,
         CookieParams: CookieParams(secure=configs.security.cookies.secure),
-        S3Config: configs.s3
+        S3Config: configs.s3,
+        AsyncBroker: task_manager
     }
 
     container: AsyncContainer = make_async_container(*setup_providers(), context=context)
