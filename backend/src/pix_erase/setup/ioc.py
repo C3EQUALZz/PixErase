@@ -52,6 +52,7 @@ from pix_erase.domain.image.ports.image_compress_converter import ImageCompressC
 from pix_erase.domain.image.ports.image_crop_converter import ImageCropConverter
 from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import \
     ImageNearestNeighbourUpscalerConverter
+from pix_erase.domain.image.ports.image_resizer import ImageResizerConverter
 from pix_erase.domain.image.ports.image_rotation_converter import ImageRotationConverter
 from pix_erase.domain.image.ports.image_watermark_remover_converter import ImageWatermarkRemoverConverter
 from pix_erase.domain.image.services.colorization_service import ImageColorizationService
@@ -77,6 +78,7 @@ from pix_erase.infrastructure.adapters.image_converters.cv2_image_compress_conve
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_crop_converter import Cv2ImageCropConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_nearest_neighbour_upscale_converter import \
     Cv2ImageNearestNeighbourUpscalerConverter
+from pix_erase.infrastructure.adapters.image_converters.cv2_image_resizer_converter import Cv2ImageResizerConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_watermark_remover import Cv2ImageWatermarkRemover
 from pix_erase.infrastructure.adapters.image_converters.exif_image_extractor import ExifImageInfoExtractor
 from pix_erase.infrastructure.adapters.image_converters.rembg_image_remove_background_converter import \
@@ -183,6 +185,7 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=Cv2ImageNearestNeighbourUpscalerConverter, provides=ImageNearestNeighbourUpscalerConverter)
     provider.provide(source=Cv2EDSRImageUpscaleConverter, provides=ImageAIUpscaleConverter)
     provider.provide(source=RembgImageRemoveBackgroundConverter, provides=ImageRemoveBackgroundConverter)
+    provider.provide(source=Cv2ImageResizerConverter, provides=ImageResizerConverter)
     provider.provide(source=UserService)
     provider.provide(source=AccessService)
     provider.provide(source=ImageService)

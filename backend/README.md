@@ -66,13 +66,13 @@ just infra
 Для запуска `worker` используем команду, которая представлена ниже: 
 
 ```bash
-taskiq worker -fsd --ack-type when_saved pix_erase.worker:create_taskiq_app -tp pix_erase.infrastructure.task_manager.tasks
+taskiq worker --ack-type when_saved pix_erase.worker:create_worker_taskiq_app -fsd -tp pix_erase.infrastructure.scheduler.tasks
 ```
 
 Теперь запускаем сам `scheduler` в отдельном процессе: 
 
 ```bash
-taskiq scheduler -fsd pix_erase.worker:create_scheduler_taskiq_app -tp pix_erase.infrastructure.task_manager.tasks
+taskiq scheduler pix_erase.scheduler:create_scheduler_taskiq_app -fsd -tp pix_erase.infrastructure.scheduler.tasks
 ```
 
 > [!IMPORTANT]

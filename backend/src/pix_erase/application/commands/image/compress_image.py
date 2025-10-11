@@ -4,11 +4,9 @@ from asyncio import Task
 from dataclasses import dataclass
 from typing import final, Final, cast, Coroutine, Any
 from uuid import UUID
-from datetime import datetime, UTC, timedelta
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.ports.scheduler.payloads.images import CompressImagePayload
-
 from pix_erase.application.common.ports.scheduler.task_id import TaskKey, TaskID
 from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.services.current_user import CurrentUserService
@@ -73,13 +71,12 @@ class CompressImageCommandHandler:
 
         background_tasks: set[Task] = set()
 
-        coroutine: Coroutine[Any, Any, None] = self._task_scheduler.schedule_by_time(
+        coroutine: Coroutine[Any, Any, None] = self._task_scheduler.schedule(
             task_id=task_id,
             payload=CompressImagePayload(
                 image_id=typed_image_id,
                 quality=data.quality,
             ),
-            run_at=datetime.now(UTC) + timedelta(seconds=5)
         )
 
         task: Task = asyncio.create_task(coroutine)

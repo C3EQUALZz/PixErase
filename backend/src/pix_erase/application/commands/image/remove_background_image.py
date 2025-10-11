@@ -2,7 +2,6 @@ import asyncio
 import logging
 from asyncio import Task
 from dataclasses import dataclass
-from datetime import timedelta, datetime, UTC
 from typing import final, Final, cast, Coroutine, Any
 from uuid import UUID
 
@@ -71,12 +70,11 @@ class RemoveBackgroundImageCommandHandler:
 
         background_tasks: set[Task] = set()
 
-        coroutine: Coroutine[Any, Any, None] = self._scheduler.schedule_by_time(
+        coroutine: Coroutine[Any, Any, None] = self._scheduler.schedule(
             task_id=task_id,
             payload=RemoveImageBackgroundPayload(
                 image_id=typed_image_id,
-            ),
-            run_at=datetime.now(UTC) + timedelta(seconds=5)
+            )
         )
 
         task: Task = asyncio.create_task(coroutine)

@@ -27,7 +27,7 @@ ImageIDPathParameter = Path(
 
 @upscale_image_router.patch(
     "/id/{image_id}/upscale/",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_202_ACCEPTED,
     summary="Upscale an image using ai at several times",
     description=getdoc(UpscaleImageCommandHandler),
     responses={

@@ -27,7 +27,7 @@ ImageIDPathParameter = Path(
 
 @remove_background_router.patch(
     "/id/{image_id}/remove-background",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_202_ACCEPTED,
     summary="Remove background from images",
     description=getdoc(RemoveBackgroundImageCommandHandler),
     responses={

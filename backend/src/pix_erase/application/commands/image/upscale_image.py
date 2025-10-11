@@ -2,7 +2,6 @@ import asyncio
 import logging
 from asyncio import Task
 from dataclasses import dataclass
-from datetime import datetime, UTC, timedelta
 from typing import final, Final, cast, Literal, Any, Coroutine
 from uuid import UUID
 
@@ -75,14 +74,13 @@ class UpscaleImageCommandHandler:
 
         background_tasks: set[Task] = set()
 
-        coroutine: Coroutine[Any, Any, None] = self._scheduler.schedule_by_time(
+        coroutine: Coroutine[Any, Any, None] = self._scheduler.schedule(
             task_id=task_id,
             payload=UpscaleImagePayload(
                 image_id=typed_image_id,
                 algorithm=data.algorithm,
                 scale=ImageScale(data.scale),
-            ),
-            run_at=datetime.now(UTC) + timedelta(seconds=5)
+            )
         )
 
         task: Task = asyncio.create_task(coroutine)

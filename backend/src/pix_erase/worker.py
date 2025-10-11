@@ -7,7 +7,7 @@ from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtSecret
 from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper
 from pix_erase.infrastructure.auth.cookie_params import CookieParams
 from pix_erase.infrastructure.auth.session.timer_utc import AuthSessionRefreshThreshold, AuthSessionTtlMin
-from pix_erase.setup.bootstrap import setup_map_tables, setup_task_manager
+from pix_erase.setup.bootstrap import setup_map_tables, setup_task_manager, setup_task_manager_tasks
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
@@ -29,6 +29,7 @@ def create_worker_taskiq_app() -> AsyncBroker:
     task_manager: AsyncBroker = setup_task_manager(
         taskiq_config=configs.worker, rabbitmq_config=configs.rabbitmq, redis_config=configs.redis
     )
+    setup_task_manager_tasks(broker=task_manager)
 
     task_manager.on_event(TaskiqEvents.WORKER_STARTUP)(startup)
     task_manager.on_event(TaskiqEvents.CLIENT_SHUTDOWN)(shutdown)

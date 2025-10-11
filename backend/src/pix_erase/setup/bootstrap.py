@@ -10,10 +10,11 @@ from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker, ScheduleSo
 from taskiq.middlewares import SmartRetryMiddleware
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
-from taskiq_redis import RedisAsyncResultBackend, RedisScheduleSource
+from taskiq_redis import RedisAsyncResultBackend, RedisScheduleSource, ListRedisScheduleSource
 
 from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_sessions_table
 from pix_erase.infrastructure.persistence.models.users import map_users_table
+from pix_erase.infrastructure.scheduler.tasks.images_tasks import setup_images_task
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionHandler
 from pix_erase.presentation.http.v1.common.routes import healthcheck, index
 from pix_erase.presentation.http.v1.middlewares.asgi_auth import ASGIAuthMiddleware
@@ -134,7 +135,10 @@ def setup_task_manager(
                 max_delay_exponent=taskiq_config.max_delay_component,
             ),
         )
-        .with_result_backend(RedisAsyncResultBackend(redis_url=redis_config.worker_uri))
+        .with_result_backend(RedisAsyncResultBackend(
+            redis_url=redis_config.worker_uri,
+            result_ex_time=1000,
+        ))
     )
     logger.debug("Set async shared broker")
     async_shared_broker.default_broker(broker)
@@ -143,8 +147,12 @@ def setup_task_manager(
     return broker
 
 
+def setup_task_manager_tasks(broker: AsyncBroker) -> None:
+    setup_images_task(broker=broker)
+
+
 def setup_schedule_source(redis_config: RedisConfig) -> ScheduleSource:
-    return RedisScheduleSource(url=redis_config.schedule_source_uri)
+    return ListRedisScheduleSource(url=redis_config.schedule_source_uri)
 
 
 def setup_scheduler(broker: AsyncBroker, schedule_source: ScheduleSource) -> TaskiqScheduler:

@@ -3,8 +3,7 @@ from typing import Annotated, Final
 
 from dishka import FromDishka
 from dishka.integrations.taskiq import inject
-from taskiq import Context, TaskiqDepends
-from taskiq.brokers.shared_broker import shared_task
+from taskiq import Context, TaskiqDepends, AsyncBroker
 from taskiq.depends.progress_tracker import ProgressTracker, TaskState
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
@@ -23,12 +22,6 @@ from pix_erase.infrastructure.scheduler.tasks.schemas import (
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
-@shared_task(
-    retry_on_error=True,
-    max_retries=3,
-    delay=15,
-    task_name="grayscale_image"
-)
 @inject(patch_module=True)
 async def convert_to_grayscale_task(
         request_schema: GrayscaleImageSchemaRequestTask,
@@ -75,12 +68,6 @@ async def convert_to_grayscale_task(
     await progress_tracker.set_progress(state=TaskState.SUCCESS)
 
 
-@shared_task(
-    retry_on_error=True,
-    max_retries=3,
-    delay=15,
-    task_name="rotate_image"
-)
 @inject(patch_module=True)
 async def rotate_image_task(
         request_schema: RotateImageSchemaRequestTask,
@@ -133,12 +120,6 @@ async def rotate_image_task(
     )
 
 
-@shared_task(
-    retry_on_error=True,
-    max_retries=3,
-    delay=15,
-    task_name="compress_image"
-)
 @inject(patch_module=True)
 async def compress_image_task(
         request_schema: CompressImageSchemaRequestTask,
@@ -192,12 +173,6 @@ async def compress_image_task(
     )
 
 
-@shared_task(
-    retry_on_error=True,
-    max_retries=3,
-    delay=15,
-    task_name="upscale_image"
-)
 @inject(patch_module=True)
 async def upscale_image_task(
         request_schema: UpscaleImageSchemaRequestTask,
@@ -252,12 +227,6 @@ async def upscale_image_task(
     )
 
 
-@shared_task(
-    retry_on_error=True,
-    max_retries=3,
-    delay=15,
-    task_name="remove_background_image"
-)
 @inject(patch_module=True)
 async def remove_background_task(
         request_schema: RemoveBackgroundImageSchemaRequestTask,
@@ -299,4 +268,48 @@ async def remove_background_task(
         "Finished task: %s with id: %s",
         context.message.task_name,
         context.message.task_id,
+    )
+
+
+def setup_images_task(broker: AsyncBroker) -> None:
+    logger.info("Setup tasks")
+
+    broker.register_task(
+        func=convert_to_grayscale_task,
+        retry_on_error=True,
+        max_retries=3,
+        delay=15,
+        task_name="grayscale_image"
+    )
+
+    broker.register_task(
+        func=rotate_image_task,
+        retry_on_error=True,
+        max_retries=3,
+        delay=15,
+        task_name="rotate_image"
+    )
+
+    broker.register_task(
+        func=compress_image_task,
+        retry_on_error=True,
+        max_retries=3,
+        delay=15,
+        task_name="compress_image"
+    )
+
+    broker.register_task(
+        func=upscale_image_task,
+        retry_on_error=True,
+        max_retries=3,
+        delay=15,
+        task_name="upscale_image"
+    )
+
+    broker.register_task(
+        func=remove_background_task,
+        retry_on_error=True,
+        max_retries=3,
+        delay=15,
+        task_name="remove_background_image"
     )

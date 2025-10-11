@@ -1,24 +1,16 @@
-from typing import Protocol, Any
-from datetime import datetime
 from abc import abstractmethod
+from typing import Protocol, Any
+
 from pix_erase.application.common.ports.scheduler.payloads.base import TaskPayload
 from pix_erase.application.common.ports.scheduler.task_id import TaskID, TaskKey, TaskInfo
 
 
 class TaskScheduler(Protocol):
     @abstractmethod
-    async def schedule_by_time(
+    async def schedule(
             self,
             task_id: TaskID,
             payload: TaskPayload,
-            run_at: datetime,
-    ) -> None:
-        ...
-
-    @abstractmethod
-    async def unschedule(
-            self,
-            task_id: TaskID
     ) -> None:
         ...
 
