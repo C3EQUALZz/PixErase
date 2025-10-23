@@ -7,6 +7,12 @@ from .internet_protocol import (
     PingTimeExceededError,
     PingPermissionError,
     PingNetworkError,
+    BadTimeOutError,
+    BadPackageSizeError,
+    BadTimeToLiveError,
+    IPInfoConnectionError,
+    IPInfoServiceError,
+    IPInfoNotFoundError,
 )
 
 __all__ = [
@@ -18,5 +24,11 @@ __all__ = [
     "PingTimeExceededError",
     "PingPermissionError",
     "PingNetworkError",
+    "BadTimeOutError",
+    "BadPackageSizeError",
+    "BadTimeToLiveError",
+    "IPInfoConnectionError",
+    "IPInfoServiceError",
+    "IPInfoNotFoundError",
 ]
 

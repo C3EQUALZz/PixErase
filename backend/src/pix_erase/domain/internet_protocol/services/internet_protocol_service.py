@@ -1,13 +1,15 @@
-from typing import Final, override
+from typing import Final
 
 from pix_erase.domain.common.services.base import DomainService
-from pix_erase.domain.internet_protocol.ports.ping_service_port import PingServicePort
-from pix_erase.domain.internet_protocol.values.ip_address import IPAddress, IPv4Address, IPv6Address
-from pix_erase.domain.internet_protocol.values.ping_result import PingResult
-from pix_erase.domain.internet_protocol.values.timeout import Timeout
-from pix_erase.domain.internet_protocol.values.packet_size import PacketSize
-from pix_erase.domain.internet_protocol.values.time_to_live import TimeToLive
 from pix_erase.domain.internet_protocol.errors.internet_protocol import InvalidIPAddressError
+from pix_erase.domain.internet_protocol.ports.ping_service_port import PingServicePort
+from pix_erase.domain.internet_protocol.ports.ip_info_service_port import IPInfoServicePort
+from pix_erase.domain.internet_protocol.values.ip_address import IPAddress, IPv4Address, IPv6Address
+from pix_erase.domain.internet_protocol.values.ip_info import IPInfo
+from pix_erase.domain.internet_protocol.values.packet_size import PacketSize
+from pix_erase.domain.internet_protocol.values.ping_result import PingResult
+from pix_erase.domain.internet_protocol.values.time_to_live import TimeToLive
+from pix_erase.domain.internet_protocol.values.timeout import Timeout
 
 
 class InternetProtocolService(DomainService):
@@ -21,9 +23,11 @@ class InternetProtocolService(DomainService):
     def __init__(
         self,
         ping_service: PingServicePort,
+        ip_info_service: IPInfoServicePort,
     ) -> None:
         super().__init__()
         self._ping_service: Final[PingServicePort] = ping_service
+        self._ip_info_service: Final[IPInfoServicePort] = ip_info_service
     
     def create(self, address: str) -> IPAddress:
         """
@@ -102,3 +106,15 @@ class InternetProtocolService(DomainService):
             packet_size=packet_size.value,
             ttl=ttl.value if ttl else None,
         )
+    
+    async def get_ip_info(self, ip_address: IPAddress) -> IPInfo:
+        """
+        Get information about an IP address.
+        
+        Args:
+            ip_address: The IP address to get information for
+            
+        Returns:
+            IPInfo containing geographical and network information
+        """
+        return await self._ip_info_service.get_ip_info(ip_address)

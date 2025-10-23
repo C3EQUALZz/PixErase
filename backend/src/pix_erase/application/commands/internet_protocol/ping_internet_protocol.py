@@ -2,12 +2,14 @@ import logging
 from dataclasses import dataclass
 from typing import final, Final
 
+from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.internet_protocol.ping_internet_protocol import PingInternetProtocolView
 from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
 from pix_erase.domain.internet_protocol.values import IPAddress, PingResult
 from pix_erase.domain.internet_protocol.values.packet_size import PacketSize
 from pix_erase.domain.internet_protocol.values.time_to_live import TimeToLive
 from pix_erase.domain.internet_protocol.values.timeout import Timeout
+from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -27,8 +29,13 @@ class PingInternetProtocolCommandHandler:
     - Async processing, non-blocking.
     - Changes existing image.
     """
-    def __init__(self, ping_service: InternetProtocolService) -> None:
+    def __init__(
+            self,
+            ping_service: InternetProtocolService,
+            current_user_service: CurrentUserService,
+    ) -> None:
         self._internet_service: Final[InternetProtocolService] = ping_service
+        self._current_user_service: Final[CurrentUserService] = current_user_service
 
     async def __call__(self, data: PingInternetProtocolCommand) -> PingInternetProtocolView:
         """
@@ -47,6 +54,10 @@ class PingInternetProtocolCommandHandler:
             data.timeout,
             data.ttl,
         )
+
+        logger.info("Getting current user id")
+        current_user: User = await self._current_user_service.get_current_user()
+        logger.info("Successfully got current user id: %s", current_user.id)
 
         ip_address: IPAddress = self._internet_service.create(data.destination_address)
 

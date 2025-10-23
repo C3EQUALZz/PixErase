@@ -42,6 +42,7 @@ from pix_erase.application.common.services.auth_session import AuthSessionServic
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.queries.images.read_by_id import ReadImageByIDQueryHandler
 from pix_erase.application.queries.images.read_exif_from_image_by_id import ReadExifFromImageByIDQueryHandler
+from pix_erase.application.queries.internet_protocol.read_ip_info import ReadIPInfoQueryHandler
 from pix_erase.application.queries.tasks.read_task_by_id import ReadTaskByIDQueryHandler
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler
 from pix_erase.application.queries.users.read_by_id import ReadUserByIDQueryHandler
@@ -59,6 +60,7 @@ from pix_erase.domain.image.ports.image_watermark_remover_converter import Image
 from pix_erase.domain.image.services.colorization_service import ImageColorizationService
 from pix_erase.domain.image.services.image_service import ImageService
 from pix_erase.domain.image.services.transformation_service import ImageTransformationService
+from pix_erase.domain.internet_protocol.ports import IPInfoServicePort
 from pix_erase.domain.internet_protocol.ports.ping_service_port import PingServicePort
 from pix_erase.domain.internet_protocol.services import InternetProtocolService
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
@@ -87,6 +89,7 @@ from pix_erase.infrastructure.adapters.image_converters.exif_image_extractor imp
 from pix_erase.infrastructure.adapters.image_converters.rembg_image_remove_background_converter import \
     RembgImageRemoveBackgroundConverter
 from pix_erase.infrastructure.adapters.image_converters.сv2_image_rotation_converter import Cv2ImageRotationConverter
+from pix_erase.infrastructure.adapters.internet_protocol.ip_api_service_port import IPAPIServicePort
 from pix_erase.infrastructure.adapters.internet_protocol.raw_socket_ping_service_port import RawSocketPingServicePort
 from pix_erase.infrastructure.adapters.persistence.aiobotocore_file_storage import AiobotocoreS3ImageStorage
 from pix_erase.infrastructure.adapters.persistence.alchemy_auth_session_command_gateway import (
@@ -191,6 +194,7 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=RembgImageRemoveBackgroundConverter, provides=ImageRemoveBackgroundConverter)
     provider.provide(source=Cv2ImageResizerConverter, provides=ImageResizerConverter)
     provider.provide(source=RawSocketPingServicePort, provides=PingServicePort)
+    provider.provide(source=IPAPIServicePort, provides=IPInfoServicePort)
     provider.provide(source=UserService)
     provider.provide(source=AccessService)
     provider.provide(source=ImageService)
@@ -262,7 +266,8 @@ def interactors_provider() -> Provider:
         ReadExifFromImageByIDQueryHandler,
         RemoveBackgroundImageCommandHandler,
         ReadTaskByIDQueryHandler,
-        PingInternetProtocolCommandHandler
+        PingInternetProtocolCommandHandler,
+        ReadIPInfoQueryHandler
     )
 
     return provider

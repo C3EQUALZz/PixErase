@@ -52,3 +52,18 @@ class BadPackageSizeError(DomainFieldError):
 class BadTimeToLiveError(DomainFieldError):
     ...
 
+
+class IPInfoConnectionError(InternetProtocolError):
+    """Raised when connection to IP information service fails."""
+    pass
+
+
+class IPInfoServiceError(InternetProtocolError):
+    """Raised when IP information service returns an error."""
+    pass
+
+
+class IPInfoNotFoundError(InternetProtocolError):
+    """Raised when IP information is not found."""
+    pass
+

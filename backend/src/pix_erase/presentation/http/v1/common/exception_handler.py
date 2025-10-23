@@ -25,6 +25,22 @@ from pix_erase.domain.user.errors.access_service import AuthorizationError, Acti
 from pix_erase.domain.user.errors.raw_password import EmptyPasswordWasProvidedError, WeakPasswordWasProvidedError
 from pix_erase.domain.user.errors.user import WrongUserAccountEmailFormatError, PasswordCantBeEmptyError, \
     UserAccountNameCantBeEmptyError, TooBigUserAccountNameError, RoleAssignmentNotPermittedError
+from pix_erase.domain.internet_protocol.errors.internet_protocol import (
+    InternetProtocolError,
+    InvalidIPAddressError,
+    InvalidPingResultError,
+    PingTimeoutError,
+    PingDestinationUnreachableError,
+    PingTimeExceededError,
+    PingPermissionError,
+    PingNetworkError,
+    BadTimeOutError,
+    BadPackageSizeError,
+    BadTimeToLiveError,
+    IPInfoConnectionError,
+    IPInfoServiceError,
+    IPInfoNotFoundError,
+)
 from pix_erase.infrastructure.errors.base import InfrastructureError
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
 from pix_erase.infrastructure.errors.transaction_manager import RepoError, EntityAddError, RollbackError
@@ -58,6 +74,11 @@ class ExceptionHandler:
             UserAccountNameCantBeEmptyError: status.HTTP_400_BAD_REQUEST,
             TooBigUserAccountNameError: status.HTTP_400_BAD_REQUEST,
             BadFileFormatError: status.HTTP_400_BAD_REQUEST,
+            BadTimeOutError: status.HTTP_400_BAD_REQUEST,
+            BadPackageSizeError: status.HTTP_400_BAD_REQUEST,
+            BadTimeToLiveError: status.HTTP_400_BAD_REQUEST,
+            InvalidIPAddressError: status.HTTP_400_BAD_REQUEST,
+            InvalidPingResultError: status.HTTP_400_BAD_REQUEST,
             # 401
             AuthenticationError: status.HTTP_401_UNAUTHORIZED,
             # 403
@@ -73,6 +94,9 @@ class ExceptionHandler:
             UserNotFoundByIDError: status.HTTP_404_NOT_FOUND,
             UserNotFoundByEmailError: status.HTTP_404_NOT_FOUND,
             ImageNotFoundError: status.HTTP_404_NOT_FOUND,
+            IPInfoNotFoundError: status.HTTP_404_NOT_FOUND,
+            # 408
+            PingTimeoutError: status.HTTP_408_REQUEST_TIMEOUT,
             # 409
             SortingError: status.HTTP_409_CONFLICT,
             EntityAddError: status.HTTP_409_CONFLICT,
@@ -86,9 +110,16 @@ class ExceptionHandler:
             InfrastructureError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             AppError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             Exception: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            InternetProtocolError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PingDestinationUnreachableError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PingTimeExceededError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PingPermissionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PingNetworkError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            IPInfoServiceError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             # 503
             RepoError: status.HTTP_503_SERVICE_UNAVAILABLE,
-            RollbackError: status.HTTP_503_SERVICE_UNAVAILABLE
+            RollbackError: status.HTTP_503_SERVICE_UNAVAILABLE,
+            IPInfoConnectionError: status.HTTP_503_SERVICE_UNAVAILABLE
         }
     )
 
