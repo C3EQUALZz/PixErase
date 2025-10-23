@@ -10,7 +10,7 @@ from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker, ScheduleSo
 from taskiq.middlewares import SmartRetryMiddleware
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
-from taskiq_redis import RedisAsyncResultBackend, RedisScheduleSource, ListRedisScheduleSource
+from taskiq_redis import RedisAsyncResultBackend, ListRedisScheduleSource
 
 from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_sessions_table
 from pix_erase.infrastructure.persistence.models.users import map_users_table
@@ -24,6 +24,7 @@ from pix_erase.presentation.http.v1.routes.auth import auth_router
 from pix_erase.presentation.http.v1.routes.image import image_router
 from pix_erase.presentation.http.v1.routes.task import task_router
 from pix_erase.presentation.http.v1.routes.user import user_router
+from pix_erase.presentation.http.v1.routes.internet_protocol import ip_router
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.logs import LoggingConfig, build_structlog_logger
@@ -111,6 +112,7 @@ def setup_http_routes(app: FastAPI, /) -> None:
     router_v1.include_router(user_router)
     router_v1.include_router(image_router)
     router_v1.include_router(task_router)
+    router_v1.include_router(ip_router)
 
     app.include_router(router_v1)
 
