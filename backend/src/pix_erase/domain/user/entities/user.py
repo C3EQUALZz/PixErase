@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+from typing import Self, TypedDict
+from uuid import UUID
 
 from pix_erase.domain.common.entities.base_aggregate import BaseAggregateRoot
 from pix_erase.domain.image.values.image_id import ImageID
@@ -7,6 +9,16 @@ from pix_erase.domain.user.values.user_email import UserEmail
 from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.domain.user.values.user_name import Username
 from pix_erase.domain.user.values.user_role import UserRole
+
+
+class SerializedUser(TypedDict):
+    id: str
+    email: str
+    name: str
+    role: str
+    is_active: bool
+    images: list[str]
+    password: bytes
 
 
 @dataclass(eq=False, kw_only=True)
@@ -30,3 +42,26 @@ class User(BaseAggregateRoot[UserID]):
     role: UserRole = field(default_factory=lambda: UserRole.USER)
     is_active: bool = field(default_factory=lambda: True)
     images: list[ImageID] = field(default_factory=lambda: [])
+
+    def serialize(self) -> SerializedUser:
+        return {
+            "id": str(self.id),
+            "email": str(self.email),
+            "name": str(self.name),
+            "role": self.role,
+            "is_active": self.is_active,
+            "images": [str(img_id) for img_id in self.images],
+            "password": self.hashed_password.value
+        }
+
+    @classmethod
+    def deserialize(cls, data: SerializedUser) -> Self:
+        return User(
+            id=UserID(UUID(data["id"])),
+            email=UserEmail(data["email"]),
+            name=Username(data["name"]),
+            hashed_password=HashedPassword(data["password"]),
+            role=UserRole(data["role"]),
+            is_active=data["is_active"],
+            images=[ImageID(UUID(img_id)) for img_id in data["images"]]
+        )

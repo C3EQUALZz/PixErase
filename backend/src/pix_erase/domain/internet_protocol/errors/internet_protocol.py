@@ -67,3 +67,45 @@ class IPInfoNotFoundError(InternetProtocolError):
     """Raised when IP information is not found."""
     pass
 
+
+class PortScanError(InternetProtocolError):
+    """Base error for port scanning operations."""
+    pass
+
+
+class PortScanTimeoutError(PortScanError):
+    """Raised when port scan operation times out."""
+    pass
+
+
+class PortScanPermissionError(PortScanError):
+    """Raised when port scan requires elevated permissions."""
+    pass
+
+
+class PortScanNetworkError(PortScanError):
+    """Raised when a network error occurs during port scanning."""
+    pass
+
+
+class PortScanConnectionError(PortScanError):
+    """Raised when connection to target fails during port scanning."""
+    pass
+
+
+class InvalidPortRangeError(DomainFieldError):
+    """Raised when port range is invalid."""
+    pass
+
+
+class PortScanCancelledError(PortScanError):
+    """Raised when port scan is cancelled."""
+    pass
+
+
+class BadPortRangeError(DomainFieldError):
+    ...
+
+
+class BadPortError(DomainFieldError):
+    ...

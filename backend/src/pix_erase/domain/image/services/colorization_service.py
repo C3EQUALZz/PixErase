@@ -2,8 +2,10 @@ import logging
 from datetime import datetime
 from typing import Final, Literal
 
+from pix_erase.domain.common.services.base import DomainService
 from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.errors.image import UnknownImageUpscalerError
+from pix_erase.domain.image.events import ImageConvertedEvent
 from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
 from pix_erase.domain.image.ports.image_background_remove_converter import ImageRemoveBackgroundConverter
 from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
@@ -16,7 +18,7 @@ from pix_erase.domain.image.values.image_scale import ImageScale
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
-class ImageColorizationService:
+class ImageColorizationService(DomainService):
     def __init__(
             self,
             color_to_gray_converter: ImageColorToCrayScaleConverter,
@@ -25,6 +27,7 @@ class ImageColorizationService:
             image_ai_upscale_converter: ImageAIUpscaleConverter,
             image_nearest_upscale_converter: ImageNearestNeighbourUpscalerConverter,
     ) -> None:
+        super().__init__()
         self._colorization_converter: Final[ImageColorToCrayScaleConverter] = color_to_gray_converter
         self._remove_converter: Final[ImageRemoveBackgroundConverter] = image_background_remove_converter
         self._watermark_converter: Final[ImageWatermarkRemoverConverter] = watermark_converter
@@ -45,6 +48,15 @@ class ImageColorizationService:
         image.data = converted_data
         image.updated_at = datetime.now()
 
+        self._record_event(
+            ImageConvertedEvent(
+                name=image.name.value,
+                width=image.width.value,
+                height=image.height.value,
+                method="convert_color_to_gray",
+            )
+        )
+
     def remove_background(self, image: Image) -> None:
         logger.debug(
             "Started removing background, image name: %s",
@@ -57,6 +69,15 @@ class ImageColorizationService:
         image.data = converted_data
         image.updated_at = datetime.now()
 
+        self._record_event(
+            ImageConvertedEvent(
+                name=image.name.value,
+                width=image.width.value,
+                height=image.height.value,
+                method="remove_background",
+            )
+        )
+
     def remove_watermark(self, image: Image) -> None:
         logger.debug("Started removing watermark, image name: %s", image.name)
 
@@ -66,6 +87,15 @@ class ImageColorizationService:
 
         image.data = converted_data
         image.updated_at = datetime.now()
+
+        self._record_event(
+            ImageConvertedEvent(
+                name=image.name.value,
+                width=image.width.value,
+                height=image.height.value,
+                method="remove_watermark",
+            )
+        )
 
     def upscale(
             self,

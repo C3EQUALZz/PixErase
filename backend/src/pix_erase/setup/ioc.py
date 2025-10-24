@@ -21,6 +21,10 @@ from pix_erase.application.commands.image.remove_watermark_from_image import Rem
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler
 from pix_erase.application.commands.image.upscale_image import UpscaleImageCommandHandler
 from pix_erase.application.commands.internet_protocol.ping_internet_protocol import PingInternetProtocolCommandHandler
+from pix_erase.application.commands.internet_protocol.scan_common_ports import ScanCommonPortsCommandHandler
+from pix_erase.application.commands.internet_protocol.scan_port import ScanPortCommandHandler
+from pix_erase.application.commands.internet_protocol.scan_port_range import ScanPortRangeCommandHandler
+from pix_erase.application.commands.internet_protocol.scan_ports import ScanPortsCommandHandler
 from pix_erase.application.commands.user.activate_user import ActivateUserCommandHandler
 from pix_erase.application.commands.user.change_user_email import ChangeUserEmailCommandHandler
 from pix_erase.application.commands.user.change_user_name import ChangeUserNameByIDCommandHandler
@@ -101,6 +105,7 @@ from pix_erase.infrastructure.adapters.persistence.alchemy_auth_transaction_mana
 from pix_erase.infrastructure.adapters.persistence.alchemy_main_transaction_manager import SqlAlchemyTransactionManager
 from pix_erase.infrastructure.adapters.persistence.alchemy_user_command_gateway import SqlAlchemyUserCommandGateway
 from pix_erase.infrastructure.adapters.persistence.alchemy_user_query_gateway import SqlAlchemyUserQueryGateway
+from pix_erase.infrastructure.adapters.persistence.cached_user_query_gateway import CachedUserQueryGateway
 from pix_erase.infrastructure.auth.cookie_params import CookieParams
 from pix_erase.infrastructure.auth.session.id_generator import AuthSessionIDGenerator
 from pix_erase.infrastructure.auth.session.ports.gateway import AuthSessionGateway
@@ -160,6 +165,7 @@ def cache_provider() -> Provider:
     provider: Final[Provider] = Provider(scope=Scope.REQUEST)
     provider.provide(get_redis_pool, scope=Scope.APP)
     provider.provide(get_redis, provides=Redis)
+    provider.decorate(source=CachedUserQueryGateway, provides=SqlAlchemyUserQueryGateway)
     return provider
 
 
@@ -267,7 +273,11 @@ def interactors_provider() -> Provider:
         RemoveBackgroundImageCommandHandler,
         ReadTaskByIDQueryHandler,
         PingInternetProtocolCommandHandler,
-        ReadIPInfoQueryHandler
+        ReadIPInfoQueryHandler,
+        ScanPortRangeCommandHandler,
+        ScanCommonPortsCommandHandler,
+        ScanPortCommandHandler,
+        ScanPortsCommandHandler
     )
 
     return provider

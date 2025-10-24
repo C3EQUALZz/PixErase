@@ -12,6 +12,8 @@ from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
 from taskiq_redis import RedisAsyncResultBackend, ListRedisScheduleSource
 
+from pix_erase.infrastructure.metrics.integrations.fastapi import get_metrics
+from pix_erase.infrastructure.metrics.manager import build_metrics_manager
 from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_sessions_table
 from pix_erase.infrastructure.persistence.models.users import map_users_table
 from pix_erase.infrastructure.scheduler.tasks.images_tasks import setup_images_task
@@ -20,16 +22,20 @@ from pix_erase.presentation.http.v1.common.routes import healthcheck, index
 from pix_erase.presentation.http.v1.middlewares.asgi_auth import ASGIAuthMiddleware
 from pix_erase.presentation.http.v1.middlewares.client_cache import ClientCacheMiddleware
 from pix_erase.presentation.http.v1.middlewares.logs import LoggingMiddleware
+from pix_erase.presentation.http.v1.middlewares.metrics import MetricsMiddleware
+from pix_erase.presentation.http.v1.middlewares.tracing import TracingMiddleware
 from pix_erase.presentation.http.v1.routes.auth import auth_router
 from pix_erase.presentation.http.v1.routes.image import image_router
+from pix_erase.presentation.http.v1.routes.internet_protocol import ip_router
 from pix_erase.presentation.http.v1.routes.task import task_router
 from pix_erase.presentation.http.v1.routes.user import user_router
-from pix_erase.presentation.http.v1.routes.internet_protocol import ip_router
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.logs import LoggingConfig, build_structlog_logger
+from pix_erase.setup.config.metrics import FastAPIMetricsConfig
 from pix_erase.setup.config.rabbit import RabbitConfig
 from pix_erase.setup.config.settings import AppConfig
+from pix_erase.setup.config.tracing import FastAPITracingConfig
 from pix_erase.setup.config.worker import TaskIQWorkerConfig
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
@@ -93,6 +99,48 @@ def setup_http_middlewares(app: FastAPI, /, api_config: ASGIConfig) -> None:
     app.add_middleware(ClientCacheMiddleware, max_age=60)  # type: ignore[arg-type, unused-ignore]
     app.add_middleware(LoggingMiddleware)  # type: ignore[arg-type, unused-ignore]
 
+
+def setup_http_tracing(app: FastAPI, config: FastAPITracingConfig) -> None:
+    """
+    Set up tracing for a FastAPI application.
+    The function adds a TracingMiddleware to the FastAPI application based on TracingConfig.
+
+    :param FastAPI app: The FastAPI application instance.
+    :param TracingConfig config: The OpenTelemetry config.
+    :returns: None
+    """
+
+    app.add_middleware(TracingMiddleware, config=config)
+
+
+def setup_http_metrics(app: FastAPI, config: FastAPIMetricsConfig) -> None:
+    """
+    Set up metrics for a FastAPI application.
+    This function adds a MetricsMiddleware to the FastAPI application with the specified parameters.
+
+    :param FastAPI app: The FastAPI application instance.
+    :param MetricsConfig config: Configuration for the metrics.
+    :returns: None
+    """
+
+    metrics = build_metrics_manager(config)
+    metrics.add_app_info()
+
+    app.add_middleware(
+        MetricsMiddleware, # type: ignore[arg-type, unused-ignore]
+        metrics=metrics,
+        include_trace_exemplar=config.include_trace_exemplar,
+    )
+    if config.include_metrics_endpoint:
+        app.state.metrics_registry = config.registry # type: ignore[arg-type, unused-ignore]
+        app.state.openmetrics_format = config.openmetrics_format # type: ignore[arg-type, unused-ignore]
+        app.add_route(
+            path="/metrics",
+            route=get_metrics,
+            methods=["GET"],
+            name="Get Prometheus metrics",
+            include_in_schema=True,
+        )
 
 def setup_http_routes(app: FastAPI, /) -> None:
     """

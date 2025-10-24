@@ -13,6 +13,13 @@ from .internet_protocol import (
     IPInfoConnectionError,
     IPInfoServiceError,
     IPInfoNotFoundError,
+    PortScanError,
+    PortScanTimeoutError,
+    PortScanPermissionError,
+    PortScanNetworkError,
+    PortScanConnectionError,
+    InvalidPortRangeError,
+    PortScanCancelledError,
 )
 
 __all__ = [
@@ -30,5 +37,12 @@ __all__ = [
     "IPInfoConnectionError",
     "IPInfoServiceError",
     "IPInfoNotFoundError",
+    "PortScanError",
+    "PortScanTimeoutError",
+    "PortScanPermissionError",
+    "PortScanNetworkError",
+    "PortScanConnectionError",
+    "InvalidPortRangeError",
+    "PortScanCancelledError",
 ]
 

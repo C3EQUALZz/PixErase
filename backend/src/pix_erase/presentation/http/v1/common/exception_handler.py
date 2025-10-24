@@ -40,6 +40,13 @@ from pix_erase.domain.internet_protocol.errors.internet_protocol import (
     IPInfoConnectionError,
     IPInfoServiceError,
     IPInfoNotFoundError,
+    PortScanError,
+    PortScanTimeoutError,
+    PortScanPermissionError,
+    PortScanNetworkError,
+    PortScanConnectionError,
+    InvalidPortRangeError,
+    PortScanCancelledError,
 )
 from pix_erase.infrastructure.errors.base import InfrastructureError
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
@@ -79,6 +86,7 @@ class ExceptionHandler:
             BadTimeToLiveError: status.HTTP_400_BAD_REQUEST,
             InvalidIPAddressError: status.HTTP_400_BAD_REQUEST,
             InvalidPingResultError: status.HTTP_400_BAD_REQUEST,
+            InvalidPortRangeError: status.HTTP_400_BAD_REQUEST,
             # 401
             AuthenticationError: status.HTTP_401_UNAUTHORIZED,
             # 403
@@ -97,6 +105,7 @@ class ExceptionHandler:
             IPInfoNotFoundError: status.HTTP_404_NOT_FOUND,
             # 408
             PingTimeoutError: status.HTTP_408_REQUEST_TIMEOUT,
+            PortScanTimeoutError: status.HTTP_408_REQUEST_TIMEOUT,
             # 409
             SortingError: status.HTTP_409_CONFLICT,
             EntityAddError: status.HTTP_409_CONFLICT,
@@ -116,6 +125,11 @@ class ExceptionHandler:
             PingPermissionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             PingNetworkError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             IPInfoServiceError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PortScanError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PortScanPermissionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PortScanNetworkError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PortScanConnectionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            PortScanCancelledError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             # 503
             RepoError: status.HTTP_503_SERVICE_UNAVAILABLE,
             RollbackError: status.HTTP_503_SERVICE_UNAVAILABLE,

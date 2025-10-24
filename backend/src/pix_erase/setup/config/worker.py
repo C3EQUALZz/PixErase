@@ -10,3 +10,6 @@ class TaskIQWorkerConfig(BaseModel):
     durable_queue: bool = Field(default=True, description="Create durable queue for tasks or not")
     durable_exchange: bool = Field(default=True, description="Create exchange for tasks or not")
     declare_exchange: bool = Field(default=True, description="Declare exchange for tasks or not")
+
+    prometheus_server_address: str = Field(description="Taskiq prometheus server address")
+    prometheus_server_port: int = Field(description="Taskiq prometheus server port")

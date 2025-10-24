@@ -1,19 +1,34 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+
 WORKDIR /app
+
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
 COPY ./pyproject.toml ./alembic.ini ./deploy/dev/pix_erase/api_entrypoint.sh ./deploy/dev/pix_erase/worker_entrypoint.sh ./
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --no-install-project \
+
 COPY ./src ./src
 
-RUN uv pip install --system --no-cache --target dependencies "."
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev
 
 
-FROM python:3.12-slim AS production
+FROM python:3.12-slim-bookworm AS final
+
+ARG APP_UID=10001
+ARG APP_GID=10001
+
+RUN groupadd -g ${APP_GID} appgroup && useradd -u ${APP_UID} -g ${APP_GID} -s /usr/sbin/nologin -M appuser
+
 WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONPATH "/app/dependencies"
+ENV VIRTUAL_ENV="/app/.venv" \
+    PATH="/app/.venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y curl
+COPY --from=builder --chown=${APP_UID}:${APP_GID} /app/ ./
 
-COPY --from=builder /app/ ./
+USER appuser

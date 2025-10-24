@@ -13,4 +13,4 @@ class UserQueryGateway(Protocol):
 
     @abstractmethod
     async def read_all_users(self, user_list_params: UserListParams) -> list[User] | None:
-        ...
+        raise NotImplementedError
