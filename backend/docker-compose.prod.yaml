@@ -181,15 +181,13 @@ services:
     image: grafana/tempo:2.8.2
     container_name: pix_erase.tempo
     hostname: pix_erase.tempo
-    command: [
-      "--target=all",
-      "--storage.trace.backend=local",
-      "--storage.trace.local.path=/var/tempo",
-      "--auth.enabled=false"
-    ]
+    command:  [ "-config.file=/etc/tempo.yaml" ]
     ports:
       - "127.0.0.1:${TEMPO_PORT}:${TEMPO_PORT}"
       - "127.0.0.1:${TEMPO_GRPC_PORT}:${TEMPO_GRPC_PORT}"
+    volumes:
+      - ./deploy/prod/tempo:/etc/tempo.yaml
+      - pix_erase.tempo.data:/var/tempo
     deploy:
       resources:
         limits:
@@ -287,11 +285,11 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '3.0'
+          memory: 3072M
+        reservations:
           cpus: '1.0'
           memory: 1024M
-        reservations:
-          cpus: '0.5'
-          memory: 512M
     ports:
       - "127.0.0.1:${UVICORN_PORT}:${UVICORN_PORT}"
     depends_on:
@@ -336,11 +334,11 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '4.0'
+          memory: 4096M
+        reservations:
           cpus: '1.0'
           memory: 1024M
-        reservations:
-          cpus: '0.5'
-          memory: 512M
     ports:
       - "127.0.0.1:${PROMETHEUS_WORKER_SERVER_PORT}:${PROMETHEUS_WORKER_SERVER_PORT}"
     depends_on:
@@ -497,6 +495,7 @@ volumes:
   pix_erase.grafana.data: { }
   pix_erase.loki.data: { }
   pix_erase.prometheus.data: { }
+  pix_erase.tempo.data: { }
 
 networks:
   pix_erase.api.network:

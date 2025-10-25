@@ -17,17 +17,22 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM python:3.12-slim-bookworm AS final
 
+WORKDIR /app
+
 ARG APP_UID=10001
 ARG APP_GID=10001
-
-RUN groupadd -g ${APP_GID} appgroup && useradd -u ${APP_UID} -g ${APP_GID} -s /usr/sbin/nologin -M appuser
-
-WORKDIR /app
 
 ENV VIRTUAL_ENV="/app/.venv" \
     PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -g ${APP_GID} appgroup && \
+    useradd -u ${APP_UID} -g ${APP_GID} -s /usr/sbin/nologin -M appuser
 
 COPY --from=builder --chown=${APP_UID}:${APP_GID} /app/ ./
 

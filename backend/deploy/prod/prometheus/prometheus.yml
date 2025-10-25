@@ -20,3 +20,7 @@ scrape_configs:
       - targets: [ "pix_erase.worker:8081" ]
     metrics_path: "/metrics"
     scrape_timeout: 10s
+
+  - job_name: 'tempo'
+    static_configs:
+      - targets: [ "tempo:3200" ]
