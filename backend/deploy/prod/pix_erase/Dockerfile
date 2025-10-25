@@ -4,7 +4,7 @@ WORKDIR /app
 
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
-COPY ./pyproject.toml ./uv.lock ./alembic.ini ./deploy/prod/pix_erase/api_entrypoint.sh ./deploy/prod/pix_erase/worker_entrypoint.sh ./
+COPY ./pyproject.toml ./uv.lock ./alembic.ini ./deploy/prod/pix_erase/api_entrypoint.sh ./deploy/prod/pix_erase/worker_entrypoint.sh ./deploy/prod/pix_erase/scheduler_entrypoint.sh ./
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project
