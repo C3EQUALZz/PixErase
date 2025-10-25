@@ -7,7 +7,7 @@ datasources:
     type: prometheus
     typeName: Prometheus
     access: proxy
-    url: http://asgi-monitor.prometheus:9090
+    url: http://pix_erase.prometheus:9090
     password: ""
     user: ""
     database: ""
@@ -25,7 +25,7 @@ datasources:
     name: Loki
     type: loki
     access: proxy
-    url: http://asgi-monitor.loki:3100
+    url: http://pix_erase.loki:3100
     basicAuth: false
     isDefault: false
     editable: true
@@ -43,7 +43,7 @@ datasources:
     type: tempo
     typeName: Tempo
     access: proxy
-    url: http://asgi-monitor.tempo
+    url: http://pix_erase.tempo
     password: ""
     user: ""
     database: ""
