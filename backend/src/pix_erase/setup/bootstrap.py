@@ -11,7 +11,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker, ScheduleSource
+from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker, ScheduleSource, PrometheusMiddleware
 from taskiq.middlewares import SmartRetryMiddleware
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
@@ -224,6 +224,10 @@ def setup_task_manager(
                 use_delay_exponent=taskiq_config.use_delay_exponent,
                 max_delay_exponent=taskiq_config.max_delay_component,
             ),
+            PrometheusMiddleware(
+                server_addr=taskiq_config.prometheus_server_address,
+                server_port=taskiq_config.prometheus_server_port
+            )
         )
         .with_result_backend(RedisAsyncResultBackend(
             redis_url=redis_config.worker_uri,

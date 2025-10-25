@@ -225,6 +225,13 @@ services:
         reservations:
           cpus: '1'
           memory: 256M
+    depends_on:
+      api:
+        condition: service_healthy
+      worker:
+        condition: service_started
+      scheduler:
+        condition: service_started
 
   postgres:
     <<: *default
