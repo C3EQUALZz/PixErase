@@ -28,31 +28,31 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "aioboto3>=15.1.0",
-    "alembic>=1.16.5",
-    "asyncpg>=0.30.0",
-    "bazario>=0.4.2",
-    "bcrypt>=4.3.0",
-    "dishka>=1.7.1",
-    "exif>=1.6.1",
-    "fastapi>=0.116.2",
-    "opencv-contrib-python>=4.12.0.88",
-    "opentelemetry-exporter-otlp>=1.25.0",
-    "opentelemetry-instrumentation-asgi>=0.46b0",
-    "opentelemetry-sdk>=1.25.0",
-    "orjson>=3.11.3",
-    "prometheus-client>=0.23.1",
-    "pydantic[email]>=2.11.9",
-    "pyjwt>=2.10.1",
-    "python-dotenv>=1.1.1",
-    "python-multipart>=0.0.20",
-    "rembg[cpu]>=2.0.67",
-    "sqlalchemy>=2.0.43",
-    "structlog>=25.4.0",
-    "taskiq-aio-pika>=0.4.3",
-    "taskiq-redis>=1.1.0",
+    "aioboto3==15.1.0",
+    "alembic==1.16.5",
+    "asyncpg==0.30.0",
+    "bazario==0.4.2",
+    "bcrypt==4.3.0",
+    "dishka==1.7.1",
+    "exif==1.6.1",
+    "fastapi==0.116.2",
+    "opencv-contrib-python==4.12.0.88",
+    "opentelemetry-exporter-otlp==1.25.0",
+    "opentelemetry-instrumentation-asgi==0.46b0",
+    "opentelemetry-sdk==1.25.0",
+    "orjson==3.11.3",
+    "prometheus-client==0.23.1",
+    "pydantic[email]==2.11.9",
+    "pyjwt==2.10.1",
+    "python-dotenv==1.1.1",
+    "python-multipart==0.0.20",
+    "rembg[cpu]==2.0.67",
+    "sqlalchemy==2.0.43",
+    "structlog==25.4.0",
+    "taskiq-aio-pika==0.4.3",
+    "taskiq-redis==1.1.0",
     "taskiq[reload]>=0.11.18",
-    "uvicorn>=0.36.0",
+    "uvicorn==0.36.0",
     "uvloop==0.21.0; sys_platform != 'win32'",
 ]
 
@@ -62,7 +62,7 @@ test = [
     "pytest==8.4.0",
     "pytest-asyncio==0.26.0",
     "httpx==0.28.1",
-    "testcontainers>=4.10.0"
+    "testcontainers==4.10.0"
 ]
 lint = [
     "ruff==0.11.13",
@@ -70,9 +70,7 @@ lint = [
     "codespell==2.4.1",
     "mypy==1.16.0",
     "basedpyright==1.29.2",
-    # semgrep depends on opentelemetry-exporter-otlp>=v1.25,<1.33.0
-    "semgrep==1.124.0",
-    "opentelemetry-exporter-otlp>=1.25.0,<1.35.0",
+    "semgrep==1.124.0"
 ]
 dev = [
     "pix_erase[test,lint]",
