@@ -21,6 +21,7 @@ x-db-environment: &x-db-environment
   POSTGRES_DB: ${POSTGRES_DB}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_DRIVER: ${POSTGRES_DRIVER}
 
 x-redis-environment: &x-redis-environment
   REDIS_PASSWORD: ${REDIS_PASSWORD}
@@ -126,6 +127,7 @@ services:
       - pix_erase.loki.data:/tmp/:rw
     environment:
       <<: *x-minio-environment
+      MINIO_HOST: minio
     command: -config.file=/etc/loki/config.yaml -config.expand-env=true
     deploy:
       resources:
@@ -192,7 +194,7 @@ services:
   prometheus:
     <<: *x-grafana-default
     profiles: [ "grafana" ]
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.7.2
     container_name: pix_erase.prometheus
     hostname: pix_erase.prometheus
     volumes:

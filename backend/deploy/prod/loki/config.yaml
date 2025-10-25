@@ -50,7 +50,7 @@ common:
       bucketnames: ${MINIO_LOKI_CHUNKS_BUCKET}
       access_key_id: ${MINIO_ROOT_USER}
       secret_access_key: ${MINIO_ROOT_PASSWORD}
-      insecure: false
+      insecure: true
       s3forcepathstyle: true
   ring:
     kvstore:
