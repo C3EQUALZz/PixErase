@@ -189,6 +189,7 @@ services:
     ]
     ports:
       - "127.0.0.1:${TEMPO_PORT}:${TEMPO_PORT}"
+      - "127.0.0.1:${TEMPO_GRPC_PORT}:${TEMPO_GRPC_PORT}"
     deploy:
       resources:
         limits:
