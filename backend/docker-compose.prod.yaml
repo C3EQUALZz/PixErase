@@ -3,11 +3,6 @@ x-default: &default
   networks:
     - pix_erase.api.network
 
-x-grafana-default: &x-grafana-default
-  restart: unless-stopped
-  networks:
-    - pix_erase.grafana.network
-
 x-healthcheck-interval: &hc-interval
   interval: 30s
   timeout: 60s
@@ -29,6 +24,7 @@ x-redis-environment: &x-redis-environment
   REDIS_USER_PASSWORD: ${REDIS_USER_PASSWORD}
   REDIS_PORT: ${REDIS_PORT}
   REDIS_CACHE_DB: ${REDIS_CACHE_DB}
+  REDIS_SCHEDULE_SOURCE_DB: ${REDIS_SCHEDULE_SOURCE_DB}
   REDIS_WORKER_DB: ${REDIS_WORKER_DB}
   REDIS_MAX_CONNECTIONS: ${REDIS_MAX_CONNECTIONS}
 
@@ -83,7 +79,7 @@ x-minio-environment: &x-minio-environment
 
 services:
   grafana:
-    <<: *x-grafana-default
+    <<: *default
     profiles: [ "grafana" ]
     image: grafana/grafana:12.3.0-18765596677
     container_name: pix_erase.grafana
@@ -117,10 +113,16 @@ services:
       <<: *hc-interval
     depends_on:
       prometheus:
-        condition: service_healthy
+        condition: service_started
+      tempo:
+        condition: service_started
+      loki:
+        condition: service_started
+      vector:
+        condition: service_started
 
   loki:
-    <<: *x-grafana-default
+    <<: *default
     profiles: [ "grafana" ]
     image: grafana/loki:3.5.3
     container_name: pix_erase.loki
@@ -147,7 +149,7 @@ services:
         condition: service_healthy
 
   vector:
-    <<: *x-grafana-default
+    <<: *default
     profiles: [ "grafana" ]
     image: timberio/vector:0.49.0-alpine
     container_name: pix_erase.vector
@@ -169,9 +171,12 @@ services:
         reservations:
           cpus: '1'
           memory: 256M
+    depends_on:
+      loki:
+        condition: service_started
 
   tempo:
-    <<: *x-grafana-default
+    <<: *default
     profiles: [ "grafana" ]
     image: grafana/tempo:2.8.2
     container_name: pix_erase.tempo
@@ -197,7 +202,7 @@ services:
         condition: service_started
 
   prometheus:
-    <<: *x-grafana-default
+    <<: *default
     profiles: [ "grafana" ]
     image: prom/prometheus:v3.7.2
     container_name: pix_erase.prometheus
@@ -220,9 +225,6 @@ services:
         reservations:
           cpus: '1'
           memory: 256M
-    healthcheck:
-      test: ["CMD", "wget", "http://localhost:9090/-/ready"]
-      <<: *hc-interval
 
   postgres:
     <<: *default
@@ -272,6 +274,7 @@ services:
       REDIS_HOST: redis
       RABBIT_HOST: rabbitmq
       TEMPO_HOST: tempo
+      MINIO_HOST: minio
     command: /bin/sh -cx "./api_entrypoint.sh"
     deploy:
       resources:
@@ -320,6 +323,7 @@ services:
       REDIS_HOST: redis
       RABBIT_HOST: rabbitmq
       TEMPO_HOST: tempo
+      MINIO_HOST: minio
     command: /bin/sh -cx "./worker_entrypoint.sh"
     deploy:
       resources:
@@ -359,6 +363,7 @@ services:
       REDIS_HOST: redis
       RABBIT_HOST: rabbitmq
       TEMPO_HOST: tempo
+      MINIO_HOST: minio
     command: /bin/sh -cx "./scheduler_entrypoint.sh"
     deploy:
       resources:
