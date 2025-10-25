@@ -1,11 +1,9 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from opentelemetry.semconv.trace import SpanAttributes
+from starlette.requests import Request
 from starlette.routing import Match
-
-if TYPE_CHECKING:
-    from starlette.requests import Request
-    from starlette.types import Scope
+from starlette.types import Scope
 
 
 def get_route_details(scope: Scope) -> str | None:

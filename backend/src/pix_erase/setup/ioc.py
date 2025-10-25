@@ -64,7 +64,7 @@ from pix_erase.domain.image.ports.image_watermark_remover_converter import Image
 from pix_erase.domain.image.services.colorization_service import ImageColorizationService
 from pix_erase.domain.image.services.image_service import ImageService
 from pix_erase.domain.image.services.transformation_service import ImageTransformationService
-from pix_erase.domain.internet_protocol.ports import IPInfoServicePort
+from pix_erase.domain.internet_protocol.ports import IPInfoServicePort, PortScanServicePort
 from pix_erase.domain.internet_protocol.ports.ping_service_port import PingServicePort
 from pix_erase.domain.internet_protocol.services import InternetProtocolService
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
@@ -95,6 +95,7 @@ from pix_erase.infrastructure.adapters.image_converters.rembg_image_remove_backg
 from pix_erase.infrastructure.adapters.image_converters.сv2_image_rotation_converter import Cv2ImageRotationConverter
 from pix_erase.infrastructure.adapters.internet_protocol.ip_api_service_port import IPAPIServicePort
 from pix_erase.infrastructure.adapters.internet_protocol.raw_socket_ping_service_port import RawSocketPingServicePort
+from pix_erase.infrastructure.adapters.internet_protocol.socket_port_scan_service_port import SocketPortScanServicePort
 from pix_erase.infrastructure.adapters.persistence.aiobotocore_file_storage import AiobotocoreS3ImageStorage
 from pix_erase.infrastructure.adapters.persistence.alchemy_auth_session_command_gateway import (
     SQLAlchemyAuthSessionCommandGateway
@@ -116,7 +117,9 @@ from pix_erase.infrastructure.auth.session.timer_utc import (
     AuthSessionTtlMin,
     UtcAuthSessionTimer
 )
+from pix_erase.infrastructure.cache.cache_store import CacheStore
 from pix_erase.infrastructure.cache.provider import get_redis_pool, get_redis
+from pix_erase.infrastructure.cache.redis_cache_store import RedisCacheStore
 from pix_erase.infrastructure.persistence.provider import (
     get_engine,
     get_sessionmaker,
@@ -165,7 +168,8 @@ def cache_provider() -> Provider:
     provider: Final[Provider] = Provider(scope=Scope.REQUEST)
     provider.provide(get_redis_pool, scope=Scope.APP)
     provider.provide(get_redis, provides=Redis)
-    provider.decorate(source=CachedUserQueryGateway, provides=SqlAlchemyUserQueryGateway)
+    provider.provide(source=RedisCacheStore, provides=CacheStore)
+    provider.decorate(source=CachedUserQueryGateway, provides=UserQueryGateway)
     return provider
 
 
@@ -201,6 +205,7 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=Cv2ImageResizerConverter, provides=ImageResizerConverter)
     provider.provide(source=RawSocketPingServicePort, provides=PingServicePort)
     provider.provide(source=IPAPIServicePort, provides=IPInfoServicePort)
+    provider.provide(source=SocketPortScanServicePort, provides=PortScanServicePort)
     provider.provide(source=UserService)
     provider.provide(source=AccessService)
     provider.provide(source=ImageService)
@@ -287,10 +292,10 @@ def setup_providers() -> Iterable[Provider]:
     return (
         configs_provider(),
         db_provider(),
-        cache_provider(),
         auth_ports_provider(),
         domain_ports_provider(),
         gateways_provider(),
+        cache_provider(),
         interactors_provider(),
         event_bus_provider(),
         s3_provider(),

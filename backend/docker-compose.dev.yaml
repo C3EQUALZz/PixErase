@@ -56,6 +56,12 @@ x-api-environment: &x-api-environment
   SESSION_TTL_MIN: ${SESSION_TTL_MIN}
   SESSION_REFRESH_THRESHOLD: ${SESSION_REFRESH_THRESHOLD}
   SECURE: ${SECURE}
+  TEMPO_HOST: ${TEMPO_HOST}
+  TEMPO_GRPC_PORT: ${TEMPO_GRPC_PORT}
+
+x-worker-environment: &x-worker-environment
+  PROMETHEUS_WORKER_SERVER_HOST: ${PROMETHEUS_WORKER_SERVER_HOST}
+  PROMETHEUS_WORKER_SERVER_PORT: ${PROMETHEUS_WORKER_SERVER_PORT}
 
 x-minio-environment: &x-minio-environment
   MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -102,7 +108,15 @@ services:
       context: .
       dockerfile: ./deploy/dev/pix_erase/Dockerfile
     environment:
-      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment, *x-minio-environment ]
+      <<: [
+        *x-db-environment,
+        *x-api-environment,
+        *x-redis-environment,
+        *x-sqlalchemy-environment,
+        *x-rabbit-environment,
+        *x-minio-environment,
+        *x-worker-environment
+      ]
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
       RABBIT_HOST: rabbitmq
@@ -141,7 +155,15 @@ services:
       context: .
       dockerfile: ./deploy/dev/pix_erase/Dockerfile
     environment:
-      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment, *x-minio-environment ]
+      <<: [
+        *x-db-environment,
+        *x-api-environment,
+        *x-redis-environment,
+        *x-sqlalchemy-environment,
+        *x-rabbit-environment,
+        *x-minio-environment,
+        *x-worker-environment
+      ]
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
       RABBIT_HOST: rabbitmq
@@ -171,7 +193,15 @@ services:
       context: .
       dockerfile: ./deploy/dev/pix_erase/Dockerfile
     environment:
-      <<: [ *x-db-environment, *x-api-environment, *x-redis-environment, *x-sqlalchemy-environment, *x-rabbit-environment, *x-minio-environment ]
+      <<: [
+        *x-db-environment,
+        *x-api-environment,
+        *x-redis-environment,
+        *x-sqlalchemy-environment,
+        *x-rabbit-environment,
+        *x-minio-environment,
+        *x-worker-environment
+      ]
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
       RABBIT_HOST: rabbitmq

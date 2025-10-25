@@ -6,6 +6,11 @@ from typing import Any, Final
 
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker, ScheduleSource
 from taskiq.middlewares import SmartRetryMiddleware
 from taskiq.schedule_sources import LabelScheduleSource
@@ -127,13 +132,13 @@ def setup_http_metrics(app: FastAPI, config: FastAPIMetricsConfig) -> None:
     metrics.add_app_info()
 
     app.add_middleware(
-        MetricsMiddleware, # type: ignore[arg-type, unused-ignore]
+        MetricsMiddleware,  # type: ignore[arg-type, unused-ignore]
         metrics=metrics,
         include_trace_exemplar=config.include_trace_exemplar,
     )
     if config.include_metrics_endpoint:
-        app.state.metrics_registry = config.registry # type: ignore[arg-type, unused-ignore]
-        app.state.openmetrics_format = config.openmetrics_format # type: ignore[arg-type, unused-ignore]
+        app.state.metrics_registry = config.registry  # type: ignore[arg-type, unused-ignore]
+        app.state.openmetrics_format = config.openmetrics_format  # type: ignore[arg-type, unused-ignore]
         app.add_route(
             path="/metrics",
             route=get_metrics,
@@ -141,6 +146,41 @@ def setup_http_metrics(app: FastAPI, config: FastAPIMetricsConfig) -> None:
             name="Get Prometheus metrics",
             include_in_schema=True,
         )
+
+
+def setup_http_observability(
+        app: FastAPI,
+        config: ASGIConfig,
+) -> None:
+    resource = Resource.create(
+        attributes={
+            "service.name": config.app_name,
+            "compose_service": config.app_name
+        },
+    )
+
+    tracer_provider: TracerProvider = TracerProvider(resource=resource)
+    trace.set_tracer_provider(tracer_provider)
+    tracer_provider.add_span_processor(
+        BatchSpanProcessor(
+            OTLPSpanExporter(
+                endpoint=config.tracing_grpc_uri
+            )
+        )
+    )
+
+    trace_config: FastAPITracingConfig = FastAPITracingConfig(
+        tracer_provider=tracer_provider
+    )
+
+    metrics_config: FastAPIMetricsConfig = FastAPIMetricsConfig(
+        app_name=config.app_name,
+        include_trace_exemplar=True
+    )
+
+    setup_http_tracing(app, config=trace_config)
+    setup_http_metrics(app, config=metrics_config)
+
 
 def setup_http_routes(app: FastAPI, /) -> None:
     """

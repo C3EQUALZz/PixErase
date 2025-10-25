@@ -4,7 +4,7 @@ from typing import Final
 import cv2
 import numpy as np
 from pathlib import Path
-from cv2.dnn_superres import DnnSuperResImpl
+from cv2 import dnn_superres
 from typing_extensions import override
 
 from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
@@ -29,7 +29,7 @@ class Cv2EDSRImageUpscaleConverter(ImageAIUpscaleConverter):
 
         image = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2RGB)
 
-        sr_model: DnnSuperResImpl = DnnSuperResImpl.create()
+        sr_model: dnn_superres.DnnSuperResImpl = dnn_superres.DnnSuperResImpl.create()
 
         sr_model.readModel(self._model_path)
         sr_model.setModel(self._model_name, 2)

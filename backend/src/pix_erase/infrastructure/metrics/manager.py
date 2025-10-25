@@ -1,5 +1,4 @@
 from pix_erase.infrastructure.metrics.metrics_container import MetricsContainer
-
 from pix_erase.setup.config.metrics import BaseMetricsConfig
 
 __all__ = (

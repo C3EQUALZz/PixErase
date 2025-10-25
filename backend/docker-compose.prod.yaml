@@ -1,0 +1,149 @@
+x-default: &default
+  restart: unless-stopped
+  networks:
+    - overlay
+
+x-grafana-default: &x-grafana-default
+  restart: unless-stopped
+  networks:
+    - pix_erase.grafana.network
+
+x-healthcheck-interval: &hc-interval
+  interval: 30s
+  timeout: 60s
+  retries: 5
+  start_period: 10s
+
+services:
+  grafana:
+    <<: *x-grafana-default
+    profiles: [ "grafana" ]
+    image: grafana/grafana:12.3.0-18765596677
+    container_name: pix_erase.grafana
+    hostname: pix_erase.grafana
+    expose:
+      - "${GRAFANA_PORT}"
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT}:${GRAFANA_PORT}"
+    volumes:
+      - pix_erase.grafana.data:/var/lib/grafana:rw
+      - ./deploy/prod/grafana/provisioning:/etc/grafana/provisioning:rw
+      - ./deploy/prod/grafana/dashboards:/etc/grafana/dashboards
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_DATABASE_WAL: true
+      VIRTUAL_HOST: pix_erase.grafana
+      NETWORK_ACCESS: internal
+      VIRTUAL_PORT: ${GRAFANA_PORT}
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${GRAFANA_PORT}/api/health" ]
+      <<: *hc-interval
+
+  loki:
+    <<: *x-grafana-default
+    profiles: [ "grafana" ]
+    image: grafana/loki:3.5.3
+    container_name: pix_erase.loki
+    hostname: pix_erase.loki
+    expose:
+      - "127.0.0.1:${LOKI_PORT}"
+    volumes:
+      - ./deploy/prod/loki/config.yaml:/etc/loki/config.yaml:ro
+      - pix_erase.loki.data:/tmp/:rw
+    command: -config.file=/etc/loki/config.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${LOKI_PORT}/ready" ]
+      <<: *hc-interval
+
+  vector:
+    <<: *x-grafana-default
+    profiles: [ "grafana" ]
+    image: timberio/vector:0.49.0-alpine
+    container_name: pix_erase.vector
+    hostname: pix_erase.vector
+    expose:
+      - "127.0.0.1:${VECTOR_PORT}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./deploy/prod/vector/vector.toml:/etc/vector/vector.toml:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+
+  tempo:
+    <<: *x-grafana-default
+    profiles: [ "grafana" ]
+    image: grafana/tempo:2.8.2
+    container_name: pix_erase.tempo
+    hostname: pix_erase.tempo
+    command: [
+      "--target=all",
+      "--storage.trace.backend=local",
+      "--storage.trace.local.path=/var/tempo",
+      "--auth.enabled=false"
+    ]
+    ports:
+      - "127.0.0.1:${TEMPO_PORT}:${TEMPO_PORT}"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    depends_on:
+      loki:
+        condition: service_healthy
+
+  prometheus:
+    <<: *x-grafana-default
+    profiles: [ "grafana" ]
+    image: prom/prometheus:latest
+    container_name: pix_erase.prometheus
+    hostname: pix_erase.prometheus
+    volumes:
+      - ./deploy/prod/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - pix_erase.prometheus.data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --enable-feature=exemplar-storage
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+    expose:
+      - "${PROMETHEUS_PORT}"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M

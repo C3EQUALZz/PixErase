@@ -10,6 +10,7 @@ from pix_erase.domain.internet_protocol.errors.internet_protocol import (
     PortScanConnectionError,
     InvalidPortRangeError,
 )
+from pix_erase.domain.internet_protocol.ports import PortScanServicePort
 from pix_erase.domain.internet_protocol.values.ip_address import IPAddress
 from pix_erase.domain.internet_protocol.values.port import Port, PortRange, COMMON_PORTS
 from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import (
@@ -19,7 +20,7 @@ from pix_erase.domain.internet_protocol.services.contracts.port_scan_result impo
 )
 
 
-class SocketPortScanServicePort:
+class SocketPortScanServicePort(PortScanServicePort):
     """
     Socket-based implementation of port scanning service.
     

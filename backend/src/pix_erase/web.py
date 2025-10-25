@@ -7,10 +7,6 @@ from dishka import AsyncContainer, make_async_container
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry import trace
-
 from sqlalchemy.orm import clear_mappers
 from taskiq import AsyncBroker
 
@@ -25,16 +21,13 @@ from pix_erase.setup.bootstrap import (
     setup_configs,
     setup_logging,
     setup_map_tables,
-    setup_http_tracing,
-    setup_http_metrics
+    setup_http_observability
 )
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.database import SQLAlchemyConfig, PostgresConfig
-from pix_erase.setup.config.metrics import FastAPIMetricsConfig
 from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.settings import AppConfig
-from pix_erase.setup.config.tracing import FastAPITracingConfig
 from pix_erase.setup.ioc import setup_providers
 from pix_erase.worker import create_worker_taskiq_app
 
@@ -108,22 +101,11 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
         version="1.0.0",
         root_path="/api",
         debug=configs.asgi.fastapi_debug,
+        title=configs.asgi.app_name
     )
 
     task_manager: AsyncBroker = create_worker_taskiq_app()
     app.state.task_manager = task_manager
-
-    resource = Resource.create(
-        attributes={
-            "service.name": "fastapi",
-        },
-    )
-
-    tracer_provider: TracerProvider = TracerProvider(resource=resource)
-    trace.set_tracer_provider(tracer_provider)
-
-    trace_config: FastAPITracingConfig = FastAPITracingConfig(tracer_provider=tracer_provider)
-    metrics_config: FastAPIMetricsConfig = FastAPIMetricsConfig(app_name="fastapi", include_trace_exemplar=True)
 
     context = {
         ASGIConfig: configs.asgi,
@@ -144,8 +126,7 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
     setup_http_routes(app)
     setup_exc_handlers(app)
     setup_http_middlewares(app, api_config=configs.asgi)
-    setup_http_tracing(app, config=trace_config)
-    setup_http_metrics(app, config=metrics_config)
+    setup_http_observability(app, config=configs.asgi)
     setup_dishka(container, app)
     logger.info("App created", extra={"app_version": app.version})
     return app
