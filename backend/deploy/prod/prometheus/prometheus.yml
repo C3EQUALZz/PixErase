@@ -11,8 +11,12 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ["pix_erase.api:8080"]
+    metrics_path: "/metrics"
+    scrape_timeout: 10s
 
   - job_name: "worker"
     scrape_interval: 30s
     static_configs:
-      - targets: [ "pix_erase.worker:9000" ]
+      - targets: [ "pix_erase.worker:9090" ]
+    metrics_path: "/metrics"
+    scrape_timeout: 10s

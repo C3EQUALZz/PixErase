@@ -491,6 +491,4 @@ volumes:
 networks:
   pix_erase.api.network:
     driver: bridge
-  pix_erase.grafana.network:
-    driver: bridge
 

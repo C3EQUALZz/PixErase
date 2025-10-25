@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final, cast
+from typing import final, Final
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
