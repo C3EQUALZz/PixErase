@@ -33,36 +33,6 @@ x-rabbit-environment: &x-rabbit-environment
   RABBITMQ_PORT: ${RABBITMQ_PORT}
   RABBITMQ_UI_PORT: ${RABBITMQ_UI_PORT}
 
-x-sqlalchemy-environment: &x-sqlalchemy-environment
-  DB_POOL_PRE_PING: ${DB_POOL_PRE_PING}
-  DB_POOL_RECYCLE: ${DB_POOL_RECYCLE}
-  DB_ECHO: ${DB_ECHO}
-  DB_AUTO_FLUSH: ${DB_AUTO_FLUSH}
-  DB_EXPIRE_ON_COMMIT: ${DB_EXPIRE_ON_COMMIT}
-  DB_DEBUG: ${DB_DEBUG}
-  DB_FUTURE: ${DB_FUTURE}
-
-x-api-environment: &x-api-environment
-  ENVIRONMENT: local
-  UVICORN_HOST: ${UVICORN_HOST}
-  UVICORN_PORT: ${UVICORN_PORT}
-  LOGGING_LEVEL: INFO
-  RENDER_JSON_LOGS: False
-  FASTAPI_DEBUG: True
-  FASTAPI_ALLOW_CREDENTIALS: False
-  JWT_SECRET: ${JWT_SECRET}
-  JWT_ALGORITHM: ${JWT_ALGORITHM}
-  PEPPER: ${PEPPER}
-  SESSION_TTL_MIN: ${SESSION_TTL_MIN}
-  SESSION_REFRESH_THRESHOLD: ${SESSION_REFRESH_THRESHOLD}
-  SECURE: ${SECURE}
-  TEMPO_HOST: ${TEMPO_HOST}
-  TEMPO_GRPC_PORT: ${TEMPO_GRPC_PORT}
-
-x-worker-environment: &x-worker-environment
-  PROMETHEUS_WORKER_SERVER_HOST: ${PROMETHEUS_WORKER_SERVER_HOST}
-  PROMETHEUS_WORKER_SERVER_PORT: ${PROMETHEUS_WORKER_SERVER_PORT}
-
 x-minio-environment: &x-minio-environment
   MINIO_ROOT_USER: ${MINIO_ROOT_USER}
   MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -75,7 +45,6 @@ x-minio-environment: &x-minio-environment
 services:
   postgres:
     <<: *default
-    profiles: [ "api", "db" ]
     container_name: pix_erase.postgres
     hostname: pix_erase.postgres
     image: postgres:16.10-alpine3.22
@@ -99,132 +68,8 @@ services:
       - ./deploy/dev/postgres/postgresql.conf:/etc/postgresql.conf
       - ./deploy/dev/postgres/pg_hba.conf:/etc/pg_hba.conf
 
-  api:
-    <<: *default
-    profiles: [ "api" ]
-    container_name: pix_erase.api
-    hostname: pix_erase.api
-    build:
-      context: .
-      dockerfile: ./deploy/dev/pix_erase/Dockerfile
-    environment:
-      <<: [
-        *x-db-environment,
-        *x-api-environment,
-        *x-redis-environment,
-        *x-sqlalchemy-environment,
-        *x-rabbit-environment,
-        *x-minio-environment,
-        *x-worker-environment
-      ]
-      POSTGRES_HOST: postgres
-      REDIS_HOST: redis
-      RABBIT_HOST: rabbitmq
-    command: /bin/sh -cx "./api_entrypoint.sh"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1024M
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-    ports:
-      - 127.0.0.1:${UVICORN_PORT}:${UVICORN_PORT}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'curl -fsSL http://localhost:${UVICORN_PORT}/healthcheck/',
-        ]
-      <<: *hc-interval
-
-  worker:
-    <<: *default
-    profiles: [ "api", "scheduler" ]
-    container_name: pix_erase.worker
-    hostname: pix_erase.worker
-    build:
-      context: .
-      dockerfile: ./deploy/dev/pix_erase/Dockerfile
-    environment:
-      <<: [
-        *x-db-environment,
-        *x-api-environment,
-        *x-redis-environment,
-        *x-sqlalchemy-environment,
-        *x-rabbit-environment,
-        *x-minio-environment,
-        *x-worker-environment
-      ]
-      POSTGRES_HOST: postgres
-      REDIS_HOST: redis
-      RABBIT_HOST: rabbitmq
-    command: /bin/sh -cx "./worker_entrypoint.sh"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1024M
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
-  scheduler:
-    <<: *default
-    profiles: [ "api", "scheduler" ]
-    container_name: pix_erase.scheduler
-    hostname: pix_erase.scheduler
-    build:
-      context: .
-      dockerfile: ./deploy/dev/pix_erase/Dockerfile
-    environment:
-      <<: [
-        *x-db-environment,
-        *x-api-environment,
-        *x-redis-environment,
-        *x-sqlalchemy-environment,
-        *x-rabbit-environment,
-        *x-minio-environment,
-        *x-worker-environment
-      ]
-      POSTGRES_HOST: postgres
-      REDIS_HOST: redis
-      RABBIT_HOST: rabbitmq
-    command: /bin/sh -cx "./scheduler_entrypoint.sh"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1024M
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
   redis:
     <<: *default
-    profiles: [ "api", "cache" ]
     image: redis:8.0.2-alpine
     container_name: pix_erase.redis
     hostname: pix_erase.redis
@@ -250,7 +95,6 @@ services:
 
   rabbitmq:
     <<: *default
-    profiles: [ "api", "rabbit" ]
     image: rabbitmq:4.0-management-alpine
     container_name: pix_erase.rabbitmq
     hostname: pix_erase.rabbitmq
@@ -280,7 +124,6 @@ services:
 
   minio:
     <<: *default
-    profiles: [ "api", "s3" ]
     image: quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z
     container_name: pix_erase.minio
     hostname: pix_erase.minio

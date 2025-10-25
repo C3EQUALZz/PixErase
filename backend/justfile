@@ -5,6 +5,7 @@ set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 set shell := ["sh", "-c"]
 
 DOCKER_COMPOSE_DEV := "docker-compose.dev.yaml"
+DOCKER_COMPOSE_PROD := "docker-compose.prod.yaml"
 
 [doc("All command information")]
 [private]
@@ -23,25 +24,31 @@ default:
 @venv-sync:
     uv pip install -e ".[dev]"
 
-[doc("Run all containers")]
+[doc("Run all containers in dev version")]
+[group("infra")]
+@up-dev:
+  docker compose -f {{ DOCKER_COMPOSE_DEV }} up -d postgres redis rabbitmq minio --wait
+
+[doc("Run all containers in production version")]
 [group("infra")]
 @up:
-  docker compose -f {{ DOCKER_COMPOSE_DEV }} --profile api up --build -d
-
-[doc("Run all containers except web-backend")]
-[group("infra")]
-@infra:
-    docker compose -f {{ DOCKER_COMPOSE_DEV }} up -d postgres redis rabbitmq minio --wait
+  docker compose -f {{ DOCKER_COMPOSE_PROD }} --profile api --profile grafana up --build -d
 
 [doc("Stop all containers")]
 [group("infra")]
 @stop:
   docker compose -f {{ DOCKER_COMPOSE_DEV }} --profile api stop
 
-[doc("Down all containers")]
+[doc("Down all production containers")]
+[group("infra")]
+@down-dev:
+  docker compose -f {{ DOCKER_COMPOSE_DEV }} down
+  docker image prune -f
+
+[doc("Down all production containers")]
 [group("infra")]
 @down:
-  docker compose -f {{ DOCKER_COMPOSE_DEV }} --profile api down
+  docker compose -f {{ DOCKER_COMPOSE_PROD }} --profile api --profile grafana down
   docker image prune -f
 
 [doc("Lint check")]
@@ -60,7 +67,7 @@ default:
 
 [doc("Run test")]
 [group("Test")]
-@test *args: infra
+@test *args: up-dev
     coverage run -m pytest -x --ff {{ args }}
     just stop
 

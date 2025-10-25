@@ -8,14 +8,7 @@
 
 ## Зависимости
 
-В проекте используются следующие зависимости: 
-
-- `fastapi`
-- `dishka`
-- `taskiq`
-- `structlog`
-- `sqlalchemy`
-- `opencv-python`
+В проекте используются следующие зависимости, которые представлены в [`pyproject.toml`]
 
 ## Деплой
 
@@ -55,7 +48,7 @@ uv install
 Для запуска `RabbitMQ`, `PostgreSQL`, `MinIO`, `Redis` используется команда: 
 
 ```bash
-just infra
+just up-dev
 ```
 
 > [!IMPORTANT]
