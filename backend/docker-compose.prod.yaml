@@ -333,6 +333,8 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
+    ports:
+      - "127.0.0.1:${PROMETHEUS_WORKER_SERVER_PORT}:${PROMETHEUS_WORKER_SERVER_PORT}"
     depends_on:
       postgres:
         condition: service_healthy
