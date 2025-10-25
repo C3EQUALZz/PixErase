@@ -71,6 +71,8 @@ x-minio-environment: &x-minio-environment
   MINIO_ROOT_USER: ${MINIO_ROOT_USER}
   MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
   MINIO_IMAGES_BUCKET: ${MINIO_IMAGES_BUCKET}
+  MINIO_LOKI_CHUNKS_BUCKET: ${MINIO_LOKI_CHUNKS_BUCKET}
+  MINIO_LOKI_RULES_BUCKET: ${MINIO_LOKI_RULES_BUCKET}
   MINIO_SCHEME: http
   MINIO_PORT: ${MINIO_PORT}
   MINIO_UI_PORT: ${MINIO_UI_PORT}
@@ -118,11 +120,13 @@ services:
     container_name: pix_erase.loki
     hostname: pix_erase.loki
     expose:
-      - "127.0.0.1:${LOKI_PORT}"
+      - "127.0.0.1:${LOKI_PORT}:${LOKI_PORT}"
     volumes:
       - ./deploy/prod/loki/config.yaml:/etc/loki/config.yaml:ro
       - pix_erase.loki.data:/tmp/:rw
-    command: -config.file=/etc/loki/config.yaml
+    environment:
+      <<: *x-minio-environment
+    command: -config.file=/etc/loki/config.yaml -config.expand-env=true
     deploy:
       resources:
         limits:
@@ -131,9 +135,9 @@ services:
         reservations:
           cpus: '1'
           memory: 256M
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${LOKI_PORT}/ready" ]
-      <<: *hc-interval
+    depends_on:
+      minio:
+        condition: service_healthy
 
   vector:
     <<: *x-grafana-default
@@ -183,7 +187,7 @@ services:
           memory: 256M
     depends_on:
       loki:
-        condition: service_healthy
+        condition: service_started
 
   prometheus:
     <<: *x-grafana-default
@@ -330,7 +334,7 @@ services:
     hostname: pix_erase.scheduler
     build:
       context: .
-      dockerfile: ./deploy/dev/pix_erase/Dockerfile
+      dockerfile: ./deploy/prod/pix_erase/Dockerfile
     environment:
       <<: [
         *x-db-environment,
@@ -437,6 +441,10 @@ services:
         mc alias set minio http://127.0.0.1:${MINIO_PORT} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} # setup Minio client
         mc mb minio/${MINIO_IMAGES_BUCKET} || true                                    # create a test bucket
         mc anonymous set public minio/${MINIO_IMAGES_BUCKET}                          # make the test bucket public
+        mc mb minio/${MINIO_LOKI_RULES_BUCKET} || true 
+        mc anonymous set public minio/${MINIO_LOKI_RULES_BUCKET}
+        mc mb minio/${MINIO_LOKI_CHUNKS_BUCKET} || true
+        mc anonymous set public minio/${MINIO_LOKI_CHUNKS_BUCKET}
         kill -s INT $(cat /tmp/minio.pid) && rm /tmp/minio.pid             # stop Minio
         while isAlive; do sleep 0.1; done                                  # wait until Minio is stopped
         exec minio $0 "$@"                                                 # start Minio in the foreground
