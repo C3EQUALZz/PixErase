@@ -872,6 +872,118 @@
       ],
       "title": "Log of All FastAPI App",
       "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 24,
+      "options": {
+        "queryType": "traceId",
+        "traces": {
+          "spanBarType": "tag",
+          "tagKeyQueries": [],
+          "traceQueryOptions": {
+            "aggregations": [
+              {
+                "field": "name",
+                "label": "By name",
+                "metric": "last"
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "tempo"
+          },
+          "query": "",
+          "queryType": "traceId",
+          "refId": "A"
+        }
+      ],
+      "title": "Trace View",
+      "type": "traces"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "id": 25,
+      "options": {
+        "queryType": "search",
+        "search": {
+          "hide": false,
+          "spanName": "",
+          "spanTags": []
+        },
+        "traces": {
+          "spanBarType": "tag",
+          "tagKeyQueries": []
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "tempo"
+          },
+          "query": "{ service.name = \"PixErase\" }",
+          "queryType": "search",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent Traces",
+      "type": "traces"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "id": 26,
+      "options": {
+        "queryType": "serviceMap",
+        "serviceMap": {
+          "hide": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "tempo"
+          },
+          "query": "{ service.name = \"PixErase\" }",
+          "queryType": "serviceMap",
+          "refId": "A"
+        }
+      ],
+      "title": "Service Map",
+      "type": "nodeGraph"
     }
   ],
   "refresh": "5s",
