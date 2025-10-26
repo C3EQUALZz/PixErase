@@ -199,6 +199,8 @@ services:
     depends_on:
       loki:
         condition: service_started
+      prometheus:
+        condition: service_started
 
   prometheus:
     <<: *default
@@ -285,10 +287,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '3.0'
-          memory: 3072M
+          cpus: '6.0'
+          memory: 4096M
         reservations:
-          cpus: '1.0'
+          cpus: '2.0'
           memory: 1024M
     ports:
       - "127.0.0.1:${UVICORN_PORT}:${UVICORN_PORT}"

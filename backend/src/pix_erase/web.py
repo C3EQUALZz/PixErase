@@ -1,8 +1,11 @@
 import logging
+import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Final, cast
 
+import uvicorn
+from asgi_monitor.logging.uvicorn import build_uvicorn_log_config
 from dishka import AsyncContainer, make_async_container
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
@@ -97,8 +100,7 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
         default_response_class=ORJSONResponse,
         version="1.0.0",
         root_path="/api",
-        debug=configs.asgi.fastapi_debug,
-        title=configs.asgi.app_name
+        debug=configs.asgi.fastapi_debug
     )
 
     task_manager: AsyncBroker = setup_task_manager(
@@ -131,3 +133,19 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
     setup_dishka(container, app)
     logger.info("App created", extra={"app_version": app.version})
     return app
+
+
+if __name__ == "__main__":
+    asgi_conf = setup_configs().asgi
+    log_config = build_uvicorn_log_config(
+        level=logging.INFO,
+        json_format=True,
+        include_trace=True,
+    )
+    uvicorn.run(
+        create_fastapi_app(),
+        host=asgi_conf.host,
+        port=asgi_conf.port,
+        log_config=log_config,
+        loop="uvloop" if sys.platform != "win32" else "asyncio",
+    )

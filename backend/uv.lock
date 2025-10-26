@@ -1394,20 +1394,20 @@ wheels = [
 ]
 
 [[package]]
-name = "opencv-contrib-python"
+name = "opencv-contrib-python-headless"
 version = "4.12.0.88"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/b4/30fb53c33da02626b66dd40ad58dd4aa01eef834e422e098dfc056ed0873/opencv-contrib-python-4.12.0.88.tar.gz", hash = "sha256:0f1e22823aace09067b9a0e8e2b4ba6d7a1ef08807d6cebea315f3133f419a0e", size = 150785997, upload-time = "2025-07-07T09:20:16.755Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d2/2d/6ff35fa696afe2c4e3616d9560848b131353f24d9110d51baa93dd947212/opencv-contrib-python-headless-4.12.0.88.tar.gz", hash = "sha256:3d8a7b23a5faba4ad34e13f51668c56be791e57ab02d68d9016200fed3c12c77", size = 150801337, upload-time = "2025-07-07T09:20:37.432Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/26/c7/7cc80acd8a1ef9438542364b41751ecea2e95cf16b8ac4e48ebca643b203/opencv_contrib_python-4.12.0.88-cp37-abi3-macosx_13_0_arm64.whl", hash = "sha256:decc3a2627e03e61ec398919a8647b7f78315bf285e64bcd7dd4501b653f22bc", size = 46854784, upload-time = "2025-07-07T09:16:09.739Z" },
-    { url = "https://files.pythonhosted.org/packages/24/50/632534ad4a029aab4e1693664d9116223345af4499c72903e7711a1b44bb/opencv_contrib_python-4.12.0.88-cp37-abi3-macosx_13_0_x86_64.whl", hash = "sha256:e1209da6553b9c2b348fb5c878c2cd0e0121f9335981b7a9735c10d1ef1580ac", size = 67163714, upload-time = "2025-07-07T09:16:22.948Z" },
-    { url = "https://files.pythonhosted.org/packages/aa/30/0829882b280f40544a83c69312da4d935ff3d6086c10351c7b1659107b5c/opencv_contrib_python-4.12.0.88-cp37-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:7b3b834d5a2b84f26e5b62ff9ae07a287ab668d2343773372c3b97a335cd7c4f", size = 51290366, upload-time = "2025-07-07T09:16:33.078Z" },
-    { url = "https://files.pythonhosted.org/packages/6a/67/905c2c9364dcd450a0997a489fd3976a10a83cd1ebcbd3d039bb2525b54c/opencv_contrib_python-4.12.0.88-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:ac2627dcdf5bd625706949ada7994524320b656a991315ff6ae70043fc983689", size = 73160002, upload-time = "2025-07-07T09:16:45.815Z" },
-    { url = "https://files.pythonhosted.org/packages/5a/78/8110f1de88155241d9df6a701e2e589734a8bf3dbe1fd1a3cd29243c732a/opencv_contrib_python-4.12.0.88-cp37-abi3-win32.whl", hash = "sha256:fe3a5cbc1467c3620aeda3afd8d363886298a6fc85b48d62b2991afab65076c5", size = 36169774, upload-time = "2025-07-07T09:16:54.401Z" },
-    { url = "https://files.pythonhosted.org/packages/7f/8c/ec631100261b0fca25cafd1e1a06592e50b3cda8aa08e7c4c14d7b4d7115/opencv_contrib_python-4.12.0.88-cp37-abi3-win_amd64.whl", hash = "sha256:62c20c14fdd794c9d0fbc780b3d52a74bc967d205664d25b3906951abedc9f65", size = 45262376, upload-time = "2025-07-07T09:17:02.868Z" },
+    { url = "https://files.pythonhosted.org/packages/33/3a/edf7380db58557cc29bdcff71862b8100c64adf489517ec7250509df4b72/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-macosx_13_0_arm64.whl", hash = "sha256:a17ebb914f309afe72447c33b9187ff02f23f1483faa5c0ffde7aadc88711e2a", size = 46854919, upload-time = "2025-07-07T09:17:29.386Z" },
+    { url = "https://files.pythonhosted.org/packages/ca/0b/abacf0a9d3161cf15ee9783fab7081f1349e825844b03178bfe6fb484e96/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-macosx_13_0_x86_64.whl", hash = "sha256:85b520e527052a85a682f09cdc12e5f156f56d8c277261b4b65b48431abae96f", size = 67163853, upload-time = "2025-07-07T09:17:40.97Z" },
+    { url = "https://files.pythonhosted.org/packages/93/b4/13f1370c2b8e566f9c9f3658982ecd331c666215e7f379e8b1d7ab52a63d/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:d60a12b915c55a50468c013fcd839e941b49ccc1f37b914b62543382c36bf81d", size = 38548620, upload-time = "2025-07-07T09:17:49.086Z" },
+    { url = "https://files.pythonhosted.org/packages/b3/17/bfe5ccbaa3b15b8af3371137732e69a4563ee1b05a17e6578521c09d2a56/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:b183e2322468c9d3bd9cac4ba44b272d828ec22842395bcfa51df31765224c0a", size = 60138674, upload-time = "2025-07-07T09:17:59.07Z" },
+    { url = "https://files.pythonhosted.org/packages/9b/2c/328488cba04909ab6f1f00ad98758cb6c4806db4904adf2d12ee988508fd/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-win32.whl", hash = "sha256:902888b4e1b4826c721840d9107e91d32f146a2c3bc8cb728f0088bf44204e4b", size = 36114174, upload-time = "2025-07-07T09:18:06.818Z" },
+    { url = "https://files.pythonhosted.org/packages/44/d0/75057aac72cb7134b430a7c4c715af8a0cc68fe17c69889d64f33a5e311a/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-win_amd64.whl", hash = "sha256:c57e32812fea2a542bb220088fb3ce8a210fe114c9454d1c9e8cd162e1a1fde8", size = 45190148, upload-time = "2025-07-07T09:18:15.15Z" },
 ]
 
 [[package]]
@@ -1756,7 +1756,7 @@ dependencies = [
     { name = "dishka" },
     { name = "exif" },
     { name = "fastapi" },
-    { name = "opencv-contrib-python" },
+    { name = "opencv-contrib-python-headless" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "orjson" },
     { name = "pydantic", extra = ["email"] },
@@ -1766,7 +1766,7 @@ dependencies = [
     { name = "rembg", extra = ["cpu"] },
     { name = "sqlalchemy" },
     { name = "structlog" },
-    { name = "taskiq", extra = ["reload"] },
+    { name = "taskiq", extra = ["metrics", "reload"] },
     { name = "taskiq-aio-pika" },
     { name = "taskiq-redis" },
     { name = "uvicorn" },
@@ -1824,7 +1824,7 @@ requires-dist = [
     { name = "fastapi", specifier = "==0.116.2" },
     { name = "httpx", marker = "extra == 'test'", specifier = "==0.28.1" },
     { name = "mypy", marker = "extra == 'lint'", specifier = "==1.18.2" },
-    { name = "opencv-contrib-python", specifier = "==4.12.0.88" },
+    { name = "opencv-contrib-python-headless", specifier = "==4.12.0.88" },
     { name = "opentelemetry-exporter-otlp", specifier = "==1.37.0" },
     { name = "orjson", specifier = "==3.11.3" },
     { name = "pix-erase", extras = ["lint", "test"], marker = "extra == 'dev'" },
@@ -1841,7 +1841,7 @@ requires-dist = [
     { name = "semgrep", marker = "extra == 'lint'", specifier = "==1.139.0" },
     { name = "sqlalchemy", specifier = "==2.0.43" },
     { name = "structlog", specifier = "==25.4.0" },
-    { name = "taskiq", extras = ["reload"], specifier = ">=0.11.18" },
+    { name = "taskiq", extras = ["metrics", "reload"], specifier = ">=0.11.18" },
     { name = "taskiq-aio-pika", specifier = "==0.4.3" },
     { name = "taskiq-redis", specifier = "==1.1.0" },
     { name = "testcontainers", marker = "extra == 'test'", specifier = "==4.10.0" },
@@ -2711,6 +2711,9 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+metrics = [
+    { name = "prometheus-client" },
+]
 reload = [
     { name = "gitignore-parser" },
     { name = "watchdog" },
