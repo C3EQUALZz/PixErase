@@ -1,22 +1,20 @@
+[api]
+enabled = true
+address = "127.0.0.1:8383"
+
 [sources.docker]
 type = "docker_logs"
 docker_host = "/var/run/docker.sock"
-include_containers = ["pix_erase.api", "pix_erase.worker"]
-
-[transforms.json]
-type = "remap"
-inputs = ["docker"]
-drop_on_error = true
-source = ".message = object!(parse_json(.message) ?? {})"
+include_containers = ["pix_erase.api"]
 
 [sinks.console]
 type = "console"
-inputs = ["json"]
+inputs = ["docker"]
 encoding.codec = "json"
 
 [sinks.loki_sync_id]
 type = "loki"
-inputs = ["json"]
+inputs = ["docker"]
 encoding.codec = "json"
 labels.event = "log"
 labels.container_name = "{{container_name}}"
