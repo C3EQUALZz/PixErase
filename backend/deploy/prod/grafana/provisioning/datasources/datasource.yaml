@@ -43,7 +43,7 @@ datasources:
     type: tempo
     typeName: Tempo
     access: proxy
-    url: http://pix_erase.tempo
+    url: http://pix_erase.tempo:3200
     password: ""
     user: ""
     database: ""

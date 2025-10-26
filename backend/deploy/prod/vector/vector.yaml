@@ -12,25 +12,59 @@ sources:
 #      - postgresql://postgres:vector@localhost:5432/postgres
 #    scrape_interval_secs: 3
 
+transforms:
+  parse_message:
+    type: remap
+    inputs:
+      - docker_logs
+    source: |
+      # Parse the nested JSON message
+      if is_string(.message) {
+        .message_fields, err = parse_json(.message)
+        if err == null && is_object(.message_fields) {
+          # Flatten important fields to top level
+          .log_level = .message_fields.level
+          .log_event = .message_fields.event
+          .log_timestamp = .message_fields.timestamp
+          .log_thread_name = .message_fields.thread_name
+          .log_filename = .message_fields.filename
+          .log_module = .message_fields.module
+          .log_process = .message_fields.process
+          .log_process_name = .message_fields.process_name
+          .log_pathname = .message_fields.pathname
+          .log_func_name = .message_fields.func_name
+          .log_client_addr = .message_fields.client_addr
+          .log_http_method = .message_fields.http_method
+          .log_url = .message_fields.url
+          .log_http_version = .message_fields.http_version
+          .log_status_code = .message_fields.status_code
+          .log_trace_id = .message_fields.trace_id
+          .log_span_id = .message_fields.span_id
+          
+          # Remove the nested message string since we've extracted it
+          del(.message)
+        }
+      }
+
 sinks:
   console:
     type: console
     inputs:
-      - docker_logs
+      - parse_message
     encoding:
       codec: json
   loki_sync_id:
     type: loki
     inputs:
-      - docker_logs
+      - parse_message
     encoding:
       codec: json
     labels:
       event: log
-      container_name: {{container_name}}
+      container_name: "{{ container_name }}"
+      log_level: "{{ log_level }}"
     endpoint: http://${LOKI_HOST}:${LOKI_PORT}
   prometheus:
-    type: prometheus_remote_write
-    endpoint: http://${PROMETHEUS_HOST}:${PROMETHEUS_PORT}
+    type: prometheus_exporter
     inputs:
       - vector_metrics

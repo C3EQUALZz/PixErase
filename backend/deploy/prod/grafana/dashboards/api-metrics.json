@@ -828,8 +828,8 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by(message_level) (rate({container_name=~\"(?s).*api\"} | json | message_level != \"\" |= \"$log_keyword\" [1m]))",
-          "legendFormat": "{{.message_level}}",
+          "expr": "sum by(log_level) (rate({container_name=~\"(?s).*api\"} | json | log_level != \"\" |= \"$log_keyword\" [1m]))",
+          "legendFormat": "{{.log_level}}",
           "refId": "A"
         }
       ],
@@ -865,7 +865,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{container_name=~\"(?s).*api\"} | json | line_format \"{{.label_com_docker_compose_service}}\\t{{.message_timestamp}}\\t{{.message_level}}\\t trace_id={{.message_trace_id}}\\t {{.message_event}}\" |= \"$log_keyword\"",
+                     "expr": "{container_name=~\"(?s).*api\"} | json | line_format \"{{.container_name}}\\t{{.log_timestamp}}\\t{{.log_level}}\\ttrace_id={{.trace_id}}\\t{{.log_event}}\" |= \"$log_keyword\"",
           "hide": false,
           "refId": "A"
         }
