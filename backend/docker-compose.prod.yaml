@@ -50,8 +50,6 @@ x-api-environment: &x-api-environment
   ENVIRONMENT: local
   UVICORN_HOST: ${UVICORN_HOST}
   UVICORN_PORT: ${UVICORN_PORT}
-  LOGGING_LEVEL: INFO
-  RENDER_JSON_LOGS: False
   FASTAPI_DEBUG: True
   FASTAPI_ALLOW_CREDENTIALS: False
   JWT_SECRET: ${JWT_SECRET}
@@ -156,9 +154,14 @@ services:
     hostname: pix_erase.vector
     expose:
       - "127.0.0.1:${VECTOR_PORT}:${VECTOR_PORT}"
+    environment:
+      LOKI_HOST: pix_erase.loki
+      LOKI_PORT: ${LOKI_PORT}
+      PROMETHEUS_HOST: pix_erase.prometheus
+      PROMETHEUS_PORT: ${PROMETHEUS_PORT}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./deploy/prod/vector/vector.toml:/etc/vector/vector.toml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./deploy/prod/vector/vector.yaml:/etc/vector/vector.yaml:ro
     logging:
       driver: "json-file"
       options:
@@ -177,7 +180,7 @@ services:
       prometheus:
         condition: service_started
       api:
-        condition: service_started
+        condition: service_healthy
 
   tempo:
     <<: *default

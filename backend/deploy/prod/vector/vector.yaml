@@ -1,0 +1,36 @@
+sources:
+  docker_logs:
+    type: docker_logs
+    include_containers:
+      - pix_erase.api
+  vector_metrics:
+    type: internal_metrics
+    scrape_interval_secs: 3
+#  postgresql_metrics:
+#    type: postgresql_metrics
+#    endpoints:
+#      - postgresql://postgres:vector@localhost:5432/postgres
+#    scrape_interval_secs: 3
+
+sinks:
+  console:
+    type: console
+    inputs:
+      - docker_logs
+    encoding:
+      codec: json
+  loki_sync_id:
+    type: loki
+    inputs:
+      - docker_logs
+    encoding:
+      codec: json
+    labels:
+      event: log
+      container_name: {{container_name}}
+    endpoint: http://${LOKI_HOST}:${LOKI_PORT}
+  prometheus:
+    type: prometheus_remote_write
+    endpoint: http://${PROMETHEUS_HOST}:${PROMETHEUS_PORT}
+    inputs:
+      - vector_metrics
