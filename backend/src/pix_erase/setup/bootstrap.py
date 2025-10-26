@@ -4,6 +4,8 @@ from functools import lru_cache
 from types import TracebackType
 from typing import Any, Final
 
+from asgi_monitor.integrations.fastapi import TracingConfig, setup_tracing, MetricsConfig, setup_metrics
+from asgi_monitor.logging import configure_logging
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from opentelemetry import trace
@@ -17,8 +19,6 @@ from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
 from taskiq_redis import RedisAsyncResultBackend, ListRedisScheduleSource
 
-from pix_erase.infrastructure.metrics.integrations.fastapi import get_metrics
-from pix_erase.infrastructure.metrics.manager import build_metrics_manager
 from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_sessions_table
 from pix_erase.infrastructure.persistence.models.users import map_users_table
 from pix_erase.infrastructure.scheduler.tasks.images_tasks import setup_images_task
@@ -27,8 +27,6 @@ from pix_erase.presentation.http.v1.common.routes import healthcheck, index
 from pix_erase.presentation.http.v1.middlewares.asgi_auth import ASGIAuthMiddleware
 from pix_erase.presentation.http.v1.middlewares.client_cache import ClientCacheMiddleware
 from pix_erase.presentation.http.v1.middlewares.logs import LoggingMiddleware
-from pix_erase.presentation.http.v1.middlewares.metrics import MetricsMiddleware
-from pix_erase.presentation.http.v1.middlewares.tracing import TracingMiddleware
 from pix_erase.presentation.http.v1.routes.auth import auth_router
 from pix_erase.presentation.http.v1.routes.image import image_router
 from pix_erase.presentation.http.v1.routes.internet_protocol import ip_router
@@ -36,11 +34,10 @@ from pix_erase.presentation.http.v1.routes.task import task_router
 from pix_erase.presentation.http.v1.routes.user import user_router
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
-from pix_erase.setup.config.logs import LoggingConfig, build_structlog_logger
-from pix_erase.setup.config.metrics import FastAPIMetricsConfig
+
+from pix_erase.setup.config.obversability import ObservabilityConfig
 from pix_erase.setup.config.rabbit import RabbitConfig
 from pix_erase.setup.config.settings import AppConfig
-from pix_erase.setup.config.tracing import FastAPITracingConfig
 from pix_erase.setup.config.worker import TaskIQWorkerConfig
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
@@ -105,81 +102,41 @@ def setup_http_middlewares(app: FastAPI, /, api_config: ASGIConfig) -> None:
     app.add_middleware(LoggingMiddleware)  # type: ignore[arg-type, unused-ignore]
 
 
-def setup_http_tracing(app: FastAPI, config: FastAPITracingConfig) -> None:
-    """
-    Set up tracing for a FastAPI application.
-    The function adds a TracingMiddleware to the FastAPI application based on TracingConfig.
-
-    :param FastAPI app: The FastAPI application instance.
-    :param TracingConfig config: The OpenTelemetry config.
-    :returns: None
-    """
-
-    app.add_middleware(TracingMiddleware, config=config)
-
-
-def setup_http_metrics(app: FastAPI, config: FastAPIMetricsConfig) -> None:
-    """
-    Set up metrics for a FastAPI application.
-    This function adds a MetricsMiddleware to the FastAPI application with the specified parameters.
-
-    :param FastAPI app: The FastAPI application instance.
-    :param MetricsConfig config: Configuration for the metrics.
-    :returns: None
-    """
-
-    metrics = build_metrics_manager(config)
-    metrics.add_app_info()
-
-    app.add_middleware(
-        MetricsMiddleware,  # type: ignore[arg-type, unused-ignore]
-        metrics=metrics,
-        include_trace_exemplar=config.include_trace_exemplar,
-    )
-    if config.include_metrics_endpoint:
-        app.state.metrics_registry = config.registry  # type: ignore[arg-type, unused-ignore]
-        app.state.openmetrics_format = config.openmetrics_format  # type: ignore[arg-type, unused-ignore]
-        app.add_route(
-            path="/metrics",
-            route=get_metrics,
-            methods=["GET"],
-            name="Get Prometheus metrics",
-            include_in_schema=True,
-        )
-
-
 def setup_http_observability(
-        app: FastAPI,
-        config: ASGIConfig,
-) -> None:
+    app: FastAPI,
+    /,
+    observability_config: ObservabilityConfig,
+) -> None:  # pragma: no cover
+    configure_logging(
+        level=logging.INFO,
+        json_format=True,
+        include_trace=True
+    )
+    sys.excepthook = global_exception_handler_with_traceback
+
     resource = Resource.create(
         attributes={
-            "service.name": config.app_name,
-            "compose_service": config.app_name
+            "service.name": observability_config.app_name,
+            "compose_service": observability_config.app_name,
         },
     )
-
-    tracer_provider: TracerProvider = TracerProvider(resource=resource)
+    tracer_provider = TracerProvider(resource=resource)
     trace.set_tracer_provider(tracer_provider)
     tracer_provider.add_span_processor(
         BatchSpanProcessor(
             OTLPSpanExporter(
-                endpoint=config.tracing_grpc_uri
-            )
-        )
+                endpoint=observability_config.tracing_grpc_uri
+            ),
+        ),
     )
+    trace_config = TracingConfig(tracer_provider=tracer_provider)
+    setup_tracing(app=app, config=trace_config)
 
-    trace_config: FastAPITracingConfig = FastAPITracingConfig(
-        tracer_provider=tracer_provider
+    metrics_config = MetricsConfig(
+        app_name=observability_config.app_name,
+        include_trace_exemplar=True,
     )
-
-    metrics_config: FastAPIMetricsConfig = FastAPIMetricsConfig(
-        app_name=config.app_name,
-        include_trace_exemplar=True
-    )
-
-    setup_http_tracing(app, config=trace_config)
-    setup_http_metrics(app, config=metrics_config)
+    setup_metrics(app=app, config=metrics_config)
 
 
 def setup_http_routes(app: FastAPI, /) -> None:
@@ -216,19 +173,6 @@ def setup_task_manager(
             declare_queues_kwargs={"durable": taskiq_config.durable_queue},
             declare_exchange_kwargs={"durable": taskiq_config.durable_exchange},
         )
-        .with_middlewares(
-            SmartRetryMiddleware(
-                default_retry_count=taskiq_config.default_retry_count,
-                default_delay=taskiq_config.default_delay,
-                use_jitter=taskiq_config.use_jitter,
-                use_delay_exponent=taskiq_config.use_delay_exponent,
-                max_delay_exponent=taskiq_config.max_delay_component,
-            ),
-            PrometheusMiddleware(
-                server_addr=taskiq_config.prometheus_server_address,
-                server_port=taskiq_config.prometheus_server_port
-            )
-        )
         .with_result_backend(RedisAsyncResultBackend(
             redis_url=redis_config.worker_uri,
             result_ex_time=1000,
@@ -239,6 +183,25 @@ def setup_task_manager(
 
     logger.debug("Returning taskiq broker")
     return broker
+
+
+def setup_task_manager_middlewares(
+        broker: AsyncBroker, taskiq_config: TaskIQWorkerConfig
+) -> AsyncBroker:
+    logger.debug("Start setup broker middlewares")
+    return broker.with_middlewares(
+        SmartRetryMiddleware(
+            default_retry_count=taskiq_config.default_retry_count,
+            default_delay=taskiq_config.default_delay,
+            use_jitter=taskiq_config.use_jitter,
+            use_delay_exponent=taskiq_config.use_delay_exponent,
+            max_delay_exponent=taskiq_config.max_delay_component,
+        ),
+        PrometheusMiddleware(
+            server_addr=taskiq_config.prometheus_server_address,
+            server_port=taskiq_config.prometheus_server_port
+        )
+    )
 
 
 def setup_task_manager_tasks(broker: AsyncBroker) -> None:
@@ -270,14 +233,6 @@ def setup_exc_handlers(app: FastAPI, /) -> None:
     """
     exception_handler: ExceptionHandler = ExceptionHandler(app)
     exception_handler.setup_handlers()
-
-
-def setup_logging(logger_config: LoggingConfig) -> None:
-    build_structlog_logger(cfg=logger_config)
-
-    root_logger: logging.Logger = logging.getLogger()
-    sys.excepthook = global_exception_handler_with_traceback
-    root_logger.info("Logger configured")
 
 
 def global_exception_handler_with_traceback(

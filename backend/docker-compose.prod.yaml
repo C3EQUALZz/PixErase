@@ -186,7 +186,7 @@ services:
       - "127.0.0.1:${TEMPO_PORT}:${TEMPO_PORT}"
       - "127.0.0.1:${TEMPO_GRPC_PORT}:${TEMPO_GRPC_PORT}"
     volumes:
-      - ./deploy/prod/tempo:/etc/tempo.yaml
+      - ./deploy/prod/tempo/tempo.yaml:/etc/tempo.yaml
       - pix_erase.tempo.data:/var/tempo
     deploy:
       resources:

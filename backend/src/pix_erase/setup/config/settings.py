@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
-from pix_erase.setup.config.logs import LoggingConfig
+from pix_erase.setup.config.obversability import ObservabilityConfig
 from pix_erase.setup.config.rabbit import RabbitConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.s3 import S3Config
@@ -15,10 +15,6 @@ from dotenv import load_dotenv
 class AppConfig(BaseModel):
     load_dotenv(r"D:\PycharmProjects\PixErase\backend\.env")
 
-    logging: LoggingConfig = Field(
-        default_factory=lambda: LoggingConfig(**os.environ),
-        description="Logging config",
-    )
     postgres: PostgresConfig = Field(
         default_factory=lambda: PostgresConfig(**os.environ),
         description="Postgres settings",
@@ -54,4 +50,8 @@ class AppConfig(BaseModel):
     s3: S3Config = Field(
         default_factory=lambda: S3Config(**os.environ),
         description="S3 settings",
+    )
+    observability: ObservabilityConfig = Field(
+        default_factory=lambda: ObservabilityConfig(**os.environ),
+        description="Observability settings",
     )

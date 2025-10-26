@@ -19,9 +19,9 @@ from pix_erase.setup.bootstrap import (
     setup_http_middlewares,
     setup_http_routes,
     setup_configs,
-    setup_logging,
     setup_map_tables,
-    setup_http_observability
+    setup_http_observability,
+    setup_task_manager
 )
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
@@ -29,7 +29,6 @@ from pix_erase.setup.config.database import SQLAlchemyConfig, PostgresConfig
 from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.settings import AppConfig
 from pix_erase.setup.ioc import setup_providers
-from pix_erase.worker import create_worker_taskiq_app
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -93,8 +92,6 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
     """
     configs: AppConfig = setup_configs()
 
-    setup_logging(logger_config=configs.logging)
-
     app: FastAPI = FastAPI(
         lifespan=lifespan,
         default_response_class=ORJSONResponse,
@@ -104,7 +101,11 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
         title=configs.asgi.app_name
     )
 
-    task_manager: AsyncBroker = create_worker_taskiq_app()
+    task_manager: AsyncBroker = setup_task_manager(
+        taskiq_config=configs.worker,
+        rabbitmq_config=configs.rabbitmq,
+        redis_config=configs.redis
+    )
     app.state.task_manager = task_manager
 
     context = {
@@ -126,7 +127,7 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
     setup_http_routes(app)
     setup_exc_handlers(app)
     setup_http_middlewares(app, api_config=configs.asgi)
-    setup_http_observability(app, config=configs.asgi)
+    setup_http_observability(app, observability_config=configs.observability)
     setup_dishka(container, app)
     logger.info("App created", extra={"app_version": app.version})
     return app
