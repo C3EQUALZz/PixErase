@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class PortScanRequestSchema(BaseModel):
     """Request schema for single port scan."""
+    model_config = ConfigDict(frozen=True)
     
     target: str = Field(..., description="Target IP address or hostname", examples=["192.168.1.1"])
     port: int = Field(..., ge=1, le=65535, description="Port number to scan", examples=[80])
@@ -19,7 +20,8 @@ class PortScanRequestSchema(BaseModel):
 
 class PortScanResponse(BaseModel):
     """Response schema for single port scan."""
-    
+    model_config = ConfigDict(frozen=True)
+
     port: int
     status: str
     response_time: float | None = None
@@ -30,6 +32,7 @@ class PortScanResponse(BaseModel):
 
 class PortScanMultipleRequest(BaseModel):
     """Request schema for multiple ports scan."""
+    model_config = ConfigDict(frozen=True)
     
     target: str = Field(..., description="Target IP address or hostname", examples=["192.168.1.1"])
     ports: list[int] = Field(..., description="List of ports to scan", examples=[80, 443, 22])
@@ -52,6 +55,7 @@ class PortScanMultipleRequest(BaseModel):
 
 class PortScanRangeRequest(BaseModel):
     """Request schema for port range scan."""
+    model_config = ConfigDict(frozen=True)
     
     target: str = Field(..., description="Target IP address or hostname", examples=["192.168.1.1"])
     start_port: int = Field(..., ge=1, le=65535, description="Start port number", examples=[1])
@@ -74,6 +78,7 @@ class PortScanRangeRequest(BaseModel):
 
 class PortScanCommonRequest(BaseModel):
     """Request schema for common ports scan."""
+    model_config = ConfigDict(frozen=True)
     
     target: str = Field(..., description="Target IP address or hostname", examples=["192.168.1.1"])
     timeout: float = Field(default=1.0, ge=0.1, le=30.0, description="Timeout in seconds", examples=[1.0])
@@ -88,7 +93,8 @@ class PortScanCommonRequest(BaseModel):
 
 class PortScanResultResponseSchema(BaseModel):
     """Response schema for individual port scan result."""
-    
+    model_config = ConfigDict(frozen=True)
+
     port: int
     status: str
     response_time: float | None = None
@@ -99,7 +105,8 @@ class PortScanResultResponseSchema(BaseModel):
 
 class PortScanSummaryResponse(BaseModel):
     """Response schema for port scan summary."""
-    
+    model_config = ConfigDict(frozen=True)
+
     target: str
     port_range: str
     total_ports: int
@@ -115,7 +122,8 @@ class PortScanSummaryResponse(BaseModel):
 
 class PortScanCommonResponse(BaseModel):
     """Response schema for common ports scan."""
-    
+    model_config = ConfigDict(frozen=True)
+
     target: str
     port_range: str
     total_ports: int

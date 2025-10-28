@@ -1,11 +1,15 @@
-from pydantic import BaseModel, networks
+from pydantic import BaseModel, networks, ConfigDict
 
 
 class ReadIPInfoSchemaRequest(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     destination_address: networks.IPvAnyAddress
 
 
 class ReadIPInfoSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     ip_address: networks.IPvAnyAddress
     isp: str | None = None
     organization: str | None = None

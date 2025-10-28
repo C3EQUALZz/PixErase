@@ -1,9 +1,11 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class CompressImageRequestSchema(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     quality: Annotated[
         int,
         Field(
@@ -17,6 +19,8 @@ class CompressImageRequestSchema(BaseModel):
 
 
 class CompressImageResponseSchema(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     task_id: Annotated[
         str,
         Field(

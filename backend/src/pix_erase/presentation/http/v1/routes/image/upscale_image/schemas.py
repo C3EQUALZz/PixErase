@@ -1,14 +1,18 @@
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class UpscaleImageRequestSchema(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     algorithm: Literal["AI", "NearestNeighbour"]
     scale: Annotated[int, Field(ge=2, le=8)]
 
 
 class UpscaleImageSchemeResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     task_id: Annotated[
         str,
         Field(

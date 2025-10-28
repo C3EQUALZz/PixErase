@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from pix_erase.application.common.views.image.read_image import (
     CameraOrientationView,
@@ -12,6 +12,8 @@ from pix_erase.application.common.views.image.read_image import (
 
 
 class CameraSettingsSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     make: Annotated[
         str,
         Field(
@@ -69,6 +71,8 @@ class CameraSettingsSchemaResponse(BaseModel):
 
 
 class ExposureSettingsSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     exposure_time: Annotated[
         str,
         Field(
@@ -114,6 +118,8 @@ class ExposureSettingsSchemaResponse(BaseModel):
 
 
 class FlashInfoSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     fired: Annotated[
         bool,
         Field(description="Сработала ли вспышка")
@@ -137,6 +143,8 @@ class FlashInfoSchemaResponse(BaseModel):
 
 
 class GPSInfoSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     latitude: Annotated[
         float,
         Field(
@@ -179,6 +187,8 @@ class GPSInfoSchemaResponse(BaseModel):
 
 
 class DateTimeInfoSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     created: Annotated[
         datetime,
         Field(
@@ -203,6 +213,8 @@ class DateTimeInfoSchemaResponse(BaseModel):
 
 
 class ReadImageExifSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     width: Annotated[
         int,
         Field(

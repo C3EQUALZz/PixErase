@@ -1,9 +1,11 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class GrayScaleImageSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     task_id: Annotated[
         str,
         Field(

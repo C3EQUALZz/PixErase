@@ -1,9 +1,11 @@
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field, BeforeValidator, AfterValidator
+from pydantic import BaseModel, EmailStr, Field, BeforeValidator, AfterValidator, ConfigDict
 
 
 class ChangeUserEmailSchemaRequest(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     email: Annotated[
         EmailStr,
         BeforeValidator(lambda x: str.strip(str(x))),

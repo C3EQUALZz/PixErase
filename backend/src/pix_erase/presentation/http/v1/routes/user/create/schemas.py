@@ -1,11 +1,13 @@
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field, StringConstraints
+from pydantic import BaseModel, EmailStr, Field, StringConstraints, ConfigDict
 from uuid import UUID
 from pix_erase.domain.user.values.user_role import UserRole
 
 
 class CreateUserSchemaRequest(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     email: Annotated[
         EmailStr,
         Field(
@@ -47,6 +49,8 @@ class CreateUserSchemaRequest(BaseModel):
 
 
 class CreateUserSchemaResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     id: Annotated[
         UUID,
         Field(

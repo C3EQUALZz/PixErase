@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Annotated
 
 
 class RotateImageSchemaRequest(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     angle: Annotated[
         int,
         Field(
