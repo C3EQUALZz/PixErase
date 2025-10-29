@@ -1,10 +1,14 @@
 from dataclasses import asdict
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Security, Depends
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.common.views.internet_protocol.ip_info import IPInfoView
 from pix_erase.application.queries.internet_protocol.read_ip_info import ReadIPInfoQueryHandler, ReadIPInfoQuery
@@ -19,6 +23,7 @@ read_ip_info_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["IP"]
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
 @read_ip_info_router.get(
@@ -37,6 +42,18 @@ read_ip_info_router: Final[APIRouter] = APIRouter(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span ip read_ip_info http",
+    attributes={
+        "http.request.method": "GET",
+        "url.path": "/ip/",
+        "http.route": "/ip/",
+        "feature": "ip",
+        "action": "read_ip_info",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def read_ip_info_handler(

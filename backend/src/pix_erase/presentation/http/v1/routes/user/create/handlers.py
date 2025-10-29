@@ -1,9 +1,13 @@
 from inspect import getdoc
 from typing import Final, cast
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Security
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 from starlette import status
 
 from pix_erase.application.commands.user.create_user import CreateUserCommandHandler, CreateUserCommand
@@ -19,6 +23,7 @@ create_user_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["User"],
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
 @create_user_router.post(
@@ -34,6 +39,18 @@ create_user_router: Final[APIRouter] = APIRouter(
         status.HTTP_409_CONFLICT: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span user create http",
+    attributes={
+        "http.request.method": "POST",
+        "url.path": "/user/",
+        "http.route": "/user/",
+        "feature": "user",
+        "action": "create",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def create_user_handler(

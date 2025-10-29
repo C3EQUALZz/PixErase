@@ -34,9 +34,13 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
 )
 @span(
     tracer=tracer,
+    name="span login http",
     attributes={
-        "path": "/auth/login/",
-        "http_method": "POST",
+        "http.request.method": "POST",
+        "url.path": "/auth/login/",
+        "http.route": "/auth/login/",
+        "feature": "auth",
+        "action": "login",
         "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )

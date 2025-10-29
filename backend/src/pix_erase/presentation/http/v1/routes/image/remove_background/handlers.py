@@ -1,10 +1,14 @@
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Path
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.commands.image.remove_background_image import (
     RemoveBackgroundImageCommandHandler,
@@ -17,6 +21,7 @@ remove_background_router: Final[APIRouter] = APIRouter(
     tags=["Image"],
     route_class=DishkaRoute,
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 ImageIDPathParameter = Path(
     title="The ID of the image that was upload",
@@ -39,6 +44,18 @@ ImageIDPathParameter = Path(
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
     },
     response_model=RemoveBackgroundSchemaResponse
+)
+@span(
+    tracer=tracer,
+    name="span image remove_background http",
+    attributes={
+        "http.request.method": "PATCH",
+        "url.path": "/image/id/{image_id}/remove-background",
+        "http.route": "/image/id/{image_id}/remove-background",
+        "feature": "image",
+        "action": "remove_background",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+    }
 )
 async def remove_background_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],

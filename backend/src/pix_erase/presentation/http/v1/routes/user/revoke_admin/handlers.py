@@ -1,10 +1,14 @@
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Path, Security
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 from starlette import status
 
 from pix_erase.application.commands.user.revoke_admin_by_id import (
@@ -18,6 +22,7 @@ revoke_admin_router: Final[APIRouter] = APIRouter(
     tags=["User"],
     route_class=DishkaRoute,
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 UserIDPathParameter = Path(
     title="The ID of the user to get",
@@ -39,6 +44,18 @@ UserIDPathParameter = Path(
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span user revoke_admin http",
+    attributes={
+        "http.request.method": "PATCH",
+        "url.path": "/user/id/{id}/revoke-admin/",
+        "http.route": "/user/id/{id}/revoke-admin/",
+        "feature": "user",
+        "action": "revoke_admin",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def revoke_admin_by_id_handler(

@@ -1,8 +1,12 @@
 from inspect import getdoc
 from typing import Final
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Security
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.commands.internet_protocol.scan_common_ports import (
     ScanCommonPortsCommand,
@@ -38,6 +42,7 @@ router: Final[APIRouter] = APIRouter(
     tags=["IP"],
     route_class=DishkaRoute
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
 @router.post(
@@ -56,6 +61,18 @@ router: Final[APIRouter] = APIRouter(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span ip scan_port http",
+    attributes={
+        "http.request.method": "POST",
+        "url.path": "/ip/scan-ports/single/",
+        "http.route": "/ip/scan-ports/single/",
+        "feature": "ip",
+        "action": "scan_port",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def scan_port(
@@ -98,6 +115,18 @@ async def scan_port(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span ip scan_ports http",
+    attributes={
+        "http.request.method": "POST",
+        "url.path": "/ip/scan-ports/multiple/",
+        "http.route": "/ip/scan-ports/multiple/",
+        "feature": "ip",
+        "action": "scan_ports",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def scan_ports(
@@ -144,6 +173,18 @@ async def scan_ports(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span ip scan_port_range http",
+    attributes={
+        "http.request.method": "POST",
+        "url.path": "/ip/scan-ports/range/",
+        "http.route": "/ip/scan-ports/range/",
+        "feature": "ip",
+        "action": "scan_port_range",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def scan_port_range(
@@ -203,6 +244,18 @@ async def scan_port_range(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span ip scan_common_ports http",
+    attributes={
+        "http.request.method": "POST",
+        "url.path": "/ip/scan-ports/common/",
+        "http.route": "/ip/scan-ports/common/",
+        "feature": "ip",
+        "action": "scan_common_ports",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def scan_common_ports(

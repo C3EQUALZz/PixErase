@@ -1,11 +1,15 @@
 from dataclasses import asdict
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Path
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.common.views.image.read_image import ReadImageExifView
 from pix_erase.application.queries.images.read_exif_from_image_by_id import (
@@ -26,6 +30,7 @@ exif_image_router: Final[APIRouter] = APIRouter(
     tags=["Image"],
     route_class=DishkaRoute,
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 ImageIDPathParameter = Path(
     title="The ID of the image that was upload",
@@ -47,6 +52,18 @@ ImageIDPathParameter = Path(
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span image exif http",
+    attributes={
+        "http.request.method": "GET",
+        "url.path": "/image/id/{image_id}/exif/",
+        "http.route": "/image/id/{image_id}/exif/",
+        "feature": "image",
+        "action": "read_exif",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def read_exif_image_handler(

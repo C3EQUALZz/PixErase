@@ -1,10 +1,14 @@
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Path
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.commands.image.grayscale_image import (
     GrayscaleImageCommandHandler,
@@ -17,6 +21,7 @@ grayscale_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["Image"]
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 ImageIDPathParameter = Path(
     title="The ID of the image that was upload",
@@ -39,6 +44,18 @@ ImageIDPathParameter = Path(
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
     },
     response_model=GrayScaleImageSchemaResponse,
+)
+@span(
+    tracer=tracer,
+    name="span image grayscale http",
+    attributes={
+        "http.request.method": "PATCH",
+        "url.path": "/image/id/{image_id}/grayscale/",
+        "http.route": "/image/id/{image_id}/grayscale/",
+        "feature": "image",
+        "action": "grayscale",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+    }
 )
 async def grayscale_image_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],

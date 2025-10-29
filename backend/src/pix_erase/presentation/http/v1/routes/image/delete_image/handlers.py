@@ -1,10 +1,14 @@
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Path
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.commands.image.delete_image import DeleteImageCommandHandler, DeleteImageCommand
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
@@ -13,6 +17,7 @@ delete_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["Image"]
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 ImageIDPathParameter = Path(
     title="The ID of the image that was upload",
@@ -33,6 +38,18 @@ ImageIDPathParameter = Path(
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span image delete http",
+    attributes={
+        "http.request.method": "DELETE",
+        "url.path": "/image/id/{image_id}/",
+        "http.route": "/image/id/{image_id}/",
+        "feature": "image",
+        "action": "delete",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def delete_image_handler(

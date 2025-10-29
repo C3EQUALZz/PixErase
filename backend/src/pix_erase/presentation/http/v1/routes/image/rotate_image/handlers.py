@@ -1,10 +1,14 @@
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Path
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler, RotateImageCommand
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
@@ -17,6 +21,7 @@ rotate_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["Image"]
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 ImageIDPathParameter = Path(
     title="The ID of the image that was upload",
@@ -39,6 +44,18 @@ ImageIDPathParameter = Path(
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
     },
     response_model=RotateImageSchemaResponse
+)
+@span(
+    tracer=tracer,
+    name="span image rotate http",
+    attributes={
+        "http.request.method": "PATCH",
+        "url.path": "/image/id/{image_id}/rotate/",
+        "http.route": "/image/id/{image_id}/rotate/",
+        "feature": "image",
+        "action": "rotate",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+    }
 )
 async def rotate_image_handler(
         image_id: Annotated[UUID, ImageIDPathParameter],

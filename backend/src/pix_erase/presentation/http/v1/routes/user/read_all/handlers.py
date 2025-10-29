@@ -1,10 +1,14 @@
 from dataclasses import asdict
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Security, status, Depends
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.common.views.user.read_user_by_id import ReadUserByIDView
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler, ReadAllUsersQuery
@@ -20,6 +24,7 @@ read_all_router: Final[APIRouter] = APIRouter(
     tags=["User"],
     route_class=DishkaRoute,
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
 @read_all_router.get(
@@ -35,6 +40,18 @@ read_all_router: Final[APIRouter] = APIRouter(
         status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span user read_all http",
+    attributes={
+        "http.request.method": "GET",
+        "url.path": "/user/",
+        "http.route": "/user/",
+        "feature": "user",
+        "action": "read_all",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def read_all_handler(

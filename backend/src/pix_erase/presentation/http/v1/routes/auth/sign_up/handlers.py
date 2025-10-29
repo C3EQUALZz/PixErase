@@ -1,9 +1,13 @@
 from inspect import getdoc
 from typing import TYPE_CHECKING, Final
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.auth.sign_up import SignUpData, SignUpHandler
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
@@ -19,6 +23,7 @@ sign_up_router: Final[APIRouter] = APIRouter(
     tags=["Auth"],
     route_class=DishkaRoute,
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
 @sign_up_router.post(
@@ -33,6 +38,18 @@ sign_up_router: Final[APIRouter] = APIRouter(
         status.HTTP_409_CONFLICT: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span signup http",
+    attributes={
+        "http.request.method": "POST",
+        "url.path": "/auth/signup/",
+        "http.route": "/auth/signup/",
+        "feature": "auth",
+        "action": "signup",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def signup_handler(

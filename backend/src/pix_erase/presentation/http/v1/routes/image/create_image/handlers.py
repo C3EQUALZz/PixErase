@@ -1,9 +1,13 @@
 from inspect import getdoc
 from typing import Final, Annotated
+from datetime import datetime, UTC
+from asgi_monitor.tracing import span
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, UploadFile, File, Security
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
 
 from pix_erase.application.commands.image.create_image import CreateImageCommandHandler, CreateImageCommand
 from pix_erase.application.common.views.image.create_image import CreateImageView
@@ -16,6 +20,7 @@ create_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
     tags=["Image"],
 )
+tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
 @create_image_router.post(
@@ -31,6 +36,18 @@ create_image_router: Final[APIRouter] = APIRouter(
         status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
+    }
+)
+@span(
+    tracer=tracer,
+    name="span image create http",
+    attributes={
+        "http.request.method": "POST",
+        "url.path": "/image/",
+        "http.route": "/image/",
+        "feature": "image",
+        "action": "create",
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     }
 )
 async def create_image_handler(
