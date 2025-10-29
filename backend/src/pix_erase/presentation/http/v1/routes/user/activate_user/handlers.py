@@ -5,7 +5,6 @@ from uuid import UUID
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Path, Security
-
 from pix_erase.application.commands.user.activate_user import ActivateUserCommandHandler, ActivateUserCommand
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
