@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, status, Security
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
-from pix_erase.application.commands.internet_protocol.analyze_domain_info import (
+from pix_erase.application.queries.internet_protocol.analyze_domain_info import (
     AnalyzeDomainQueryHandler,
     AnalyzeDomainQuery
 )
