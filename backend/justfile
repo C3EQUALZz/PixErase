@@ -27,7 +27,7 @@ default:
 [doc("Run all containers in dev version")]
 [group("infra")]
 @up-dev:
-  docker compose -f {{ DOCKER_COMPOSE_DEV }} up -d postgres redis rabbitmq minio --wait
+  docker compose -f {{ DOCKER_COMPOSE_DEV }} up -d postgres redis rabbitmq minio tempo --wait
 
 [doc("Run all containers in production version")]
 [group("infra")]

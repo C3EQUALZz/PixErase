@@ -1,28 +1,32 @@
 from inspect import getdoc
-from typing import Final
+from typing import Final, cast, Literal, TYPE_CHECKING, Annotated
 from datetime import datetime, UTC
 from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status, Security
+from fastapi.params import Depends
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
-from pix_erase.application.commands.internet_protocol.scan_common_ports import (
-    ScanCommonPortsCommand,
-    ScanCommonPortsCommandHandler,
+if TYPE_CHECKING:
+    pass
+
+from pix_erase.application.queries.internet_protocol.scan_common_ports import (
+    ScanCommonPortsQuery,
+    ScanCommonPortsQueryHandler,
 )
-from pix_erase.application.commands.internet_protocol.scan_port import (
-    ScanPortCommand,
-    ScanPortCommandHandler,
+from pix_erase.application.queries.internet_protocol.scan_port import (
+    ScanPortQuery,
+    ScanPortQueryHandler,
 )
-from pix_erase.application.commands.internet_protocol.scan_port_range import (
-    ScanPortRangeCommand,
-    ScanPortRangeCommandHandler,
+from pix_erase.application.queries.internet_protocol.scan_port_range import (
+    ScanPortRangeQuery,
+    ScanPortRangeQueryHandler,
 )
-from pix_erase.application.commands.internet_protocol.scan_ports import (
-    ScanPortsCommand,
-    ScanPortsCommandHandler,
+from pix_erase.application.queries.internet_protocol.scan_ports import (
+    ScanPortsQuery,
+    ScanPortsQueryHandler,
 )
 from pix_erase.application.common.views.internet_protocol.port_scan import PortScanSummaryView, PortScanView
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
@@ -37,7 +41,7 @@ from pix_erase.presentation.http.v1.routes.internet_protocol.scan_ports.schemas 
     PortScanSummaryResponse,
 )
 
-router: Final[APIRouter] = APIRouter(
+scan_ports_router: Final[APIRouter] = APIRouter(
     prefix="/scan-ports",
     tags=["IP"],
     route_class=DishkaRoute
@@ -45,12 +49,12 @@ router: Final[APIRouter] = APIRouter(
 tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
-@router.post(
+@scan_ports_router.get(
     "/single/",
     response_model=PortScanResultResponseSchema,
     status_code=status.HTTP_200_OK,
     summary="Scan a single port",
-    description=getdoc(ScanPortCommandHandler),
+    description=getdoc(ScanPortQueryHandler),
     dependencies=[Security(cookie_scheme)],
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
@@ -76,11 +80,11 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
     }
 )
 async def scan_port(
-        request: PortScanRequestSchema,
-        handler: FromDishka[ScanPortCommandHandler],
+        request: Annotated[PortScanRequestSchema, Depends()],
+        handler: FromDishka[ScanPortQueryHandler],
 ) -> PortScanResultResponseSchema:
-    command: ScanPortCommand = ScanPortCommand(
-        target=request.target,
+    command: ScanPortQuery = ScanPortQuery(
+        target=str(request.target),
         port=request.port,
         timeout=request.timeout,
     )
@@ -89,7 +93,7 @@ async def scan_port(
 
     response: PortScanResultResponseSchema = PortScanResultResponseSchema(
         port=result.port,
-        status=result.status,
+        status=cast(Literal["open", "closed"], result.status),
         response_time=result.response_time,
         service=result.service,
         error_message=result.error_message,
@@ -99,7 +103,7 @@ async def scan_port(
     return response
 
 
-@router.post(
+@scan_ports_router.get(
     "/multiple/",
     response_model=list[PortScanResultResponseSchema],
     status_code=status.HTTP_200_OK,
@@ -130,11 +134,11 @@ async def scan_port(
     }
 )
 async def scan_ports(
-        request: PortScanMultipleRequest,
-        handler: FromDishka[ScanPortsCommandHandler],
+        request: Annotated[PortScanMultipleRequest, Depends()],
+        handler: FromDishka[ScanPortsQueryHandler],
 ) -> list[PortScanResultResponseSchema]:
-    command: ScanPortsCommand = ScanPortsCommand(
-        target=request.target,
+    command: ScanPortsQuery = ScanPortsQuery(
+        target=str(request.target),
         ports=request.ports,
         timeout=request.timeout,
         max_concurrent=request.max_concurrent,
@@ -145,7 +149,7 @@ async def scan_ports(
     response: list[PortScanResultResponseSchema] = [
         PortScanResultResponseSchema(
             port=result.port,
-            status=result.status,
+            status=cast(Literal["open", "closed"], result.status),
             response_time=result.response_time,
             service=result.service,
             error_message=result.error_message,
@@ -157,12 +161,12 @@ async def scan_ports(
     return response
 
 
-@router.post(
+@scan_ports_router.post(
     "/range/",
     response_model=PortScanSummaryResponse,
     status_code=status.HTTP_200_OK,
     summary="Scan a range of ports",
-    description=getdoc(ScanPortRangeCommandHandler),
+    description=getdoc(ScanPortRangeQueryHandler),
     dependencies=[Security(cookie_scheme)],
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
@@ -188,11 +192,11 @@ async def scan_ports(
     }
 )
 async def scan_port_range(
-        request: PortScanRangeRequest,
-        handler: FromDishka[ScanPortRangeCommandHandler],
+        request: Annotated[PortScanRangeRequest, Depends()],
+        handler: FromDishka[ScanPortRangeQueryHandler],
 ) -> PortScanSummaryResponse:
-    command: ScanPortRangeCommand = ScanPortRangeCommand(
-        target=request.target,
+    command: ScanPortRangeQuery = ScanPortRangeQuery(
+        target=str(request.target),
         start_port=request.start_port,
         end_port=request.end_port,
         timeout=request.timeout,
@@ -202,7 +206,7 @@ async def scan_port_range(
     result: PortScanSummaryView = await handler(command)
 
     response: PortScanSummaryResponse = PortScanSummaryResponse(
-        target=result.target,
+        target=cast("IPvAnyAddress", result.target),
         port_range=result.port_range,
         total_ports=result.total_ports,
         open_ports=result.open_ports,
@@ -228,12 +232,12 @@ async def scan_port_range(
     return response
 
 
-@router.post(
+@scan_ports_router.get(
     "/common/",
     response_model=PortScanSummaryResponse,
     status_code=status.HTTP_200_OK,
     summary="Scan common ports",
-    description=getdoc(ScanCommonPortsCommandHandler),
+    description=getdoc(ScanCommonPortsQueryHandler),
     dependencies=[Security(cookie_scheme)],
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
@@ -259,11 +263,11 @@ async def scan_port_range(
     }
 )
 async def scan_common_ports(
-        request: PortScanCommonRequest,
-        handler: FromDishka[ScanCommonPortsCommandHandler],
+        request: Annotated[PortScanCommonRequest, Depends()],
+        handler: FromDishka[ScanCommonPortsQueryHandler],
 ) -> PortScanSummaryResponse:
-    command: ScanCommonPortsCommand = ScanCommonPortsCommand(
-        target=request.target,
+    command: ScanCommonPortsQuery = ScanCommonPortsQuery(
+        target=str(request.target),
         timeout=request.timeout,
         max_concurrent=request.max_concurrent,
     )
@@ -271,7 +275,7 @@ async def scan_common_ports(
     result: PortScanSummaryView = await handler(command)
 
     response: PortScanSummaryResponse = PortScanSummaryResponse(
-        target=result.target,
+        target=cast("IPvAnyAddress", result.target),
         port_range=result.port_range,
         total_ports=result.total_ports,
         open_ports=result.open_ports,

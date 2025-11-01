@@ -12,22 +12,22 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class ScanPortsCommand:
-    """Command to scan multiple ports on a target."""
+class ScanPortQuery:
+    """Command to scan a single port on a target."""
     target: str
-    ports: list[int]
+    port: int
     timeout: float = 1.0
-    max_concurrent: int = 100
 
 
 @final
-class ScanPortsCommandHandler:
+class ScanPortQueryHandler:
     """
-    Handler for scanning multiple ports.
-    
+    Scan a single port on a target IP address or hostname
+    It's useful for checking if a specific service is running on a target.
+
     - Opens to everyone.
     - Async processing, non-blocking.
-    - Scans multiple ports on target.
+    - Scans a single port on target.
     """
     
     def __init__(
@@ -38,22 +38,21 @@ class ScanPortsCommandHandler:
         self._internet_protocol_service: Final[InternetProtocolService] = internet_protocol_service
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: ScanPortsCommand) -> list[PortScanView]:
+    async def __call__(self, data: ScanPortQuery) -> PortScanView:
         """
-        Execute multiple port scan command using domain service.
+        Execute port scan command using domain service.
         
         Args:
-            data: Multiple port scan command data
+            data: Port scan command data
             
         Returns:
-            List of PortScanView containing the scan results
+            PortScanView containing the scan result
         """
         logger.info(
-            "Started multiple port scan for target: %s, ports: %s, timeout: %s, max_concurrent: %s",
+            "Started port scan for target: %s, port: %s, timeout: %s",
             data.target,
-            data.ports,
+            data.port,
             data.timeout,
-            data.max_concurrent,
         )
 
         logger.info("Getting current user")
@@ -64,37 +63,33 @@ class ScanPortsCommandHandler:
         ip_address: IPAddress = self._internet_protocol_service.create(data.target)
         logger.info("Created IP address: %s", ip_address)
 
-        # Create ports
-        ports = [Port(port_num) for port_num in data.ports]
-        logger.info("Created ports: %s", [p.value for p in ports])
+        # Create port
+        port: Port = Port(data.port)
+        logger.info("Created port: %s", port)
 
         # Create timeout
         timeout: Timeout = Timeout(data.timeout)
         logger.info("Created timeout: %s", timeout)
 
         # Perform port scan
-        logger.info("Starting multiple port scan")
-        results = await self._internet_protocol_service.scan_ports(
+        logger.info("Starting port scan")
+        result = await self._internet_protocol_service.scan_port(
             target=ip_address,
-            ports=ports,
+            port=port,
             timeout=timeout,
-            max_concurrent=data.max_concurrent,
         )
-        logger.info("Multiple port scan completed: %s results", len(results))
+        logger.info("Port scan completed: %s", result)
 
-        # Create views
-        views: list[PortScanView] = [
-            PortScanView(
-                port=result.port.value,
-                status=result.status.value,
-                response_time=result.response_time,
-                service=result.service,
-                error_message=result.error_message,
-                scanned_at=result.scanned_at,
-            )
-            for result in results
-        ]
+        # Create view
+        view: PortScanView = PortScanView(
+            port=result.port.value,
+            status=result.status.value,
+            response_time=result.response_time,
+            service=result.service,
+            error_message=result.error_message,
+            scanned_at=result.scanned_at,
+        )
 
-        logger.info("Created %s views", len(views))
-        return views
+        logger.info("Created view: %s", view)
+        return view
 

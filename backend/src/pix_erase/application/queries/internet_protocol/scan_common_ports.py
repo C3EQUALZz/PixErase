@@ -12,7 +12,7 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class ScanCommonPortsCommand:
+class ScanCommonPortsQuery:
     """Command to scan common well-known ports on a target."""
     target: str
     timeout: float = 1.0
@@ -20,7 +20,7 @@ class ScanCommonPortsCommand:
 
 
 @final
-class ScanCommonPortsCommandHandler:
+class ScanCommonPortsQueryHandler:
     """
     Scan common well-known ports (1-1023) on a target IP address or hostname.
     It's useful for a quick security assessment of a target.
@@ -38,7 +38,7 @@ class ScanCommonPortsCommandHandler:
         self._internet_protocol_service: Final[InternetProtocolService] = internet_protocol_service
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: ScanCommonPortsCommand) -> PortScanSummaryView:
+    async def __call__(self, data: ScanCommonPortsQuery) -> PortScanSummaryView:
         """
         Execute common ports scan command using domain service.
         

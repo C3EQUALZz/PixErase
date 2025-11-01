@@ -8,9 +8,9 @@ from fastapi import APIRouter, status, Depends, Security
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
-from pix_erase.application.commands.internet_protocol.ping_internet_protocol import (
-    PingInternetProtocolCommandHandler,
-    PingInternetProtocolCommand
+from pix_erase.application.queries.internet_protocol.ping_internet_protocol import (
+    PingInternetProtocolQueryHandler,
+    PingInternetProtocolQuery
 )
 from pix_erase.application.common.views.internet_protocol.ping_internet_protocol import PingInternetProtocolView
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
@@ -29,7 +29,7 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
     status_code=status.HTTP_200_OK,
     summary="Ping service with known ip",
     response_model=PingSchemaResponse,
-    description=getdoc(PingInternetProtocolCommandHandler),
+    description=getdoc(PingInternetProtocolQueryHandler),
     dependencies=[Security(cookie_scheme)],
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
@@ -56,9 +56,9 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
 )
 async def ping_handler(
         request_schema: Annotated[PingSchemaRequest, Depends()],
-        interactor: FromDishka[PingInternetProtocolCommandHandler]
+        interactor: FromDishka[PingInternetProtocolQueryHandler]
 ) -> PingSchemaResponse:
-    command: PingInternetProtocolCommand = PingInternetProtocolCommand(
+    command: PingInternetProtocolQuery = PingInternetProtocolQuery(
         destination_address=str(request_schema.destination_address),
         timeout=request_schema.timeout,
         packet_size=request_schema.packet_size,

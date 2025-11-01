@@ -21,11 +21,11 @@ from pix_erase.application.commands.image.remove_watermark_from_image import Rem
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler
 from pix_erase.application.commands.image.upscale_image import UpscaleImageCommandHandler
 from pix_erase.application.commands.internet_protocol.analyze_domain_info import AnalyzeDomainQueryHandler
-from pix_erase.application.commands.internet_protocol.ping_internet_protocol import PingInternetProtocolCommandHandler
-from pix_erase.application.commands.internet_protocol.scan_common_ports import ScanCommonPortsCommandHandler
-from pix_erase.application.commands.internet_protocol.scan_port import ScanPortCommandHandler
-from pix_erase.application.commands.internet_protocol.scan_port_range import ScanPortRangeCommandHandler
-from pix_erase.application.commands.internet_protocol.scan_ports import ScanPortsCommandHandler
+from pix_erase.application.queries.internet_protocol.ping_internet_protocol import PingInternetProtocolQueryHandler
+from pix_erase.application.queries.internet_protocol.scan_common_ports import ScanCommonPortsQueryHandler
+from pix_erase.application.queries.internet_protocol.scan_port import ScanPortQueryHandler
+from pix_erase.application.queries.internet_protocol.scan_port_range import ScanPortRangeQueryHandler
+from pix_erase.application.queries.internet_protocol.scan_ports import ScanPortsQueryHandler
 from pix_erase.application.commands.user.activate_user import ActivateUserCommandHandler
 from pix_erase.application.commands.user.change_user_email import ChangeUserEmailCommandHandler
 from pix_erase.application.commands.user.change_user_name import ChangeUserNameByIDCommandHandler
@@ -305,12 +305,12 @@ def interactors_provider() -> Provider:
         ReadExifFromImageByIDQueryHandler,
         RemoveBackgroundImageCommandHandler,
         ReadTaskByIDQueryHandler,
-        PingInternetProtocolCommandHandler,
+        PingInternetProtocolQueryHandler,
         ReadIPInfoQueryHandler,
-        ScanPortRangeCommandHandler,
-        ScanCommonPortsCommandHandler,
-        ScanPortCommandHandler,
-        ScanPortsCommandHandler,
+        ScanPortRangeQueryHandler,
+        ScanCommonPortsQueryHandler,
+        ScanPortQueryHandler,
+        ScanPortsQueryHandler,
         AnalyzeDomainQueryHandler
     )
 

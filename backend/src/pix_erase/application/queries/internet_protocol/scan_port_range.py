@@ -12,7 +12,7 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class ScanPortRangeCommand:
+class ScanPortRangeQuery:
     """Command to scan a range of ports on a target."""
     target: str
     start_port: int
@@ -22,7 +22,7 @@ class ScanPortRangeCommand:
 
 
 @final
-class ScanPortRangeCommandHandler:
+class ScanPortRangeQueryHandler:
     """
     Handler for scanning a range of ports on a target IP address or hostname.
     It's useful for comprehensive port scanning of a target.
@@ -40,7 +40,7 @@ class ScanPortRangeCommandHandler:
         self._internet_protocol_service: Final[InternetProtocolService] = internet_protocol_service
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: ScanPortRangeCommand) -> PortScanSummaryView:
+    async def __call__(self, data: ScanPortRangeQuery) -> PortScanSummaryView:
         """
         Execute port range scan command using domain service.
         

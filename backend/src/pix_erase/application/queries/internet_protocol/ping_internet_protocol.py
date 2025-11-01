@@ -15,7 +15,7 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class PingInternetProtocolCommand:
+class PingInternetProtocolQuery:
     destination_address: str
     timeout: float = 4.0
     packet_size: int = 56
@@ -23,7 +23,7 @@ class PingInternetProtocolCommand:
 
 
 @final
-class PingInternetProtocolCommandHandler:
+class PingInternetProtocolQueryHandler:
     """
     - Opens to everyone.
     - Async processing, non-blocking.
@@ -37,7 +37,7 @@ class PingInternetProtocolCommandHandler:
         self._internet_service: Final[InternetProtocolService] = ping_service
         self._current_user_service: Final[CurrentUserService] = current_user_service
 
-    async def __call__(self, data: PingInternetProtocolCommand) -> PingInternetProtocolView:
+    async def __call__(self, data: PingInternetProtocolQuery) -> PingInternetProtocolView:
         """
         Execute ping command using domain service.
         
