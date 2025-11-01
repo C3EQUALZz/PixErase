@@ -16,6 +16,7 @@ from pix_erase.setup.bootstrap import (
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
+from pix_erase.setup.config.http import HttpClientConfig
 from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.settings import AppConfig
 from pix_erase.setup.ioc import setup_providers
@@ -56,6 +57,7 @@ def create_worker_taskiq_app() -> AsyncBroker:
         CookieParams: CookieParams(secure=configs.security.cookies.secure),
         S3Config: configs.s3,
         AsyncBroker: task_manager,
+        HttpClientConfig: configs.http,
     }
 
     container: AsyncContainer = make_async_container(*setup_providers(), context=context)

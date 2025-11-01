@@ -133,6 +133,7 @@ from pix_erase.infrastructure.cache.provider import get_redis_pool, get_redis
 from pix_erase.infrastructure.cache.redis_cache_store import RedisCacheStore
 from pix_erase.infrastructure.http.base import HttpClient
 from pix_erase.infrastructure.http.httpx_client import HttpxHttpClient
+from pix_erase.infrastructure.http.provider import get_httpx_client
 from pix_erase.infrastructure.persistence.provider import (
     get_engine,
     get_sessionmaker,
@@ -144,6 +145,7 @@ from pix_erase.infrastructure.scheduler.task_iq_task_scheduler import TaskIQTask
 from pix_erase.setup.bootstrap import setup_schedule_source
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.database import PostgresConfig
+from pix_erase.setup.config.http import HttpClientConfig
 from pix_erase.setup.config.s3 import S3Config
 
 
@@ -159,6 +161,7 @@ def configs_provider() -> Provider:
     provider.from_context(provides=CookieParams)
     provider.from_context(provides=S3Config)
     provider.from_context(provides=AsyncBroker)
+    provider.from_context(provides=HttpClientConfig)
     return provider
 
 
@@ -241,6 +244,12 @@ def gateways_provider() -> Provider:
     provider.provide(source=SqlAlchemyUserCommandGateway, provides=UserCommandGateway)
     provider.provide(source=SqlAlchemyUserQueryGateway, provides=UserQueryGateway)
     provider.provide(source=AiobotocoreS3ImageStorage, provides=ImageStorage)
+    return provider
+
+
+def http_client_provider() -> Provider:
+    provider: Final[Provider] = Provider(scope=Scope.REQUEST)
+    provider.provide(get_httpx_client)
     provider.provide(source=HttpxHttpClient, provides=HttpClient)
     return provider
 
@@ -319,5 +328,6 @@ def setup_providers() -> Iterable[Provider]:
         interactors_provider(),
         event_bus_provider(),
         s3_provider(),
-        application_ports_provider()
+        application_ports_provider(),
+        http_client_provider()
     )

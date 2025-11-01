@@ -1,16 +1,18 @@
 import os
 
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 from pix_erase.setup.config.asgi import ASGIConfig
+from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
+from pix_erase.setup.config.http import HttpClientConfig
 from pix_erase.setup.config.obversability import ObservabilityConfig
 from pix_erase.setup.config.rabbit import RabbitConfig
-from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.security import SecurityConfig, AuthSettings, CookiesSettings, PasswordSettings
 from pix_erase.setup.config.worker import TaskIQWorkerConfig
-from dotenv import load_dotenv
+
 
 class AppConfig(BaseModel):
     load_dotenv(r"D:\PycharmProjects\PixErase\backend\.env")
@@ -54,4 +56,8 @@ class AppConfig(BaseModel):
     observability: ObservabilityConfig = Field(
         default_factory=lambda: ObservabilityConfig(**os.environ),
         description="Observability settings",
+    )
+    http: HttpClientConfig = Field(
+        default_factory=lambda: HttpClientConfig(**os.environ),
+        description="HTTP settings",
     )
