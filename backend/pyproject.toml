@@ -37,6 +37,7 @@ dependencies = [
     "dishka==1.7.1",
     "exif==1.6.1",
     "fastapi==0.116.2",
+    "httpx>=0.28.1",
     "opencv-contrib-python-headless==4.12.0.88",
     "opentelemetry-exporter-otlp==1.37.0",
     "orjson==3.11.3",
@@ -50,6 +51,7 @@ dependencies = [
     "taskiq-aio-pika==0.4.3",
     "taskiq-redis==1.1.0",
     "taskiq[reload, metrics]>=0.11.18",
+    "tenacity>=9.1.2",
     "uvicorn==0.36.0",
     "uvloop==0.21.0; sys_platform != 'win32'",
 ]

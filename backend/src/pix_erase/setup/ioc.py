@@ -20,6 +20,7 @@ from pix_erase.application.commands.image.remove_background_image import RemoveB
 from pix_erase.application.commands.image.remove_watermark_from_image import RemoveWatermarkFromImageCommandHandler
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler
 from pix_erase.application.commands.image.upscale_image import UpscaleImageCommandHandler
+from pix_erase.application.commands.internet_protocol.analyze_domain_info import AnalyzeDomainQueryHandler
 from pix_erase.application.commands.internet_protocol.ping_internet_protocol import PingInternetProtocolCommandHandler
 from pix_erase.application.commands.internet_protocol.scan_common_ports import ScanCommonPortsCommandHandler
 from pix_erase.application.commands.internet_protocol.scan_port import ScanPortCommandHandler
@@ -65,8 +66,13 @@ from pix_erase.domain.image.services.colorization_service import ImageColorizati
 from pix_erase.domain.image.services.image_service import ImageService
 from pix_erase.domain.image.services.transformation_service import ImageTransformationService
 from pix_erase.domain.internet_protocol.ports import IPInfoServicePort, PortScanServicePort
+from pix_erase.domain.internet_protocol.ports.certificate_transparency_port import CertificateTransparencyPort
+from pix_erase.domain.internet_protocol.ports.dns_resolver_port import DnsResolverPort
+from pix_erase.domain.internet_protocol.ports.domain_id_generator import DomainIdGenerator
+from pix_erase.domain.internet_protocol.ports.http_title_fetcher_port import HttpTitleFetcherPort
 from pix_erase.domain.internet_protocol.ports.ping_service_port import PingServicePort
 from pix_erase.domain.internet_protocol.services import InternetProtocolService
+from pix_erase.domain.internet_protocol.services.internet_domain_service import InternetDomainService
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
 from pix_erase.domain.user.ports.password_hasher import PasswordHasher
 from pix_erase.domain.user.services.access_service import AccessService
@@ -77,6 +83,7 @@ from pix_erase.infrastructure.adapters.auth.jwt_auth_session_transport import Jw
 from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtSecret, JwtAlgorithm, JwtAccessTokenProcessor
 from pix_erase.infrastructure.adapters.auth.secrets_auth_session_generator import SecretsAuthSessionIdGenerator
 from pix_erase.infrastructure.adapters.common.bazario_event_bus import BazarioEventBus
+from pix_erase.infrastructure.adapters.common.domain_id_generator import UUID4DomainIDGenerator
 from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper, BcryptPasswordHasher
 from pix_erase.infrastructure.adapters.common.uuid4_image_id_generator import UUID4ImageIdGenerator
 from pix_erase.infrastructure.adapters.common.uuid4_user_id_generator import UUID4UserIdGenerator
@@ -93,6 +100,10 @@ from pix_erase.infrastructure.adapters.image_converters.exif_image_extractor imp
 from pix_erase.infrastructure.adapters.image_converters.rembg_image_remove_background_converter import \
     RembgImageRemoveBackgroundConverter
 from pix_erase.infrastructure.adapters.image_converters.сv2_image_rotation_converter import Cv2ImageRotationConverter
+from pix_erase.infrastructure.adapters.internet_protocol.crtsh_certificate_transparency_port import \
+    CrtShCertificateTransparencyPort
+from pix_erase.infrastructure.adapters.internet_protocol.dns_python_resolver_port import DnsPythonResolverPort
+from pix_erase.infrastructure.adapters.internet_protocol.http_title_fetcher_port import HttpTitleFetcher
 from pix_erase.infrastructure.adapters.internet_protocol.ip_api_service_port import IPAPIServicePort
 from pix_erase.infrastructure.adapters.internet_protocol.raw_socket_ping_service_port import RawSocketPingServicePort
 from pix_erase.infrastructure.adapters.internet_protocol.socket_port_scan_service_port import SocketPortScanServicePort
@@ -120,6 +131,8 @@ from pix_erase.infrastructure.auth.session.timer_utc import (
 from pix_erase.infrastructure.cache.cache_store import CacheStore
 from pix_erase.infrastructure.cache.provider import get_redis_pool, get_redis
 from pix_erase.infrastructure.cache.redis_cache_store import RedisCacheStore
+from pix_erase.infrastructure.http.base import HttpClient
+from pix_erase.infrastructure.http.httpx_client import HttpxHttpClient
 from pix_erase.infrastructure.persistence.provider import (
     get_engine,
     get_sessionmaker,
@@ -194,6 +207,7 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=BcryptPasswordHasher, provides=PasswordHasher)
     provider.provide(source=UUID4UserIdGenerator, provides=UserIdGenerator)
     provider.provide(source=UUID4ImageIdGenerator, provides=ImageIdGenerator)
+    provider.provide(source=UUID4DomainIDGenerator, provides=DomainIdGenerator)
     provider.provide(source=Cv2ImageColorToCrayScaleConverter, provides=ImageColorToCrayScaleConverter)
     provider.provide(source=Cv2ImageCompressConverter, provides=ImageCompressConverter)
     provider.provide(source=Cv2ImageCropConverter, provides=ImageCropConverter)
@@ -205,13 +219,17 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=Cv2ImageResizerConverter, provides=ImageResizerConverter)
     provider.provide(source=RawSocketPingServicePort, provides=PingServicePort)
     provider.provide(source=IPAPIServicePort, provides=IPInfoServicePort)
+    provider.provide(source=HttpTitleFetcher, provides=HttpTitleFetcherPort)
     provider.provide(source=SocketPortScanServicePort, provides=PortScanServicePort)
+    provider.provide(source=DnsPythonResolverPort, provides=DnsResolverPort)
+    provider.provide(source=CrtShCertificateTransparencyPort, provides=CertificateTransparencyPort)
     provider.provide(source=UserService)
     provider.provide(source=AccessService)
     provider.provide(source=ImageService)
     provider.provide(source=ImageTransformationService)
     provider.provide(source=ImageColorizationService)
     provider.provide(source=InternetProtocolService)
+    provider.provide(source=InternetDomainService)
     return provider
 
 
@@ -223,6 +241,7 @@ def gateways_provider() -> Provider:
     provider.provide(source=SqlAlchemyUserCommandGateway, provides=UserCommandGateway)
     provider.provide(source=SqlAlchemyUserQueryGateway, provides=UserQueryGateway)
     provider.provide(source=AiobotocoreS3ImageStorage, provides=ImageStorage)
+    provider.provide(source=HttpxHttpClient, provides=HttpClient)
     return provider
 
 
@@ -282,7 +301,8 @@ def interactors_provider() -> Provider:
         ScanPortRangeCommandHandler,
         ScanCommonPortsCommandHandler,
         ScanPortCommandHandler,
-        ScanPortsCommandHandler
+        ScanPortsCommandHandler,
+        AnalyzeDomainQueryHandler
     )
 
     return provider

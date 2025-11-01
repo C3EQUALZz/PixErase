@@ -1756,6 +1756,7 @@ dependencies = [
     { name = "dishka" },
     { name = "exif" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "opencv-contrib-python-headless" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "orjson" },
@@ -1769,6 +1770,7 @@ dependencies = [
     { name = "taskiq", extra = ["metrics", "reload"] },
     { name = "taskiq-aio-pika" },
     { name = "taskiq-redis" },
+    { name = "tenacity" },
     { name = "uvicorn" },
     { name = "uvloop", marker = "sys_platform != 'win32'" },
 ]
@@ -1822,6 +1824,7 @@ requires-dist = [
     { name = "dishka", specifier = "==1.7.1" },
     { name = "exif", specifier = "==1.6.1" },
     { name = "fastapi", specifier = "==0.116.2" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "httpx", marker = "extra == 'test'", specifier = "==0.28.1" },
     { name = "mypy", marker = "extra == 'lint'", specifier = "==1.18.2" },
     { name = "opencv-contrib-python-headless", specifier = "==4.12.0.88" },
@@ -1844,6 +1847,7 @@ requires-dist = [
     { name = "taskiq", extras = ["metrics", "reload"], specifier = ">=0.11.18" },
     { name = "taskiq-aio-pika", specifier = "==0.4.3" },
     { name = "taskiq-redis", specifier = "==1.1.0" },
+    { name = "tenacity", specifier = ">=9.1.2" },
     { name = "testcontainers", marker = "extra == 'test'", specifier = "==4.10.0" },
     { name = "uvicorn", specifier = "==0.36.0" },
     { name = "uvloop", marker = "sys_platform != 'win32'", specifier = "==0.21.0" },
@@ -2752,6 +2756,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/59/73/ce7dd796950f792c94ea7e59609ff0ab5205fea72bbb60054be6f8757b1f/taskiq_redis-1.1.0.tar.gz", hash = "sha256:c10bac567cce0b83caa22640da54305d6ddb74ad1324e638367e1b2bd46f682d", size = 15770, upload-time = "2025-07-25T07:38:00.093Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/24/f9/0622ce1c5100b008b34cf7719a576491c1a0f22f50f8db090d797d8de6dc/taskiq_redis-1.1.0-py3-none-any.whl", hash = "sha256:516abe3cd703a7d97a5c0979102082e295d6cf2396a43b1c572382798df221cd", size = 20095, upload-time = "2025-07-25T07:37:58.908Z" },
+]
+
+[[package]]
+name = "tenacity"
+version = "9.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0a/d4/2b0cd0fe285e14b36db076e78c93766ff1d529d70408bd1d2a5a84f1d929/tenacity-9.1.2.tar.gz", hash = "sha256:1169d376c297e7de388d18b4481760d478b0e99a777cad3a9c86e556f4b697cb", size = 48036, upload-time = "2025-04-02T08:25:09.966Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/30/643397144bfbfec6f6ef821f36f33e57d35946c44a2352d3c9f0ae847619/tenacity-9.1.2-py3-none-any.whl", hash = "sha256:f77bf36710d8b73a50b2dd155c97b870017ad21afe6ab300326b0371b3b05138", size = 28248, upload-time = "2025-04-02T08:25:07.678Z" },
 ]
 
 [[package]]

@@ -27,7 +27,7 @@ class PingInternetProtocolCommandHandler:
     """
     - Opens to everyone.
     - Async processing, non-blocking.
-    - Changes existing image.
+    - Pings IP with ICMP packets.
     """
     def __init__(
             self,

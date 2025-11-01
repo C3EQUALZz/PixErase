@@ -1,6 +1,7 @@
 from .internet_protocol import (
     InternetProtocolError,
     InvalidIPAddressError,
+    InvalidDomainNameError,
     InvalidPingResultError,
     PingTimeoutError,
     PingDestinationUnreachableError,
@@ -25,6 +26,7 @@ from .internet_protocol import (
 __all__ = [
     "InternetProtocolError",
     "InvalidIPAddressError",
+    "InvalidDomainNameError",
     "InvalidPingResultError", 
     "PingTimeoutError",
     "PingDestinationUnreachableError",

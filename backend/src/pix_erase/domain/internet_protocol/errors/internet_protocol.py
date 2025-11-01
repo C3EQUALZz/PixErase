@@ -11,6 +11,11 @@ class InvalidIPAddressError(InternetProtocolError):
     pass
 
 
+class InvalidDomainNameError(DomainFieldError):
+    """Raised when a domain name format is invalid."""
+    pass
+
+
 class InvalidPingResultError(InternetProtocolError):
     """Raised when ping result data is invalid."""
     pass
