@@ -159,11 +159,33 @@ services:
     volumes:
       - pix_erase.minio.data:/data
 
+  tempo:
+    <<: *default
+    image: grafana/tempo:2.8.2
+    container_name: pix_erase.tempo
+    hostname: pix_erase.tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    ports:
+      - "127.0.0.1:${TEMPO_PORT}:${TEMPO_PORT}"
+      - "127.0.0.1:${TEMPO_GRPC_PORT}:${TEMPO_GRPC_PORT}"
+    volumes:
+      - ./deploy/dev/tempo/tempo.yaml:/etc/tempo.yaml
+      - pix_erase.tempo.data:/var/tempo
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 256M
+
 volumes:
   pix_erase.postgres.data: {}
   pix_erase.redis.data: {}
   pix_erase.rabbitmq.data: {}
   pix_erase.minio.data: {}
+  pix_erase.tempo.data: {}
 
 networks:
   overlay:
