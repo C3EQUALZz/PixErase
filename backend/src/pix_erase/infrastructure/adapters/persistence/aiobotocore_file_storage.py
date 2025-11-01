@@ -5,6 +5,7 @@ from typing import Final, Any, AsyncGenerator
 
 from aiobotocore.client import AioBaseClient
 from botocore.exceptions import EndpointConnectionError, ClientError
+from tenacity import retry, stop_after_attempt, wait_exponential
 from typing_extensions import override
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
@@ -29,6 +30,10 @@ class AiobotocoreS3ImageStorage(ImageStorage):
         self._client: Final[AioBaseClient] = client
         self._bucket_name: Final[str] = s3_config.images_bucket_name
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+    )
     @override
     async def add(self, image: Image) -> None:
         try:
@@ -63,6 +68,10 @@ class AiobotocoreS3ImageStorage(ImageStorage):
             logger.exception(UPLOAD_FILE_FAILED)
             raise FileStorageError(UPLOAD_FILE_FAILED) from e
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+    )
     @override
     async def read_by_id(self, image_id: ImageID) -> Image | None:
         s3_key: str = f"images/{image_id!s}"
@@ -98,6 +107,10 @@ class AiobotocoreS3ImageStorage(ImageStorage):
                 height=ImageSize(int(metadata.get("height"))),
             )
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+    )
     @override
     async def delete_by_id(self, image_id: ImageID) -> None:
         s3_key: str = f"images/{image_id}"
@@ -120,6 +133,10 @@ class AiobotocoreS3ImageStorage(ImageStorage):
             logger.exception(DELETE_FILE_FAILED)
             raise FileStorageError(DELETE_FILE_FAILED) from e
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+    )
     @override
     async def update(self, image: Image) -> None:
         s3_key: str = f"images/{image.id}"
@@ -157,6 +174,10 @@ class AiobotocoreS3ImageStorage(ImageStorage):
             logger.exception(UPLOAD_FILE_FAILED)
             raise FileStorageError(UPLOAD_FILE_FAILED) from e
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+    )
     @override
     async def stream_by_id(self, image_id: ImageID) -> ImageStreamQueryModel | None:
         """
