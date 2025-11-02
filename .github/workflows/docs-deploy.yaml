@@ -41,7 +41,7 @@ jobs:
             pymdown-extensions==10.16.1
 
       - name: Build MkDocs
-        run: uv run mkdocs build --strict
+        run: uv run mkdocs build --strict -f mkdocs.yml
 
       - name: Deploy to GitHub Pages
         uses: actions/upload-pages-artifact@v4

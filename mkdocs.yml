@@ -25,6 +25,7 @@ repo_name: C3EQUALZz/PixErase
 nav:
   - Home: index.md
 
+
 plugins:
   - search
   - mkdocstrings:
