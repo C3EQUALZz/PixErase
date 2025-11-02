@@ -1,101 +1,100 @@
 # PixErase Backend
 
-Бекенд часть сервиса OSINT по обработке данных. 
+Backend part of the OSINT service for data processing.
 
-## Принцип реализации
+## Implementation Principle
 
-В проекте используется архитектурный подход `Clean Architecture`, `EDA`. 
+The project uses the `Clean Architecture` and `EDA` (Event-Driven Architecture) approaches.
 
-## Зависимости
+## Dependencies
 
-В проекте используются следующие зависимости, которые представлены в [`pyproject.toml`]
+The following dependencies are used in the project, which are presented in [`pyproject.toml`](pyproject.toml)
 
-## Деплой
-
-> [!IMPORTANT]
-> Убедитесь, что на вашем ПК или сервере установлен `Docker` и `Docker compose`.
-
-### Локальная разработка
+## Deployment
 
 > [!IMPORTANT]
-> Для запуска и взаимодействия используется [`just`](https://github.com/casey/just). 
-> В дальнейшем в мануале будут использоваться команды с помощью `just`.  
+> Make sure that `Docker` and `Docker Compose` are installed on your PC or server.
 
-#### Инициализация переменных окружения
-
-Для начала создайте `.env` файл, скопировав значения из `.env.dist`.
+### Local Development
 
 > [!IMPORTANT]
-> При запуске приложения без `Docker` следует все хосты поменять на `localhost`.
+> [`just`](https://github.com/casey/just) is used for running and interacting with the project.
+> All subsequent commands in this manual will use `just`.
 
-#### Инициализация `Python` проекта
+#### Environment Variables Initialization
 
-Создайте `.venv`, выбрав `Python 3.12`. 
-После этого вам нужно будет установить `uv` в данное виртуальное окружение, использовав команду: 
+First, create a `.env` file by copying values from `.env.dist`.
+
+> [!IMPORTANT]
+> When running the application without `Docker`, all hosts should be changed to `localhost`.
+
+#### Python Project Initialization
+
+Create a `.venv` using `Python 3.12`.
+After that, you need to install `uv` in this virtual environment using the command:
 
 ```bash
 pip install uv
 ```
 
-Теперь установим библиотеки и фреймворки, которые используются в проекте с помощью команды: 
+Now install the libraries and frameworks used in the project with the command:
 
 ```bash
 uv install
 ```
 
-#### Запуск инфраструктурных зависимостей
+#### Starting Infrastructure Dependencies
 
-Для запуска `RabbitMQ`, `PostgreSQL`, `MinIO`, `Redis` используется команда: 
+To start `RabbitMQ`, `PostgreSQL`, `MinIO`, and `Redis`, use the command:
 
 ```bash
 just up-dev
 ```
 
 > [!IMPORTANT]
-> Ожидается, что `.env` был удачно создан заранее. 
+> It is expected that `.env` has been created successfully beforehand.
 
-#### Запуск `scheduler`
+#### Starting the Scheduler
 
-Для запуска `worker` используем команду, которая представлена ниже: 
+To start the `worker`, use the command below:
 
 ```bash
 taskiq worker --ack-type when_saved pix_erase.worker:create_worker_taskiq_app -fsd -tp pix_erase.infrastructure.scheduler.tasks
 ```
 
-Теперь запускаем сам `scheduler` в отдельном процессе: 
+Now start the `scheduler` itself in a separate process:
 
 ```bash
 taskiq scheduler pix_erase.scheduler:create_scheduler_taskiq_app -fsd -tp pix_erase.infrastructure.scheduler.tasks
 ```
 
 > [!IMPORTANT]
-> Ожидается, что `.env` был удачно создан заранее. 
-> Ожидается, что инфраструктурные зависимости уже были запущены. 
+> It is expected that `.env` has been created successfully beforehand.
+> It is expected that infrastructure dependencies have already been started.
 
-#### Запуск миграций
+#### Running Migrations
 
 ```bash
 alembic upgrade head
 ```
 
-#### Запуск `api`
+#### Starting the API
 
-Для запуска `api` используем команду, которая представлена ниже: 
+To start the `api`, use the command below:
 
 ```bash
 uvicorn --factory src.pix_erase.web:create_fastapi_app --port 8080
 ```
 
 > [!IMPORTANT]
-> Ожидается, что `.env` был удачно создан заранее. 
-> Ожидается, что инфраструктурные зависимости уже были запущены. 
-> Ожидается, что `worker` был запущен заранее.
+> It is expected that `.env` has been created successfully beforehand.
+> It is expected that infrastructure dependencies have already been started.
+> It is expected that the `worker` has been started beforehand.
 
 > [!NOTE]
-> `Swagger` будет доступен на http://localhost:8080
+> `Swagger` will be available at http://localhost:8080/api/docs
 
-Учетная запись супер админа: 
+Super admin account credentials:
 
 > email: `admin@pixerase.com`
 > password: `admin12345`
-
