@@ -43,10 +43,5 @@ jobs:
       - name: Build MkDocs
         run: uv run mkdocs build --strict
 
-      - name: Deploy to GitHub Pages
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: site/
-
-      - name: Deploy GitHub Pages
-        uses: actions/deploy-pages@v4
+      - name: Deploy MkDocs
+        run: uv run mkdocs gh-deploy --force
