@@ -1,4 +1,12 @@
-from pydantic import BaseModel, Field, RedisDsn
+from typing import Final
+
+from pydantic import BaseModel, Field, RedisDsn, field_validator
+
+from pix_erase.setup.config.consts import PORT_MAX, PORT_MIN
+
+REDIS_DB_MIN: Final[int] = 0
+REDIS_DB_MAX: Final[int] = 15
+REDIS_MAX_CONNECTIONS_MIN: Final[int] = 1
 
 
 class RedisConfig(BaseModel):
@@ -36,6 +44,33 @@ class RedisConfig(BaseModel):
         description="Redis max connections",
         validate_default=True
     )
+
+    @field_validator("port")
+    @classmethod
+    def validate_port(cls, v: int) -> int:
+        if not PORT_MIN <= v <= PORT_MAX:
+            raise ValueError(
+                f"REDIS_PORT must be between {PORT_MIN} and {PORT_MAX}, got {v}."
+            )
+        return v
+
+    @field_validator("cache_db", "worker_db", "schedule_source_db")
+    @classmethod
+    def validate_redis_db(cls, v: int) -> int:
+        if not REDIS_DB_MIN <= v <= REDIS_DB_MAX:
+            raise ValueError(
+                f"Redis DB index must be between {REDIS_DB_MIN} and {REDIS_DB_MAX}, got {v}."
+            )
+        return v
+
+    @field_validator("max_connections")
+    @classmethod
+    def validate_max_connections(cls, v: int) -> int:
+        if v < REDIS_MAX_CONNECTIONS_MIN:
+            raise ValueError(
+                f"REDIS_MAX_CONNECTIONS must be at least {REDIS_MAX_CONNECTIONS_MIN}, got {v}."
+            )
+        return v
 
     @property
     def cache_uri(self) -> str:

@@ -20,11 +20,17 @@ class AuthSettings(BaseModel):
     @field_validator("session_ttl_min", mode="before")
     @classmethod
     def convert_session_ttl_min(cls, v: Any) -> timedelta:
-        v = int(v)
+        if isinstance(v, str):
+            raise ValueError("SESSION_TTL_MIN must be a number, not a string.")
+        
+        if not isinstance(v, (int, float)):
+            raise ValueError(f"SESSION_TTL_MIN must be a number, got {type(v).__name__}.")
+        
+        minutes = float(v)
 
-        if v < 1:
+        if minutes < 1:
             raise ValueError("SESSION_TTL_MIN must be at least 1 (n of minutes).")
-        return timedelta(minutes=v)
+        return timedelta(minutes=minutes)
 
     @field_validator("session_refresh_threshold", mode="before")
     @classmethod

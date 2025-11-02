@@ -24,7 +24,8 @@ from pix_erase.domain.user.errors.access_service import AuthorizationError, Acti
     RoleChangeNotPermittedError
 from pix_erase.domain.user.errors.raw_password import EmptyPasswordWasProvidedError, WeakPasswordWasProvidedError
 from pix_erase.domain.user.errors.user import WrongUserAccountEmailFormatError, PasswordCantBeEmptyError, \
-    UserAccountNameCantBeEmptyError, TooBigUserAccountNameError, RoleAssignmentNotPermittedError
+    UserAccountNameCantBeEmptyError, TooBigUserAccountNameError, RoleAssignmentNotPermittedError, BadUserNameError, \
+    TooSmallUserAccountNameError
 from pix_erase.domain.internet_protocol.errors.internet_protocol import (
     InternetProtocolError,
     InvalidIPAddressError,
@@ -72,6 +73,8 @@ class ExceptionHandler:
         {
             # 400
             DomainFieldError: status.HTTP_400_BAD_REQUEST,
+            BadUserNameError: status.HTTP_400_BAD_REQUEST,
+            TooSmallUserAccountNameError: status.HTTP_400_BAD_REQUEST,
             BadImageNameError: status.HTTP_400_BAD_REQUEST,
             BadImageSizeError: status.HTTP_400_BAD_REQUEST,
             EmptyPasswordWasProvidedError: status.HTTP_400_BAD_REQUEST,
@@ -111,8 +114,8 @@ class ExceptionHandler:
             EntityAddError: status.HTTP_409_CONFLICT,
             UserAlreadyExistsError: status.HTTP_409_CONFLICT,
             # 422
-            pydantic.ValidationError: status.HTTP_422_UNPROCESSABLE_ENTITY,
-            PaginationError: status.HTTP_422_UNPROCESSABLE_ENTITY,
+            pydantic.ValidationError: status.HTTP_422_UNPROCESSABLE_CONTENT,
+            PaginationError: status.HTTP_422_UNPROCESSABLE_CONTENT,
             # 500
             DomainError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             ApplicationError: status.HTTP_500_INTERNAL_SERVER_ERROR,

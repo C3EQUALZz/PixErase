@@ -1,4 +1,6 @@
-from pydantic import AmqpDsn, BaseModel, Field
+from pydantic import AmqpDsn, BaseModel, Field, field_validator
+
+from pix_erase.setup.config.consts import PORT_MAX, PORT_MIN
 
 
 class RabbitConfig(BaseModel):
@@ -29,6 +31,15 @@ class RabbitConfig(BaseModel):
         alias="RABBITMQ_DEFAULT_PASS",
         description="Default RabbitMQ password.",
     )
+
+    @field_validator("port")
+    @classmethod
+    def validate_port(cls, v: int) -> int:
+        if not PORT_MIN <= v <= PORT_MAX:
+            raise ValueError(
+                f"RABBITMQ_PORT must be between {PORT_MIN} and {PORT_MAX}, got {v}."
+            )
+        return v
 
     @property
     def uri(self) -> str:

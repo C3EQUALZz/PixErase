@@ -3,8 +3,12 @@ from typing import Final
 
 from pydantic import BaseModel, Field, PostgresDsn, field_validator
 
-PORT_MIN: Final[int] = 1
-PORT_MAX: Final[int] = 65535
+from pix_erase.setup.config.consts import PORT_MIN, PORT_MAX
+
+POOL_SIZE_MIN: Final[int] = 1
+POOL_SIZE_MAX: Final[int] = 1000
+POOL_RECYCLE_MIN: Final[int] = 1
+POOL_OVERFLOW_MIN: Final[int] = 0
 
 
 class PostgresConfig(BaseModel):
@@ -107,6 +111,33 @@ class SQLAlchemyConfig(BaseModel):
         alias="DB_POOL_MAX_OVERFLOW",
         description="Count of database connection pools overflow",
     )
+
+    @field_validator("pool_size")
+    @classmethod
+    def validate_pool_size(cls, v: int) -> int:
+        if not POOL_SIZE_MIN <= v <= POOL_SIZE_MAX:
+            raise ValueError(
+                f"DB_POOL_SIZE must be between {POOL_SIZE_MIN} and {POOL_SIZE_MAX}, got {v}."
+            )
+        return v
+
+    @field_validator("pool_recycle")
+    @classmethod
+    def validate_pool_recycle(cls, v: int) -> int:
+        if v < POOL_RECYCLE_MIN:
+            raise ValueError(
+                f"DB_POOL_RECYCLE must be at least {POOL_RECYCLE_MIN} minutes, got {v}."
+            )
+        return v
+
+    @field_validator("max_overflow")
+    @classmethod
+    def validate_max_overflow(cls, v: int) -> int:
+        if v < POOL_OVERFLOW_MIN:
+            raise ValueError(
+                f"DB_POOL_MAX_OVERFLOW must be at least {POOL_OVERFLOW_MIN}, got {v}."
+            )
+        return v
     echo: bool = Field(
         alias="DB_ECHO",
         description="Enable database echo mode for debugging.",

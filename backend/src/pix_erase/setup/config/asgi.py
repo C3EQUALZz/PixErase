@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from pix_erase.setup.config.consts import PORT_MAX, PORT_MIN
 
 
 class ASGIConfig(BaseModel):
@@ -21,6 +23,7 @@ class ASGIConfig(BaseModel):
         description="TCP port to listen on.",
         validate_default=True,
     )
+
     fastapi_debug: bool = Field(
         alias="FASTAPI_DEBUG",
         default=True,
@@ -48,3 +51,12 @@ class ASGIConfig(BaseModel):
         "Access-Control-Allow-Headers",
         "Access-Control-Allow-Origin",
     ]
+
+    @field_validator("port")
+    @classmethod
+    def validate_port(cls, v: int) -> int:
+        if not PORT_MIN <= v <= PORT_MAX:
+            raise ValueError(
+                f"UVICORN_PORT must be between {PORT_MIN} and {PORT_MAX}, got {v}."
+            )
+        return v

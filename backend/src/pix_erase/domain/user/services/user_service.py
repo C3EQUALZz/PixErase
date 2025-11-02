@@ -111,7 +111,7 @@ class UserService(DomainService):
         """
 
         hashed_password: HashedPassword = self._password_hasher.hash(raw_password)
-        user.password_hash = hashed_password
+        user.hashed_password = hashed_password
         user.updated_at = datetime.now(UTC)
 
         new_event: UserChangedPasswordEvent = UserChangedPasswordEvent(

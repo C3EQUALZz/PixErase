@@ -66,7 +66,7 @@ class BaseEntity(Generic[OIDType]):
         Prevents modifying the `id` after it's set.
         Other attributes can be changed as usual.
         """
-        if name == "id_" and getattr(self, "id_", None) is not None:
+        if name == "id" and getattr(self, "id", None) is not None:
             msg = "Changing entity ID is not permitted."
             raise DomainError(msg)
         super().__setattr__(name, value)
