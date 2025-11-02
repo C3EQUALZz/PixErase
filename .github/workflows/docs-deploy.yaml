@@ -37,7 +37,8 @@ jobs:
           uv pip install --system \
             mkdocs==1.6.1 \
             mkdocs-material==9.6.21 \
-            mkdocstrings[python]==0.30.1
+            mkdocstrings[python]==0.30.1 \
+            pymdown-extensions==10.16.1
 
       - name: Build MkDocs
         run: uv run mkdocs build --strict
