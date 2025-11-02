@@ -21,15 +21,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Build MkDocs
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Install MkDocs dependencies
         run: |
-          docker run --rm \
-            -v "${PWD}/mkdocs.yml:/docs/mkdocs.yml:ro" \
-            -v "${PWD}/docs:/docs/docs:ro" \
-            -v "${PWD}/site:/docs/site" \
-            -w /docs \
-            squidfunk/mkdocs-material:9.6 \
-            build --strict
+          uv pip install --system \
+            mkdocs-material==9.6 \
+            mkdocstrings[python] \
+            mkdocs-gen-files \
+            mkdocs-literate-nav
+
+      - name: Build MkDocs
+        run: uv run mkdocs build --strict
 
       - name: Deploy to GitHub Pages
         uses: actions/upload-pages-artifact@v4
