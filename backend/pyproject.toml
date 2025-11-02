@@ -79,6 +79,12 @@ dev = [
     "python-dotenv>=1.1.0"
 ]
 
+[project.urls]
+Homepage = "https://github.com/C3EQUALZz/PixErase"
+Documentation = "https://github.com/C3EQUALZz/PixErase/README.md"
+Repository = "https://github.com/C3EQUALZz/PixErase"
+Issues = "https://github.com/C3EQUALZz/PixErase/issues"
+
 [tool.pytest.ini_options]
 xfail_strict = true
 testpaths = ["tests"]

@@ -268,5 +268,3 @@ Value objects enforce validation rules at the domain level:
 
 > [!NOTE]
 > For other schemas see `Swagger`
-
-See [API Reference](api-reference/endpoints.md) for complete usage examples.

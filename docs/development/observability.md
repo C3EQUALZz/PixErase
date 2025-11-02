@@ -114,17 +114,17 @@ Key environment variables (`.env.dist`):
 
 ### Observability Stack
 
-| Variable           | Description                              | Default   |
-|--------------------|------------------------------------------|-----------|
-| `GRAFANA_PORT`     | Grafana web UI port                      | `3000`    |
-| `GRAFANA_USER`     | Grafana admin username                   | `admin`   |
-| `GRAFANA_PASSWORD` | Grafana admin password                   | `admin`   |
-| `LOKI_PORT`        | Loki log aggregation service port       | `3100`    |
-| `VECTOR_PORT`      | Vector log router/metrics port           | `8383`    |
-| `TEMPO_HOST`       | Tempo distributed tracing hostname       | `localhost`|
-| `TEMPO_PORT`       | Tempo HTTP API port                      | `3200`    |
-| `TEMPO_GRPC_PORT`  | Tempo gRPC endpoint port for traces      | `4317`    |
-| `PROMETHEUS_PORT`  | Prometheus metrics collection port       | `9090`    |
+| Variable           | Description                         | Default     |
+|--------------------|-------------------------------------|-------------|
+| `GRAFANA_PORT`     | Grafana web UI port                 | `3000`      |
+| `GRAFANA_USER`     | Grafana admin username              | `admin`     |
+| `GRAFANA_PASSWORD` | Grafana admin password              | `admin`     |
+| `LOKI_PORT`        | Loki log aggregation service port   | `3100`      |
+| `VECTOR_PORT`      | Vector log router/metrics port      | `8383`      |
+| `TEMPO_HOST`       | Tempo distributed tracing hostname  | `localhost` |
+| `TEMPO_PORT`       | Tempo HTTP API port                 | `3200`      |
+| `TEMPO_GRPC_PORT`  | Tempo gRPC endpoint port for traces | `4317`      |
+| `PROMETHEUS_PORT`  | Prometheus metrics collection port  | `9090`      |
 
 ### Application Observability
 

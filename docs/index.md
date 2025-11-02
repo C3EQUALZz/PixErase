@@ -23,7 +23,7 @@ Built using Robert Martin's (Uncle Bob) Clean Architecture principles, the proje
 
 ## Getting Started
 
-To start using the PixErase, follow the [Quick Start](getting-started/quick-start.md) guide to set up the project locally or deploy it using Docker.
+To start using the PixErase, follow the [Quick Start](getting-started/installation.md) guide to set up the project locally or deploy it using Docker.
 
 ## Repository
 
@@ -33,4 +33,4 @@ To start using the PixErase, follow the [Quick Start](getting-started/quick-star
 
 ---
 
-Explore the documentation to learn about the [Architecture](architecture/backend/overview.md), [API Reference](api-reference/endpoints.md), and [Development](development/testing.md) processes.
+Explore the documentation to learn about the [Architecture](architecture/backend/overview.md), [API Reference](api-reference/endpoints.md), and [Development](development/backend.md) processes.
