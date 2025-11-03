@@ -20,6 +20,7 @@ from taskiq_aio_pika import AioPikaBroker
 from taskiq_redis import RedisAsyncResultBackend, ListRedisScheduleSource
 
 from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_sessions_table
+from pix_erase.infrastructure.persistence.models.image_comparisons import map_image_comparisons_table
 from pix_erase.infrastructure.persistence.models.users import map_users_table
 from pix_erase.infrastructure.scheduler.tasks.images_tasks import setup_images_task
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionHandler
@@ -73,6 +74,7 @@ def setup_map_tables() -> None:
     """
     map_users_table()
     map_auth_sessions_table()
+    map_image_comparisons_table()
 
 
 def setup_http_middlewares(app: FastAPI, /, api_config: ASGIConfig) -> None:

@@ -33,3 +33,9 @@ class UpscaleImagePayload(TaskPayload):
 @dataclass(frozen=True)
 class RemoveImageBackgroundPayload(TaskPayload):
     image_id: ImageID
+
+
+@dataclass(frozen=True)
+class CompareImagesPayload(TaskPayload):
+    first_image_id: ImageID
+    second_image_id: ImageID

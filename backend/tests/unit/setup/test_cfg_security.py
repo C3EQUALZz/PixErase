@@ -28,7 +28,7 @@ def test_auth_converts_ttl_to_timedelta(ttl: int | float, expected: timedelta) -
 @pytest.mark.parametrize(
     "ttl",
     [
-        pytest.param("1", id="wrong_type"),
+        pytest.param("affas", id="wrong_type"),
         pytest.param(0.99, id="too_small"),
     ],
 )

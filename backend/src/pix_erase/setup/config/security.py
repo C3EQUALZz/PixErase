@@ -20,13 +20,20 @@ class AuthSettings(BaseModel):
     @field_validator("session_ttl_min", mode="before")
     @classmethod
     def convert_session_ttl_min(cls, v: Any) -> timedelta:
+        # Convert string to number (env variables are always strings)
         if isinstance(v, str):
-            raise ValueError("SESSION_TTL_MIN must be a number, not a string.")
-        
-        if not isinstance(v, (int, float)):
-            raise ValueError(f"SESSION_TTL_MIN must be a number, got {type(v).__name__}.")
-        
-        minutes = float(v)
+            try:
+                minutes = float(v)
+            except (ValueError, TypeError) as e:
+                raise ValueError(
+                    f"SESSION_TTL_MIN must be a number, got string '{v}' that cannot be converted to number."
+                ) from e
+        elif isinstance(v, (int, float)):
+            minutes = float(v)
+        else:
+            raise ValueError(
+                f"SESSION_TTL_MIN must be a number (int, float, or numeric string), got {type(v).__name__}."
+            )
 
         if minutes < 1:
             raise ValueError("SESSION_TTL_MIN must be at least 1 (n of minutes).")

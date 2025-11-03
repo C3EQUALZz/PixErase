@@ -28,3 +28,8 @@ class UpscaleImageSchemaRequestTask(BaseModel):
 
 class RemoveBackgroundImageSchemaRequestTask(BaseModel):
     image_id: ImageID
+
+
+class CompareImagesSchemaRequestTask(BaseModel):
+    first_image_id: ImageID
+    second_image_id: ImageID

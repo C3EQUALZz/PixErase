@@ -37,6 +37,7 @@ from pix_erase.application.commands.user.revoke_admin_by_id import RevokeAdminBy
 from pix_erase.application.common.ports.access_revoker import AccessRevoker
 from pix_erase.application.common.ports.event_bus import EventBus
 from pix_erase.application.common.ports.identity_provider import IdentityProvider
+from pix_erase.application.common.ports.image.comparison_gateway import ImageComparisonGateway
 from pix_erase.application.common.ports.image.extractor import ImageInfoExtractor
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
@@ -56,6 +57,7 @@ from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpsc
 from pix_erase.domain.image.ports.image_background_remove_converter import ImageRemoveBackgroundConverter
 from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
 from pix_erase.domain.image.ports.image_compress_converter import ImageCompressConverter
+from pix_erase.domain.image.ports.image_comparer_converter import ImageComparerConverter
 from pix_erase.domain.image.ports.image_crop_converter import ImageCropConverter
 from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import \
     ImageNearestNeighbourUpscalerConverter
@@ -91,6 +93,7 @@ from pix_erase.infrastructure.adapters.image_converters.cv2_edsr_upscale_convert
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_color_to_gray_converter import \
     Cv2ImageColorToCrayScaleConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_compress_converter import Cv2ImageCompressConverter
+from pix_erase.infrastructure.adapters.image_converters.cv2_image_comparer_converter import Cv2ImageComparerConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_crop_converter import Cv2ImageCropConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_nearest_neighbour_upscale_converter import \
     Cv2ImageNearestNeighbourUpscalerConverter
@@ -115,6 +118,7 @@ from pix_erase.infrastructure.adapters.persistence.alchemy_auth_transaction_mana
     SqlaAuthSessionTransactionManager
 )
 from pix_erase.infrastructure.adapters.persistence.alchemy_main_transaction_manager import SqlAlchemyTransactionManager
+from pix_erase.infrastructure.adapters.persistence.alchemy_image_comparison_gateway import SqlAlchemyImageComparisonGateway
 from pix_erase.infrastructure.adapters.persistence.alchemy_user_command_gateway import SqlAlchemyUserCommandGateway
 from pix_erase.infrastructure.adapters.persistence.alchemy_user_query_gateway import SqlAlchemyUserQueryGateway
 from pix_erase.infrastructure.adapters.persistence.cached_user_query_gateway import CachedUserQueryGateway
@@ -213,6 +217,7 @@ def domain_ports_provider() -> Provider:
     provider.provide(source=UUID4DomainIDGenerator, provides=DomainIdGenerator)
     provider.provide(source=Cv2ImageColorToCrayScaleConverter, provides=ImageColorToCrayScaleConverter)
     provider.provide(source=Cv2ImageCompressConverter, provides=ImageCompressConverter)
+    provider.provide(source=Cv2ImageComparerConverter, provides=ImageComparerConverter)
     provider.provide(source=Cv2ImageCropConverter, provides=ImageCropConverter)
     provider.provide(source=Cv2ImageRotationConverter, provides=ImageRotationConverter)
     provider.provide(source=Cv2ImageWatermarkRemover, provides=ImageWatermarkRemoverConverter)
@@ -244,6 +249,7 @@ def gateways_provider() -> Provider:
     provider.provide(source=SqlAlchemyUserCommandGateway, provides=UserCommandGateway)
     provider.provide(source=SqlAlchemyUserQueryGateway, provides=UserQueryGateway)
     provider.provide(source=AiobotocoreS3ImageStorage, provides=ImageStorage)
+    provider.provide(source=SqlAlchemyImageComparisonGateway, provides=ImageComparisonGateway)
     return provider
 
 

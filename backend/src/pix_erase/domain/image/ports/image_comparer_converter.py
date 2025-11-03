@@ -7,6 +7,9 @@ class ScoresDTO(TypedDict):
     CHISQR: float
     INTERSECT: float
     BHATTACHARYYA: float
+    MSE: float  # Mean Squared Error
+    PSNR: float  # Peak Signal-to-Noise Ratio
+    SSIM: float  # Structural Similarity Index
 
 
 class ImageComparerConverter(Protocol):
