@@ -58,3 +58,4 @@ def test_ttl_inequality() -> None:
     # Assert
     assert ttl1 != ttl2
 
+

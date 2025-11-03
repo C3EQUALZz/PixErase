@@ -1,5 +1,6 @@
 import logging
-from typing import Final, Any, Mapping
+from collections.abc import Mapping
+from typing import Final, Any
 
 from redis.asyncio import Redis
 from taskiq import AsyncBroker, ScheduleSource
@@ -59,8 +60,11 @@ class TaskIQTaskScheduler(TaskScheduler):
 
         return TaskInfo(
             task_id=task_id,
-            status=map_with_task_iq_progress_and_our.get(progress.state),
-            description=progress.meta,
+            status=map_with_task_iq_progress_and_our.get(
+                progress.state if isinstance(progress.state, TaskState) else TaskState.STARTED,
+                TaskInfoStatus.STARTED
+            ),
+            description=progress.meta if progress.meta is not None else "",
         )
 
     @override

@@ -57,7 +57,7 @@ async def analyze_domain(
         interactor: FromDishka[AnalyzeDomainQueryHandler]
 ) -> AnalyzeDomainResponse:
     query: AnalyzeDomainQuery = AnalyzeDomainQuery(
-        domain=request_schema.domain,
+        domain=str(request_schema.domain),
         timeout=request_schema.timeout
     )
 

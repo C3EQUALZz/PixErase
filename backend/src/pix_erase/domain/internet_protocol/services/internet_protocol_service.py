@@ -56,7 +56,7 @@ class InternetProtocolService(DomainService):
             if std_ip.version == 6:
                 return IPv6Address(value=address)
 
-            msg = f"Unsupported IP version: {std_ip.version}"
+            msg = f"Unsupported IP version: {std_ip.version}" # type: ignore[unreachable, unused-ignore]
             raise InvalidIPAddressError(msg)
 
         except ValueError as e:

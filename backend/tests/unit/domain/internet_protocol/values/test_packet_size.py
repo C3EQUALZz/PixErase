@@ -63,3 +63,4 @@ def test_packet_size_inequality() -> None:
     # Assert
     assert packet_size1 != packet_size2
 
+

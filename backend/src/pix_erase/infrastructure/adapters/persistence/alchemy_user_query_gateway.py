@@ -40,7 +40,7 @@ class SqlAlchemyUserQueryGateway(UserQueryGateway):
 
     @override
     async def read_all_users(self, user_list_params: UserListParams) -> list[User] | None:
-        table_sorting_field: ColumnElement[UUID | str | UserRole | bool] | None = ( # type: ignore
+        table_sorting_field: ColumnElement[UUID | str | UserRole | bool] | None = ( # type: ignore[unused-ignore]
             users_table.c.get(user_list_params.sorting.sorting_field)
         )
         if table_sorting_field is None:

@@ -58,7 +58,7 @@ async def create_user_handler(
         interactor: FromDishka[CreateUserCommandHandler]
 ) -> CreateUserSchemaResponse:
     command: CreateUserCommand = CreateUserCommand(
-        email=cast(str, schemas.email),
+        email=schemas.email,
         name=schemas.name,
         password=schemas.password,
         role=schemas.role,

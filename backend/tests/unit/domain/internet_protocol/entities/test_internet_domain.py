@@ -241,3 +241,4 @@ def test_mark_as_analyzed() -> None:
     # Assert
     assert sut.is_analyzed is True
 
+

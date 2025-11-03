@@ -39,3 +39,4 @@ def test_s3_port_rejects_incorrect_value(port: int) -> None:
     with pytest.raises(ValidationError):
         S3Config.model_validate(data)
 
+

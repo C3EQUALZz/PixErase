@@ -47,15 +47,15 @@ class TraceableHttpClient(HttpClient):
         *,
         params: QueryParams | None = None,
         headers: HttpHeaders | None = None,
-        json: Any | None = None,
+        json_like: Any | None = None,
         data: Any | None = None,
         timeout: float | None = None,
     ) -> HttpResponse:
         span_name = "http.client POST"
         with tracer.start_as_current_span(span_name, kind=SpanKind.CLIENT) as span:
             _set_common_request_attributes(span, method="POST", url=url, params=params, timeout=timeout)
-            if json is not None:
-                span.set_attribute("http.request.body.size_hint", len(json))
+            if json_like is not None:
+                span.set_attribute("http.request.body.size_hint", len(json_like))
             if data is not None and isinstance(data, (bytes, str)):
                 span.set_attribute("http.request.body.size", len(data))
             injected_headers = _prepare_headers_with_context(headers)
@@ -64,7 +64,7 @@ class TraceableHttpClient(HttpClient):
                     url,
                     params=params,
                     headers=injected_headers,
-                    json=json,
+                    json_like=json_like,
                     data=data,
                     timeout=timeout,
                 )
@@ -82,7 +82,7 @@ class TraceableHttpClient(HttpClient):
         *,
         params: QueryParams | None = None,
         headers: HttpHeaders | None = None,
-        json: Any | None = None,
+        json_like: Any | None = None,
         data: Any | None = None,
         timeout: float | None = None,
     ) -> HttpResponse:
@@ -95,7 +95,7 @@ class TraceableHttpClient(HttpClient):
                     url,
                     params=params,
                     headers=injected_headers,
-                    json=json,
+                    json_like=json_like,
                     data=data,
                     timeout=timeout,
                 )
@@ -168,6 +168,7 @@ def _set_response_attributes(span: trace.Span, response: HttpResponse) -> None:
         span.set_attribute("http.response.body.size", len(response.content))
     if 400 <= response.status_code:
         span.set_status(Status(StatusCode.ERROR))
+
 
 
 

@@ -33,6 +33,4 @@ class AnalyzeDomainResponse(BaseModel):
         description="Subdomains for this domain",
         examples=["www.example1.com", "www.example2.com"]
     )
-    title: str = Field(
-
-    )
+    title: str | None = Field()

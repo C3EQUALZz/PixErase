@@ -119,7 +119,7 @@ class RawSocketPingServicePort(PingServicePort):
             self.ping(dest, timeout, packet_size, ttl)
             for dest in destinations
         ]
-        return await asyncio.gather(*tasks, return_exceptions=True)
+        return await asyncio.gather(*tasks)
 
     async def _ping_ipv4(
             self,
@@ -365,7 +365,7 @@ class RawSocketPingServicePort(PingServicePort):
         
         while True:
             timeout_left = timeout_time - time.time()
-            timeout_left = max(0, timeout_left)  # Timeout must be non-negative
+            timeout_left = max(0.0, timeout_left)  # Timeout must be non-negative
             
             # Use select to wait for data (like original library)
             ready, _, _ = select.select([sock], [], [], timeout_left)
@@ -403,7 +403,7 @@ class RawSocketPingServicePort(PingServicePort):
                 # Extract timestamp from payload
                 payload_start = icmp_start + 8
                 timestamp = struct.unpack(ICMP_TIME_FORMAT, recv_data[payload_start:payload_start + 8])[0]
-                return time_recv - timestamp
+                return time_recv - float(timestamp)
             
             # Handle case where kernel rewrites ICMP ID (Linux unprivileged)
             if not has_ip_header and recv_id != icmp_id:
@@ -412,7 +412,7 @@ class RawSocketPingServicePort(PingServicePort):
                 if recv_id == port_id and recv_seq == seq and type_code == ICMP_ECHO_REPLY:
                     payload_start = icmp_start + 8
                     timestamp = struct.unpack(ICMP_TIME_FORMAT, recv_data[payload_start:payload_start + 8])[0]
-                    return time_recv - timestamp
+                    return time_recv - float(timestamp)
 
     async def _receive_icmpv6_response_select(
             self,
@@ -427,7 +427,7 @@ class RawSocketPingServicePort(PingServicePort):
         
         while True:
             timeout_left = timeout_time - time.time()
-            timeout_left = max(0, timeout_left)
+            timeout_left = max(0.0, timeout_left)
             
             # Use select to wait for data
             ready, _, _ = select.select([sock], [], [], timeout_left)
@@ -465,4 +465,4 @@ class RawSocketPingServicePort(PingServicePort):
                 # Extract timestamp from payload
                 payload_start = icmp_start + 8
                 timestamp = struct.unpack(ICMP_TIME_FORMAT, recv_data[payload_start:payload_start + 8])[0]
-                return time_recv - timestamp
+                return float(time_recv - timestamp)

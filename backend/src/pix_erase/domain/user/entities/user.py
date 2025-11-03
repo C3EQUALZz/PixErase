@@ -56,7 +56,7 @@ class User(BaseAggregateRoot[UserID]):
 
     @classmethod
     def deserialize(cls, data: SerializedUser) -> Self:
-        return User(
+        return cls(
             id=UserID(UUID(data["id"])),
             email=UserEmail(data["email"]),
             name=Username(data["name"]),

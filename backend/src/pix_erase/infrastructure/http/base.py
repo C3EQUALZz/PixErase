@@ -1,15 +1,25 @@
 import json
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Mapping, MutableMapping, Protocol, Sequence, runtime_checkable
+from collections.abc import Mapping, MutableMapping, Sequence
+from typing import Any, Protocol, runtime_checkable
 
 HttpHeaders = Mapping[str, str]
 MutableHttpHeaders = MutableMapping[str, str]
 
 # Each query item can be a scalar or a sequence of scalars for repeated keys
-QueryValue = str | int | float | bool
-QueryParamItem = QueryValue | Sequence[QueryValue]
-QueryParams = Mapping[str, QueryParamItem] | Sequence[tuple[str, QueryValue]]
+_QueryScalar = str | int | float | bool | None
+_QueryValue = _QueryScalar | Sequence[_QueryScalar]
+
+# Align with httpx's accepted types:
+# - Mapping[str, scalar or sequence of scalars]
+# - list[tuple[str, scalar]]
+# - tuple[tuple[str, scalar], ...]
+QueryParams = (
+    Mapping[str, _QueryValue]
+    | list[tuple[str, _QueryScalar]]
+    | tuple[tuple[str, _QueryScalar], ...]
+)
 
 
 @dataclass(slots=True)
@@ -53,7 +63,7 @@ class HttpClient(Protocol):
             *,
             params: QueryParams | None = None,
             headers: HttpHeaders | None = None,
-            json: Any | None = None,
+            json_like: Any | None = None,
             data: Any | None = None,
             timeout: float | None = None,
     ) -> HttpResponse:
@@ -66,7 +76,7 @@ class HttpClient(Protocol):
             *,
             params: QueryParams | None = None,
             headers: HttpHeaders | None = None,
-            json: Any | None = None,
+            json_like: Any | None = None,
             data: Any | None = None,
             timeout: float | None = None,
     ) -> HttpResponse:

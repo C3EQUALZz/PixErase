@@ -54,16 +54,22 @@ default:
 [doc("Lint check")]
 [group("Lint")]
 @lint:
-    echo "Run ruff check..." && ruff check --exit-non-zero-on-fix
-    echo "Run ruff format..." && ruff format
-    echo "Run codespell..." && codespell
+  echo "Run ruff check..."
+  ruff check --exit-non-zero-on-fix
+  echo "Run ruff format..."
+  ruff format
+  echo "Run codespell..."
+  codespell
 
 [doc("Static analysis")]
 [group("Static")]
 @static:
-    echo "Run mypy.." && mypy --config-file pyproject.toml
-    echo "Run bandit..." && bandit -c pyproject.toml -r src
-    echo "Run semgrep..." && semgrep scan --config auto --error
+  echo "Run mypy.."
+  mypy --config-file pyproject.toml
+  echo "Run bandit..."
+  bandit -c pyproject.toml -r src
+  echo "Run semgrep..."
+  semgrep scan --config auto --error
 
 [doc("Run test")]
 [group("Test")]

@@ -55,8 +55,8 @@ async def convert_to_grayscale_task(
 
         context.reject()
 
-    colorization_service.convert_color_to_gray(image=image)
-    await file_storage.update(image=image)
+    colorization_service.convert_color_to_gray(image=image) # type: ignore[arg-type]
+    await file_storage.update(image=image) # type: ignore[arg-type]
 
     logger.info(
         "Finished task: %s with id: %s",
@@ -102,11 +102,11 @@ async def rotate_image_task(
         context.reject()
 
     image_transformation_service.rotate_image(
-        image=image,
+        image=image, # type: ignore[arg-type]
         angle=request_schema.angle,
     )
 
-    await file_storage.update(image=image)
+    await file_storage.update(image=image) # type: ignore[arg-type]
 
     await progress_tracker.set_progress(
         state=TaskState.SUCCESS,
@@ -154,11 +154,11 @@ async def compress_image_task(
         context.reject()
 
     image_transformation_service.compress_image(
-        image=image,
+        image=image, # type: ignore[arg-type]
         quality=request_schema.quality,
     )
 
-    await file_storage.update(image=image)
+    await file_storage.update(image=image) # type: ignore[arg-type]
 
     await progress_tracker.set_progress(
         state=TaskState.SUCCESS,
@@ -207,12 +207,12 @@ async def upscale_image_task(
         context.reject()
 
     image_colorization_service.upscale(
-        image=image,
+        image=image, # type: ignore[arg-type]
         algorithm=request_schema.algorithm,
         scale=request_schema.scale,
     )
 
-    await file_storage.update(image=image)
+    await file_storage.update(image=image) # type: ignore[arg-type]
 
     await progress_tracker.set_progress(
         state=TaskState.SUCCESS,
@@ -255,8 +255,8 @@ async def remove_background_task(
 
         context.reject()
 
-    colorization_service.remove_background(image=image)
-    await file_storage.update(image=image)
+    colorization_service.remove_background(image=image) # type: ignore[arg-type]
+    await file_storage.update(image=image) # type: ignore[arg-type]
 
     await progress_tracker.set_progress(
         state=TaskState.SUCCESS,

@@ -27,15 +27,15 @@ class SocketPortScanServicePort(PortScanServicePort):
     This implementation uses raw sockets to perform port scanning,
     similar to the provided example code but integrated with the domain architecture.
     """
-    
+
     def __init__(self) -> None:
         self._max_concurrent: Final[int] = 100
-    
+
     async def scan_port(
-        self,
-        target: IPAddress,
-        port: Port,
-        timeout: float = 1.0,
+            self,
+            target: IPAddress,
+            port: Port,
+            timeout: float = 1.0,
     ) -> PortScanResult:
         """
         Scan a single port on a target using socket connection.
@@ -56,17 +56,17 @@ class SocketPortScanServicePort(PortScanServicePort):
         """
         try:
             start_time = datetime.now()
-            
+
             # Create socket and set timeout
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(timeout)
-            
+
             try:
                 # Attempt to connect
                 result = sock.connect_ex((target.value, port.value))
                 end_time = datetime.now()
                 response_time = (end_time - start_time).total_seconds()
-                
+
                 if result == 0:
                     # Connection successful - port is open
                     status = PortStatus.OPEN
@@ -75,7 +75,7 @@ class SocketPortScanServicePort(PortScanServicePort):
                     # Connection failed - port is closed
                     status = PortStatus.CLOSED
                     service = None
-                
+
                 return PortScanResult(
                     port=port,
                     status=status,
@@ -83,10 +83,10 @@ class SocketPortScanServicePort(PortScanServicePort):
                     service=service,
                     scanned_at=start_time,
                 )
-                
+
             finally:
                 sock.close()
-                
+
         except socket.timeout:
             raise PortScanTimeoutError(f"Port scan timed out for {target.value}:{port.value}")
         except PermissionError as e:
@@ -100,13 +100,13 @@ class SocketPortScanServicePort(PortScanServicePort):
                 raise PortScanNetworkError(f"Network error during port scan: {e}")
         except Exception as e:
             raise PortScanNetworkError(f"Unexpected error during port scan: {e}")
-    
+
     async def scan_ports(
-        self,
-        target: IPAddress,
-        ports: list[Port],
-        timeout: float = 1.0,
-        max_concurrent: int = 100,
+            self,
+            target: IPAddress,
+            ports: list[Port],
+            timeout: float = 1.0,
+            max_concurrent: int = 100,
     ) -> list[PortScanResult]:
         """
         Scan multiple ports on a target concurrently.
@@ -121,20 +121,20 @@ class SocketPortScanServicePort(PortScanServicePort):
             List of PortScanResult objects in the same order as ports
         """
         semaphore = asyncio.Semaphore(max_concurrent)
-        
+
         async def scan_single_port(port: Port) -> PortScanResult:
             async with semaphore:
                 return await self.scan_port(target, port, timeout)
-        
+
         tasks: list[Coroutine[None, None, PortScanResult]] = [scan_single_port(port) for port in ports]
-        return await asyncio.gather(*tasks, return_exceptions=True)
-    
+        return await asyncio.gather(*tasks)
+
     async def scan_port_range(
-        self,
-        target: IPAddress,
-        port_range: PortRange,
-        timeout: float = 1.0,
-        max_concurrent: int = 100,
+            self,
+            target: IPAddress,
+            port_range: PortRange,
+            timeout: float = 1.0,
+            max_concurrent: int = 100,
     ) -> PortScanSummary:
         """
         Scan a range of ports on a target.
@@ -150,12 +150,12 @@ class SocketPortScanServicePort(PortScanServicePort):
         """
         if port_range.start.value > port_range.end.value:
             raise InvalidPortRangeError(f"Invalid port range: {port_range}")
-        
+
         start_time = datetime.now()
-        
+
         # Convert port range to list of ports
         ports = list(port_range)
-        
+
         # Scan all ports concurrently
         results = await self.scan_ports(
             target=target,
@@ -163,15 +163,15 @@ class SocketPortScanServicePort(PortScanServicePort):
             timeout=timeout,
             max_concurrent=max_concurrent,
         )
-        
+
         end_time = datetime.now()
         scan_duration = (end_time - start_time).total_seconds()
-        
+
         # Count results by status
         open_ports = sum(1 for result in results if isinstance(result, PortScanResult) and result.is_open)
         closed_ports = sum(1 for result in results if isinstance(result, PortScanResult) and result.is_closed)
         filtered_ports = sum(1 for result in results if isinstance(result, PortScanResult) and result.is_filtered)
-        
+
         return PortScanSummary(
             target=target.value,
             port_range=str(port_range),
@@ -184,12 +184,12 @@ class SocketPortScanServicePort(PortScanServicePort):
             completed_at=end_time,
             results=results,
         )
-    
+
     async def scan_common_ports(
-        self,
-        target: IPAddress,
-        timeout: float = 1.0,
-        max_concurrent: int = 100,
+            self,
+            target: IPAddress,
+            timeout: float = 1.0,
+            max_concurrent: int = 100,
     ) -> PortScanSummary:
         """
         Scan common well-known ports (1-1023) on a target.
@@ -239,15 +239,5 @@ class SocketPortScanServicePort(PortScanServicePort):
             6379: "Redis",
             27017: "MongoDB",
         }
-        
+
         return port_services.get(port.value)
-
-
-
-
-
-
-
-
-
-

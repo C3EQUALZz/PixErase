@@ -10,7 +10,7 @@ from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
 if TYPE_CHECKING:
-    pass
+    from pydantic import IPvAnyAddress
 
 from pix_erase.application.queries.internet_protocol.scan_common_ports import (
     ScanCommonPortsQuery,

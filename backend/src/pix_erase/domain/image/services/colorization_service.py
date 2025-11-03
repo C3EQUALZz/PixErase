@@ -121,7 +121,7 @@ class ImageColorizationService(DomainService):
                 scale=scale
             )
         else:
-            msg = "Unknown algorithm for upscaling."
+            msg = "Unknown algorithm for upscaling." # type: ignore[unreachable]
             raise UnknownImageUpscalerError(msg)
 
         image.data = converted_data

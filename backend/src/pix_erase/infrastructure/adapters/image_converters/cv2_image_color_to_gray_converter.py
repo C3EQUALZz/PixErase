@@ -9,7 +9,7 @@ from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
 class Cv2ImageColorToCrayScaleConverter(ImageColorToCrayScaleConverter):
     @override
     def convert(self, data: bytes) -> bytes:
-        cv2_image: cv2.typing.MatLike = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
+        cv2_image: cv2.typing.MatLike | None = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
 
         if cv2_image is None:
             msg = "Failed to decoding image"

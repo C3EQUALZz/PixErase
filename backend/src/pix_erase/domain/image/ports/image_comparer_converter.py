@@ -11,9 +11,5 @@ class ScoresDTO(TypedDict):
 
 class ImageComparerConverter(Protocol):
     @abstractmethod
-    def convert(self, first_image: bytes, second_image: bytes) -> bytes:
-        ...
-
-    @abstractmethod
     def compare_by_histograms(self, first_image: bytes, second_image: bytes) -> ScoresDTO:
         ...

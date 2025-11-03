@@ -59,3 +59,4 @@ def test_timeout_inequality() -> None:
     # Assert
     assert timeout1 != timeout2
 
+

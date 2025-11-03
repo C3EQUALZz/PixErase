@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime
-from typing import override, Final, Any, Mapping, Literal
+from typing import override, Final, Any, Mapping, Literal, MutableMapping, cast
 
 import cv2
+import exif
 import numpy as np
 from exif import Image
 
@@ -65,7 +66,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
     @staticmethod
     def _safe_extract_exif(data: bytes) -> Mapping[str, Any]:
         """Безопасно извлекает EXIF данные"""
-        exif_data = {}
+        exif_data: MutableMapping[str, Any] = {}
 
         try:
             pic = Image(data)
@@ -92,7 +93,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         except Exception as e:
             logger.warning("Failed to extract EXIF data: %s", e)
 
-        return exif_data
+        return cast(Mapping[str, Any], exif_data)
 
     def _create_camera_settings(self, exif_data: Mapping[str, Any]) -> CameraSettings | None:
         if not any([exif_data.get('make'), exif_data.get('model')]):
@@ -132,7 +133,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         return FlashInfo(
             fired=getattr(flash, 'flash_fired', False),
             mode=self._parse_flash_mode(flash),
-            return_light=getattr(flash, 'flash_return', None),
+            return_light=getattr(flash, 'flash_return', False),
             function_present=not getattr(flash, 'flash_function_not_present', True),
             red_eye_reduction=getattr(flash, 'red_eye_reduction_supported', False)
         )
@@ -165,7 +166,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         )
 
     @staticmethod
-    def _parse_orientation(orientation) -> Orientation | None:
+    def _parse_orientation(orientation: exif.Orientation | None) -> Orientation | None:
         if orientation is None:
             return None
         try:
@@ -174,7 +175,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
             return None
 
     @staticmethod
-    def _parse_metering_mode(metering_mode) -> MeteringMode | None:
+    def _parse_metering_mode(metering_mode: exif.MeteringMode | None) -> MeteringMode | None:
         if metering_mode is None:
             return None
         try:
@@ -183,7 +184,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
             return None
 
     @staticmethod
-    def _parse_white_balance(white_balance) -> WhiteBalance | None:
+    def _parse_white_balance(white_balance: exif.WhiteBalance | None) -> WhiteBalance | None:
         if white_balance is None:
             return None
         try:
@@ -192,7 +193,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
             return None
 
     @staticmethod
-    def _parse_flash_mode(flash) -> FlashMode | None:
+    def _parse_flash_mode(flash: exif.Flash | None) -> FlashMode | None:
         if not flash:
             return None
         try:
@@ -254,7 +255,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         return False
 
     @staticmethod
-    def _format_exposure_time(value: tuple[int, int]) -> str | None:
+    def _format_exposure_time(value: tuple[int, int] | float | None | object) -> str | None:
         if value is None:
             return None
         try:

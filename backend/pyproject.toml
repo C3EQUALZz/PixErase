@@ -101,6 +101,7 @@ reportUnusedCallResult = false
 
 [tool.mypy]
 mypy_path = "src"
+plugins = "pydantic.mypy"
 files = ["src"]
 exclude = ["src/pix_erase/setup/config/"]
 python_version = "3.12"

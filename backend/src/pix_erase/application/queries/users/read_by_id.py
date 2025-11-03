@@ -71,7 +71,7 @@ class ReadUserByIDQueryHandler:
         logger.info("Read user by id: done.")
 
         return ReadUserByIDView(
-            user_id=user_id,
+            id=user_id,
             email=str(user.email),
             name=str(user.name),
             role=user.role,

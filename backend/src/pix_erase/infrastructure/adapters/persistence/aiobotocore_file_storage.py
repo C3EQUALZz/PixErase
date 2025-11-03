@@ -1,3 +1,5 @@
+# mypy: ignore-errors
+
 import io
 import logging
 from datetime import datetime

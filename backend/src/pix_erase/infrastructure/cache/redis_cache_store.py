@@ -1,6 +1,4 @@
-import asyncio
-from asyncio import Task
-from typing import Final
+from typing import Final, cast
 
 from redis.asyncio import Redis
 from typing_extensions import override
@@ -19,21 +17,15 @@ class RedisCacheStore(CacheStore):
             value: bytes,
             ttl: int = 30
     ) -> None:
-        tasks: set[Task[None]] = set()
-        task: Task[None] = asyncio.create_task(self._redis_client.set(name=name, value=value, ex=ttl))
-        tasks.add(task)
-        task.add_done_callback(tasks.discard)
+        await self._redis_client.set(name=name, value=value, ex=ttl)
 
     @override
     async def get(
             self,
             name: str,
     ) -> bytes:
-        return await self._redis_client.get(name=name)
+        return cast(bytes, await self._redis_client.get(name=name))
 
     @override
     async def delete(self, name: str) -> None:
-        tasks: set[Task[None]] = set()
-        task: Task[None] = asyncio.create_task(self._redis_client.delete(name))
-        tasks.add(task)
-        task.add_done_callback(tasks.discard)
+        await self._redis_client.delete(name)

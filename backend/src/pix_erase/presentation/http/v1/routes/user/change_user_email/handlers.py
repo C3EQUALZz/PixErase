@@ -63,7 +63,7 @@ async def change_user_email_by_id(
 ) -> None:
     command: ChangeUserEmailCommand = ChangeUserEmailCommand(
         user_id=user_id,
-        new_email=cast(str, request_schema.email),
+        new_email=request_schema.email,
     )
 
     await interactor(command)

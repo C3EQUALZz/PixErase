@@ -1,6 +1,5 @@
 import pytest
 
-from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.services.authorization.permission import (
     CanManageRole,
     CanManageSelf,
@@ -125,4 +124,5 @@ def test_can_manage_role_returns_false_when_subject_cannot_assign_role() -> None
 
     # Assert
     assert result is False
+
 

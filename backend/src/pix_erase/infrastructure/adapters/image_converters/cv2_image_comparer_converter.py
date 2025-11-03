@@ -7,13 +7,10 @@ from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
 
 
 class Cv2ImageComparerConverter(ImageComparerConverter):
-    @override
-    def convert(self, first_image: bytes, second_image: bytes) -> bytes:
-        ...
 
     @override
     def compare_by_histograms(self, first_image: bytes, second_image: bytes) -> ScoresDTO:
-        cv2_first_image: cv2.typing.MatLike = cv2.imdecode(
+        cv2_first_image: cv2.typing.MatLike | None = cv2.imdecode(
             np.frombuffer(first_image, dtype=np.uint8),
             cv2.IMREAD_COLOR
         )
@@ -22,7 +19,7 @@ class Cv2ImageComparerConverter(ImageComparerConverter):
             msg = "Failed to decoding first image"
             raise ImageDecodingError(msg)
 
-        cv2_second_image: cv2.typing.MatLike = cv2.imdecode(
+        cv2_second_image: cv2.typing.MatLike | None = cv2.imdecode(
             np.frombuffer(second_image, dtype=np.uint8),
             cv2.IMREAD_COLOR
         )
@@ -47,6 +44,6 @@ class Cv2ImageComparerConverter(ImageComparerConverter):
         }
         for method in methods_and_scores:
             score = cv2.compareHist(hist1, hist2, getattr(cv2, f'HISTCMP_{method}'))
-            methods_and_scores[method] = score
+            methods_and_scores[method] = score # type: ignore[literal-required]
 
         return methods_and_scores

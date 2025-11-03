@@ -89,3 +89,4 @@ def test_preserves_super_admin_role(
 
     assert user.role == UserRole.SUPER_ADMIN
 
+

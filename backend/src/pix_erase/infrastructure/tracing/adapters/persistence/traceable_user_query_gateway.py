@@ -70,8 +70,23 @@ def _set_user_attributes(span: trace.Span, user: User) -> None:
 
 def _set_user_list_params_attributes(span: trace.Span, user_list_params: UserListParams) -> None:
     """Set user list query parameters attributes on a span."""
+
+    limit: int
+
+    if user_list_params.pagination.limit is None:
+        limit = 0
+    else:
+        limit = user_list_params.pagination.limit
+
+    offset: int
+
+    if user_list_params.pagination.offset is None:
+        offset = 0
+    else:
+        offset = user_list_params.pagination.offset
+
     span.set_attribute("db.query.sorting.field", user_list_params.sorting.sorting_field)
     span.set_attribute("db.query.sorting.order", user_list_params.sorting.sorting_order)
-    span.set_attribute("db.query.pagination.limit", user_list_params.pagination.limit)
-    span.set_attribute("db.query.pagination.offset", user_list_params.pagination.offset)
+    span.set_attribute("db.query.pagination.limit", limit)
+    span.set_attribute("db.query.pagination.offset", offset)
 

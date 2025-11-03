@@ -69,7 +69,7 @@ class CachedUserQueryGateway(UserQueryGateway):
 
             logger.debug("User %s not found in cache, querying database", user_id)
 
-            user: User = await self._user_query_gateway.read_user_by_id(user_id)
+            user: User | None = await self._user_query_gateway.read_user_by_id(user_id)
 
             if user is not None:
                 user_data = self._serialize_user(user)
@@ -103,7 +103,7 @@ class CachedUserQueryGateway(UserQueryGateway):
 
             logger.debug("Users list not found in cache, querying database")
 
-            users: list[User] = await self._user_query_gateway.read_all_users(user_list_params)
+            users: list[User] | None = await self._user_query_gateway.read_all_users(user_list_params)
 
             if users is not None:
                 users_data: bytes = self._serialize_users_list(users)

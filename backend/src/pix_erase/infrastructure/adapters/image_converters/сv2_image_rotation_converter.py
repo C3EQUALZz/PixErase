@@ -14,7 +14,7 @@ class Cv2ImageRotationConverter(ImageRotationConverter):
         np_arr: np.ndarray = np.frombuffer(data, np.uint8)
 
         # Декодируем изображение
-        img: cv2.typing.MatLike = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        img: cv2.typing.MatLike | None = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
         if img is None:
             msg = "Failed to decoding image"

@@ -13,7 +13,7 @@ class Cv2ImageCropConverter(ImageCropConverter):
         buffer: np.ndarray = np.frombuffer(data, np.uint8)
 
         # Декодируем изображение
-        img: cv2.typing.MatLike = cv2.imdecode(buffer, cv2.IMREAD_COLOR)
+        img: cv2.typing.MatLike | None = cv2.imdecode(buffer, cv2.IMREAD_COLOR)
 
         if img is None:
             msg = "Failed to decoding image"

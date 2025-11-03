@@ -40,10 +40,10 @@ class DnsPythonResolverPort(DnsResolverPort):
                 answers = self._resolver.resolve(domain, rr, lifetime=lifetime)
                 logger.debug("Got answers: %s", answers)
 
-                records[rr] = [r.to_text() for r in answers]
+                records[rr] = [r.to_text() for r in answers] # type: ignore[literal-required]
 
             except LifetimeTimeout:
-                records[rr] = []
+                records[rr] = [] # type: ignore[literal-required]
 
             except dns.resolver.NXDOMAIN:
                 logger.error(

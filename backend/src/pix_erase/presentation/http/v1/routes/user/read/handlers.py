@@ -69,7 +69,7 @@ async def read_user_by_id_handler(
     view: ReadUserByIDView = await interactor(data=query)
 
     return ReadUserByIDResponse(
-        id=view.user_id,
+        id=view.id,
         email=view.email,  # type: ignore[arg-type, unused-ignore]
         name=view.name,
         role=view.role,  # type: ignore[arg-type, unused-ignore]

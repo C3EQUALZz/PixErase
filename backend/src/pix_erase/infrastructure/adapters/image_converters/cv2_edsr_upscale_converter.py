@@ -21,7 +21,7 @@ class Cv2EDSRImageUpscaleConverter(ImageAIUpscaleConverter):
 
     @override
     def convert(self, data: bytes, width: int, height: int, scale: ImageScale) -> bytes:
-        cv2_image: cv2.typing.MatLike = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
+        cv2_image: cv2.typing.MatLike | None = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
 
         if cv2_image is None:
             msg = "Failed to decoding image"

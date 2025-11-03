@@ -46,3 +46,4 @@ def certificate_transparency() -> CertificateTransparencyPort:
 def http_title_fetcher() -> HttpTitleFetcherPort:
     return cast(HttpTitleFetcherPort, create_autospec(HttpTitleFetcherPort))
 
+

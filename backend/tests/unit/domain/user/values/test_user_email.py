@@ -99,3 +99,4 @@ def test_email_str_representation() -> None:
     # Assert
     assert result == email
 
+

@@ -76,7 +76,7 @@ class HttpxHttpClient(HttpClient):
             *,
             params: QueryParams | None = None,
             headers: HttpHeaders | None = None,
-            json: Any | None = None,
+            json_like: Any | None = None,
             data: Any | None = None,
             timeout: float | None = None,
     ) -> HttpResponse:
@@ -85,7 +85,7 @@ class HttpxHttpClient(HttpClient):
                 url,
                 params=params,
                 headers=headers,
-                json=json,
+                json=json_like,
                 data=data,
                 timeout=timeout,
             )
@@ -115,7 +115,7 @@ class HttpxHttpClient(HttpClient):
             *,
             params: QueryParams | None = None,
             headers: HttpHeaders | None = None,
-            json: Any | None = None,
+            json_like: Any | None = None,
             data: Any | None = None,
             timeout: float | None = None,
     ) -> HttpResponse:
@@ -124,7 +124,7 @@ class HttpxHttpClient(HttpClient):
                 url,
                 params=params,
                 headers=headers,
-                json=json,
+                json=json_like,
                 data=data,
                 timeout=timeout,
             )
@@ -177,6 +177,3 @@ class HttpxHttpClient(HttpClient):
             )
             logger.exception(msg_for_log)
             raise HttpError(msg) from exc
-
-
-

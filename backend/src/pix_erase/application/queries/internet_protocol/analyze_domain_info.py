@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Final, final
+from typing import Final, final, cast
 
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.internet_protocol.analyze_domain import AnalyzeDomainView
@@ -60,7 +60,7 @@ class AnalyzeDomainQueryHandler:
         return AnalyzeDomainView(
             domain_id=info_for_domain.id,
             domain_name=str(info_for_domain.domain_name),
-            dns_records=info_for_domain.dns_records.to_dict() if info_for_domain.dns_records else None,
+            dns_records=cast(dict[str, list[str]], info_for_domain.dns_records.to_dict()) if info_for_domain.dns_records else None,
             subdomains=[str(subdomain) for subdomain in info_for_domain.subdomains],
             title=info_for_domain.title,
             created_at=info_for_domain.created_at,

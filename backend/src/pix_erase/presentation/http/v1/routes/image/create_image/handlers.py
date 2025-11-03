@@ -1,3 +1,5 @@
+import random
+import string
 from inspect import getdoc
 from typing import Final, Annotated
 from datetime import datetime, UTC
@@ -54,12 +56,19 @@ async def create_image_handler(
         image: Annotated[UploadFile, File(description="A file for uploading to backend")],
         interactor: FromDishka[CreateImageCommandHandler]
 ) -> CreateImageSchemaResponse:
+    if image.content_type is None:
+        msg = f"Unknown content type"
+        raise BadFileFormatError(msg)
+
     if not image.content_type.startswith("image/"):
         msg = f"Invalid content type {image.content_type}"
         raise BadFileFormatError(msg)
 
+    letters: str = string.ascii_lowercase
+    result_str: str = ''.join(random.choice(letters) for _ in range(20))
+
     content: bytes = await image.read()
-    filename: str = image.filename
+    filename: str = image.filename if image.filename is not None else result_str
 
     command: CreateImageCommand = CreateImageCommand(
         data=content,

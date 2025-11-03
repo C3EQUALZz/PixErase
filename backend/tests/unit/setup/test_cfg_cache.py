@@ -109,3 +109,4 @@ def test_redis_max_connections_rejects_incorrect_value(max_connections: int) -> 
     with pytest.raises(ValidationError):
         RedisConfig.model_validate(data)
 
+
