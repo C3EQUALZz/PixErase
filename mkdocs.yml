@@ -24,6 +24,21 @@ repo_name: C3EQUALZz/PixErase
 
 nav:
   - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Configuration: getting-started/configuration.md
+  - Architecture:
+      - Overview: architecture/backend/overview.md
+      - Clean Architecture: architecture/backend/clean-architecture.md
+      - Dependency Injection: architecture/backend/dependency-injection.md
+  - API Reference:
+      - Endpoints: api-reference/endpoints.md
+      - Data Models: api-reference/data-models.md
+  - Development:
+      - Backend: development/backend.md
+      - Observability: development/observability.md
+  - Contributing: contributing.md
+  - License: license.md
 
 
 plugins:
