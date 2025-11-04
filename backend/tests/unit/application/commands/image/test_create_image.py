@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from typing import TYPE_CHECKING
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
@@ -10,32 +11,34 @@ from pix_erase.application.commands.image.create_image import (
     CreateImageCommandHandler,
 )
 from pix_erase.application.common.ports.image.extractor import ImageInfo
-from pix_erase.application.common.views.image.create_image import CreateImageView
 from pix_erase.domain.image.entities.image import Image
-from pix_erase.domain.image.services.image_service import ImageService
 from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.image.values.image_name import ImageName
 from pix_erase.domain.image.values.image_size import ImageSize
-from pix_erase.domain.user.services.user_service import UserService
+
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.image.create_image import CreateImageView
 
 
 @pytest.mark.asyncio
 async def test_create_image_success(
-    fake_current_user_service,
-    fake_image_storage,
-    fake_image_extractor,
-    fake_image_service: ImageService,
-    fake_user_service: UserService,
-    fake_transaction,
-    fake_user_command_gateway,
+    fake_current_user_service: Mock,
+    fake_image_storage: Mock,
+    fake_image_extractor: Mock,
+    fake_image_service: Mock,
+    fake_user_service: Mock,
+    fake_transaction: Mock,
+    fake_user_command_gateway: Mock,
 ) -> None:
     # Arrange
     data = b"image-bytes"
     filename = "test.jpg"
-    fake_image_extractor.extract = AsyncMock(return_value=ImageInfo(  # type: ignore[attr-defined]
-        height=100,
-        width=200,
-    ))
+    fake_image_extractor.extract = AsyncMock(
+        return_value=ImageInfo(  # type: ignore[attr-defined]
+            height=100,
+            width=200,
+        )
+    )
     new_id = ImageID(uuid4())
     new_image = Image(id=new_id, name=ImageName(filename), height=ImageSize(100), width=ImageSize(200), data=data)
     fake_image_service.create.return_value = new_image  # type: ignore[assignment]
@@ -64,4 +67,3 @@ async def test_create_image_success(
     fake_user_command_gateway.update.assert_awaited()  # type: ignore[attr-defined]
     fake_transaction.flush.assert_awaited()  # type: ignore[attr-defined]
     fake_transaction.commit.assert_awaited()  # type: ignore[attr-defined]
-

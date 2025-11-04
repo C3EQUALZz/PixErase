@@ -83,5 +83,3 @@ async def test_compress_image_not_found(
     )
     with pytest.raises(ImageNotFoundError):
         await sut(CompressImageCommand(image_id=image_id, quality=80))
-
-

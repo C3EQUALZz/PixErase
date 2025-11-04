@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
@@ -18,10 +18,10 @@ from pix_erase.domain.image.values.image_size import ImageSize
 
 @pytest.mark.asyncio
 async def test_delete_image_success(
-    fake_current_user_service,
-    fake_image_storage,
-    fake_user_command_gateway,
-    fake_transaction,
+    fake_current_user_service: Mock,
+    fake_image_storage: Mock,
+    fake_user_command_gateway: Mock,
+    fake_transaction: Mock,
 ) -> None:
     # Arrange
     image_uuid = uuid4()
@@ -59,10 +59,10 @@ async def test_delete_image_success(
 
 @pytest.mark.asyncio
 async def test_delete_image_not_found(
-    fake_current_user_service,
-    fake_image_storage,
-    fake_user_command_gateway,
-    fake_transaction,
+    fake_current_user_service: Mock,
+    fake_image_storage: Mock,
+    fake_user_command_gateway: Mock,
+    fake_transaction: Mock,
 ) -> None:
     # Arrange
     image_uuid = uuid4()
@@ -85,10 +85,10 @@ async def test_delete_image_not_found(
 
 @pytest.mark.asyncio
 async def test_delete_image_wrong_owner(
-    fake_current_user_service,
-    fake_image_storage,
-    fake_user_command_gateway,
-    fake_transaction,
+    fake_current_user_service: Mock,
+    fake_image_storage: Mock,
+    fake_user_command_gateway: Mock,
+    fake_transaction: Mock,
 ) -> None:
     # Arrange
     image_uuid = uuid4()
@@ -115,5 +115,3 @@ async def test_delete_image_wrong_owner(
     # Act / Assert
     with pytest.raises(ImageDoesntBelongToThisUserError):
         await sut(DeleteImageCommand(image_id=image_uuid))
-
-

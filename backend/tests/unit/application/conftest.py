@@ -4,10 +4,14 @@ from unittest.mock import AsyncMock, Mock, create_autospec
 import pytest
 
 from pix_erase.application.common.ports.event_bus import EventBus
+from pix_erase.application.common.ports.image.extractor import ImageInfoExtractor
+from pix_erase.application.common.ports.image.storage import ImageStorage
+from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
 from pix_erase.application.common.services.current_user import CurrentUserService
+from pix_erase.domain.image.services.image_service import ImageService
 from pix_erase.domain.internet_protocol.services import InternetProtocolService
 from pix_erase.domain.internet_protocol.services.internet_domain_service import InternetDomainService
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
@@ -99,12 +103,6 @@ def fake_user_query_gateway() -> UserQueryGateway:
 @pytest.fixture
 def fake_internet_service() -> InternetProtocolService:
     return cast("InternetProtocolService", create_autospec(InternetProtocolService))
-
-# Image command fixtures
-from pix_erase.application.common.ports.image.extractor import ImageInfoExtractor
-from pix_erase.application.common.ports.image.storage import ImageStorage
-from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
-from pix_erase.domain.image.services.image_service import ImageService
 
 
 @pytest.fixture
