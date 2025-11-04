@@ -100,6 +100,32 @@ def fake_user_query_gateway() -> UserQueryGateway:
 def fake_internet_service() -> InternetProtocolService:
     return cast("InternetProtocolService", create_autospec(InternetProtocolService))
 
+# Image command fixtures
+from pix_erase.application.common.ports.image.extractor import ImageInfoExtractor
+from pix_erase.application.common.ports.image.storage import ImageStorage
+from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
+from pix_erase.domain.image.services.image_service import ImageService
+
+
+@pytest.fixture
+def fake_image_storage() -> ImageStorage:
+    return cast("ImageStorage", create_autospec(ImageStorage))
+
+
+@pytest.fixture
+def fake_task_scheduler() -> TaskScheduler:
+    return cast("TaskScheduler", create_autospec(TaskScheduler))
+
+
+@pytest.fixture
+def fake_image_extractor() -> ImageInfoExtractor:
+    return cast("ImageInfoExtractor", create_autospec(ImageInfoExtractor))
+
+
+@pytest.fixture
+def fake_image_service() -> ImageService:
+    return cast("ImageService", create_autospec(ImageService))
+
 
 @pytest.fixture
 def fake_internet_domain_service() -> InternetDomainService:
