@@ -67,7 +67,7 @@ async def create_image_handler(
         raise BadFileFormatError(msg)
 
     letters: str = string.ascii_lowercase
-    result_str: str = "".join(random.choice(letters) for _ in range(20)) # nosec B311
+    result_str: str = "".join(random.choice(letters) for _ in range(20))  # nosec B311
 
     content: bytes = await image.read()
     filename: str = image.filename if image.filename is not None else result_str

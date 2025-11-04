@@ -149,7 +149,7 @@ ignore = ["D", "CPY001", "A005", "TRY003", "COM812", "FBT001", "FBT003", "PLR091
 "src/pix_erase/infrastructure/adapters/persistence/**" = ["PGH003"]
 "src/pix_erase/presentation/http/v1/routes/image/create_image/handlers.py" = ["S311"]
 "src/pix_erase/infrastructure/adapters/image_converters/**" = ["PLR2004"]
-"tests/**" = ["S101", "PLR0913", "S106"]
+"tests/**" = ["S101", "PLR0913", "S106", "PLR2004"]
 
 [tool.ruff.format]
 docstring-code-format = true

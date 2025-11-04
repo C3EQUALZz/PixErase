@@ -149,7 +149,7 @@ def test_user_images_can_be_modified() -> None:
     sut.images.append(image_id2)
 
     # Assert
-    assert len(sut.images) == 2  # noqa: PLR2004
+    assert len(sut.images) == 2
     assert image_id1 in sut.images
     assert image_id2 in sut.images
 
@@ -260,7 +260,7 @@ def test_user_can_be_used_in_set() -> None:
     user_set = {user1, user2, user3}
 
     # Assert
-    assert len(user_set) == 2  # noqa: PLR2004
+    assert len(user_set) == 2
     assert user1 in user_set
     assert user2 in user_set
     assert user3 in user_set

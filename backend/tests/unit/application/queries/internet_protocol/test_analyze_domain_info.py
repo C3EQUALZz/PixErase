@@ -1,11 +1,11 @@
 from datetime import UTC, datetime
-from uuid import uuid4
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
+from uuid import uuid4
 
 import pytest
 
 from pix_erase.application.common.services.current_user import CurrentUserService
-from pix_erase.application.common.views.internet_protocol.analyze_domain import AnalyzeDomainView
 from pix_erase.application.queries.internet_protocol.analyze_domain_info import (
     AnalyzeDomainQuery,
     AnalyzeDomainQueryHandler,
@@ -14,6 +14,9 @@ from pix_erase.domain.internet_protocol.entities.internet_domain import Internet
 from pix_erase.domain.internet_protocol.services.internet_domain_service import InternetDomainService
 from pix_erase.domain.internet_protocol.values import DnsRecords, DomainName
 from pix_erase.domain.internet_protocol.values.domain_id import DomainID
+
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.internet_protocol.analyze_domain import AnalyzeDomainView
 
 
 @pytest.mark.asyncio
@@ -48,8 +51,9 @@ async def test_analyze_domain_success(
     # Assert
     assert view.domain_id == domain_id
     assert view.domain_name == "example.com"
-    assert view.dns_records is not None and "A" in view.dns_records
+    assert view.dns_records is not None
+    assert "A" in view.dns_records
     assert view.subdomains == ["api.example.com"]
     assert view.title == "Example"
-    assert view.created_at == now and view.updated_at == now
-
+    assert view.created_at == now
+    assert view.updated_at == now

@@ -1,5 +1,3 @@
-# ruff: noqa: PLR2004
-
 from unittest.mock import Mock
 
 import pytest

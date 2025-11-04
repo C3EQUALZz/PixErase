@@ -43,7 +43,7 @@ def _calculate_ssim(img1: cv2.typing.MatLike, img2: cv2.typing.MatLike) -> float
 
     # Calculate SSIM
     ssim_map = ((2 * mu1_mu2 + c1) * (2 * sigma12 + c2)) / ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
-    return float(np.mean(ssim_map)) # type: ignore[arg-type]
+    return float(np.mean(ssim_map))  # type: ignore[arg-type]
 
 
 def _calculate_mse(img1: cv2.typing.MatLike, img2: cv2.typing.MatLike) -> float:

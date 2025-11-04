@@ -1,5 +1,3 @@
-# ruff: noqa: PLR2004
-
 import pytest
 
 from pix_erase.domain.internet_protocol.entities.internet_domain import InternetDomain

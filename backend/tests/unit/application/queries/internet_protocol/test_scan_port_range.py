@@ -1,22 +1,25 @@
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
 
 from pix_erase.application.common.services.current_user import CurrentUserService
-from pix_erase.application.common.views.internet_protocol.port_scan import PortScanSummaryView
 from pix_erase.application.queries.internet_protocol.scan_port_range import (
     ScanPortRangeQuery,
     ScanPortRangeQueryHandler,
 )
-from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
 from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import (
     PortScanResult,
     PortScanSummary,
     PortStatus,
 )
+from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
 from pix_erase.domain.internet_protocol.values.ip_address import IPv4Address
 from pix_erase.domain.internet_protocol.values.port import Port
+
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.internet_protocol.port_scan import PortScanSummaryView
 
 
 @pytest.mark.asyncio
@@ -63,4 +66,3 @@ async def test_scan_port_range_success(
     assert view.closed_ports == 1
     assert view.filtered_ports == 0
     assert len(view.results) == 2
-

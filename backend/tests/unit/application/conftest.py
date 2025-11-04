@@ -95,6 +95,7 @@ def fake_user_query_gateway() -> UserQueryGateway:
     fake.read_all_users = AsyncMock()
     return cast("UserQueryGateway", fake)
 
+
 @pytest.fixture
 def fake_internet_service() -> InternetProtocolService:
     return cast("InternetProtocolService", create_autospec(InternetProtocolService))

@@ -1,9 +1,9 @@
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
 
 from pix_erase.application.common.services.current_user import CurrentUserService
-from pix_erase.application.common.views.internet_protocol.ip_info import IPInfoView
 from pix_erase.application.queries.internet_protocol.read_ip_info import (
     ReadIPInfoQuery,
     ReadIPInfoQueryHandler,
@@ -13,18 +13,19 @@ from pix_erase.domain.internet_protocol.services.internet_protocol_service impor
 from pix_erase.domain.internet_protocol.values import IPInfo, PingResult
 from pix_erase.domain.internet_protocol.values.ip_address import IPv4Address
 
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.internet_protocol.ip_info import IPInfoView
+
 
 @pytest.mark.asyncio
 async def test_read_ip_info_success(
-        fake_current_user_service: CurrentUserService,
-        fake_internet_service: InternetProtocolService,
+    fake_current_user_service: CurrentUserService,
+    fake_internet_service: InternetProtocolService,
 ) -> None:
     # Arrange
     ip_address = IPv4Address(value="8.8.8.8")
     fake_internet_service.create.return_value = ip_address  # type: ignore[assignment]
-    fake_internet_service.ping = AsyncMock(
-        return_value=PingResult(success=True, response_time_ms=10.0)
-    )
+    fake_internet_service.ping = AsyncMock(return_value=PingResult(success=True, response_time_ms=10.0))
     ip_info = IPInfo(
         ip_address="8.8.8.8",
         isp="ISP",
@@ -62,8 +63,8 @@ async def test_read_ip_info_success(
 
 @pytest.mark.asyncio
 async def test_read_ip_info_raises_when_ping_failed(
-        fake_current_user_service: CurrentUserService,
-        fake_internet_service: InternetProtocolService,
+    fake_current_user_service: CurrentUserService,
+    fake_internet_service: InternetProtocolService,
 ) -> None:
     # Arrange
     ip_address = IPv4Address(value="1.1.1.1")
@@ -73,10 +74,7 @@ async def test_read_ip_info_raises_when_ping_failed(
         return_value=PingResult(success=False, error_message="timeout"),  # type: ignore[arg-type]
     )
 
-    sut = ReadIPInfoQueryHandler(
-        internet_service=fake_internet_service,
-        current_user_service=fake_current_user_service
-    )
+    sut = ReadIPInfoQueryHandler(internet_service=fake_internet_service, current_user_service=fake_current_user_service)
     query = ReadIPInfoQuery(ip_address="1.1.1.1")
 
     # Act / Assert

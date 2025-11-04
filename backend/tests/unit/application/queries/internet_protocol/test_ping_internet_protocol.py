@@ -1,11 +1,9 @@
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
 
 from pix_erase.application.common.services.current_user import CurrentUserService
-from pix_erase.application.common.views.internet_protocol.ping_internet_protocol import (
-    PingInternetProtocolView,
-)
 from pix_erase.application.queries.internet_protocol.ping_internet_protocol import (
     PingInternetProtocolQuery,
     PingInternetProtocolQueryHandler,
@@ -15,6 +13,11 @@ from pix_erase.domain.internet_protocol.services.internet_protocol_service impor
 )
 from pix_erase.domain.internet_protocol.values import PingResult
 from pix_erase.domain.internet_protocol.values.ip_address import IPv4Address
+
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.internet_protocol.ping_internet_protocol import (
+        PingInternetProtocolView,
+    )
 
 
 @pytest.mark.asyncio
@@ -43,4 +46,3 @@ async def test_ping_internet_protocol_success(
     assert view.response_time_ms == 12.5
     assert view.ttl == 20
     assert view.packet_size == 56
-

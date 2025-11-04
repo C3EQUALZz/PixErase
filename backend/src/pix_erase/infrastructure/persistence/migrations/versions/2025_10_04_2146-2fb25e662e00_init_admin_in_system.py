@@ -36,7 +36,7 @@ def upgrade() -> None:
             # It is not a credential and is safe to keep for test/dev bootstrap.
             sa.bindparam(
                 "hashed_password",
-                b"$2b$12$4fu0v.ZGLAbPR47DZPokseGqAEuH8Pj8xZs6sZHIWeXvkzE/qP38y", # nosemgrep
+                b"$2b$12$4fu0v.ZGLAbPR47DZPokseGqAEuH8Pj8xZs6sZHIWeXvkzE/qP38y",  # nosemgrep
                 type_=sa.LargeBinary,
             ),
             sa.bindparam("role", "SUPER_ADMIN", type_=sa.Enum(name="userrole")),

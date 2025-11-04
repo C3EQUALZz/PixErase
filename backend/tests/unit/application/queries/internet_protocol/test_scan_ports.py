@@ -1,21 +1,24 @@
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
 
 from pix_erase.application.common.services.current_user import CurrentUserService
-from pix_erase.application.common.views.internet_protocol.port_scan import PortScanView
 from pix_erase.application.queries.internet_protocol.scan_ports import (
     ScanPortsQuery,
     ScanPortsQueryHandler,
 )
-from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
 from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import (
     PortScanResult,
     PortStatus,
 )
+from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
 from pix_erase.domain.internet_protocol.values.ip_address import IPv4Address
 from pix_erase.domain.internet_protocol.values.port import Port
+
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.internet_protocol.port_scan import PortScanView
 
 
 @pytest.mark.asyncio
@@ -45,6 +48,8 @@ async def test_scan_ports_success(
 
     # Assert
     assert len(views) == 2
-    assert views[0].port == 22 and views[0].status == PortStatus.CLOSED.value
-    assert views[1].port == 443 and views[1].status == PortStatus.OPEN.value and views[1].service == "https"
-
+    assert views[0].port == 22
+    assert views[0].status == PortStatus.CLOSED.value
+    assert views[1].port == 443
+    assert views[1].status == PortStatus.OPEN.value
+    assert views[1].service == "https"
