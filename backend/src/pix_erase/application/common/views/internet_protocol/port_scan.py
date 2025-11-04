@@ -1,34 +1,34 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class PortScanView:
     """
     View for single port scan response.
-    
+
     This view represents the response data for single port scan operations
     that will be returned to the client.
     """
-    
+
     port: int
     status: str
-    response_time: Optional[float] = None
-    service: Optional[str] = None
-    error_message: Optional[str] = None
-    scanned_at: Optional[datetime] = None
+    response_time: float | None = None
+    service: str | None = None
+    error_message: str | None = None
+    scanned_at: datetime | None = None
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class PortScanSummaryView:
     """
     View for port scan summary response.
-    
+
     This view represents the summary data for port scan operations
     that will be returned to the client.
     """
-    
+
     target: str
     port_range: str
     total_ports: int
@@ -40,4 +40,3 @@ class PortScanSummaryView:
     completed_at: datetime
     success_rate: float
     results: list[dict[str, Any]]
-

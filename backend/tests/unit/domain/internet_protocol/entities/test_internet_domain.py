@@ -1,5 +1,6 @@
+# ruff: noqa: PLR2004
+
 from pix_erase.domain.internet_protocol.values.dns_records import DnsRecords
-from pix_erase.domain.internet_protocol.values.domain_name import DomainName
 from tests.unit.factories.internet_protocol_entity import create_internet_domain
 from tests.unit.factories.value_objects import create_domain_name
 
@@ -240,5 +241,3 @@ def test_mark_as_analyzed() -> None:
 
     # Assert
     assert sut.is_analyzed is True
-
-

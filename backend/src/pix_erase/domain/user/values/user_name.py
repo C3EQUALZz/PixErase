@@ -4,9 +4,10 @@ from typing import Final, override
 
 from pix_erase.domain.common.values.base import BaseValueObject
 from pix_erase.domain.user.errors.user import (
+    BadUserNameError,
     TooBigUserAccountNameError,
+    TooSmallUserAccountNameError,
     UserAccountNameCantBeEmptyError,
-    TooSmallUserAccountNameError, BadUserNameError
 )
 
 MAX_LENGTH_OF_USERNAME: Final[int] = 255
@@ -60,10 +61,7 @@ class Username(BaseValueObject):
             raise BadUserNameError(msg)
 
         if not re.fullmatch(PATTERN_NO_CONSECUTIVE_SPECIALS, self.value):
-            msg = (
-                "Username cannot contain consecutive special characters"
-                " like .., --, or __."
-            )
+            msg = "Username cannot contain consecutive special characters like .., --, or __."
 
             raise BadUserNameError(msg)
 

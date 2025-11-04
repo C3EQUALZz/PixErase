@@ -1,4 +1,4 @@
-from taskiq import TaskiqScheduler, ScheduleSource, AsyncBroker
+from taskiq import AsyncBroker, ScheduleSource, TaskiqScheduler
 
 from pix_erase.setup.bootstrap import setup_schedule_source, setup_scheduler
 from pix_erase.setup.config.settings import AppConfig

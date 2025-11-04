@@ -8,8 +8,7 @@ from pix_erase.application.common.ports.user.command_gateway import UserCommandG
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.auth.sign_up import SignUpView
 from pix_erase.application.consts import AUTH_ALREADY_AUTHENTICATED
-from pix_erase.application.errors.auth import AlreadyAuthenticatedError
-from pix_erase.application.errors.auth import AuthenticationError
+from pix_erase.application.errors.auth import AlreadyAuthenticatedError, AuthenticationError
 from pix_erase.application.errors.user import UserAlreadyExistsError
 from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.domain.user.values.raw_password import RawPassword
@@ -39,13 +38,14 @@ class SignUpHandler:
     - Passwords are peppered, salted, and stored as hashes.
     - A logged-in user cannot sign up until the session expires or is terminated.
     """
+
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            user_service: UserService,
-            user_command_gateway: UserCommandGateway,
-            transaction_manager: TransactionManager,
-            event_bus: EventBus,
+        self,
+        current_user_service: CurrentUserService,
+        user_service: UserService,
+        user_command_gateway: UserCommandGateway,
+        transaction_manager: TransactionManager,
+        event_bus: EventBus,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._user_service: Final[UserService] = user_service

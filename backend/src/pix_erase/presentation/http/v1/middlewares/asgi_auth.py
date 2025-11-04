@@ -1,6 +1,6 @@
 import logging
 from http.cookies import SimpleCookie
-from typing import Literal, Final
+from typing import Final, Literal
 
 from starlette.datastructures import MutableHeaders
 from starlette.requests import Request
@@ -58,33 +58,32 @@ class ASGIAuthMiddleware:
             samesite=cookie_params.same_site,
         )
         headers.append("Set-Cookie", cookie_header)
-        logger.debug("Cookie with access token '%s' was set.", new_access_token)
+        # Do not log raw tokens
+        logger.debug("Cookie with access token was set.")
 
     def _maybe_delete_cookie(
-            self,
-            request: Request,
-            headers: MutableHeaders,
+        self,
+        request: Request,
+        headers: MutableHeaders,
     ) -> None:
         if not getattr(request.state, REQUEST_STATE_DELETE_ACCESS_TOKEN_KEY, False):
             return
 
-        current_access_token: str | None = request.cookies.get(COOKIE_ACCESS_TOKEN_NAME)
-        logger.debug(
-            "Deleting cookie with access token: '%s'.",
-            current_access_token if current_access_token else "already deleted",
-        )
+        # Do not log raw tokens
+        _ = request.cookies.get(COOKIE_ACCESS_TOKEN_NAME)
+        logger.debug("Deleting cookie with access token.")
 
         cookie_header = self._make_cookie_header(value="", max_age=0)
         headers.append("Set-Cookie", cookie_header)
         logger.debug("Cookie was deleted.")
 
     def _make_cookie_header(
-            self,
-            *,
-            value: str,
-            is_secure: bool = False,
-            samesite: Literal["strict"] | None = None,
-            max_age: int | None = None,
+        self,
+        *,
+        value: str,
+        is_secure: bool = False,
+        samesite: Literal["strict"] | None = None,
+        max_age: int | None = None,
     ) -> str:
         cookie = SimpleCookie()
         cookie["access_token"] = value

@@ -2,7 +2,7 @@ import pytest
 
 from pix_erase.domain.common.errors.base import DomainFieldError
 from pix_erase.domain.internet_protocol.errors.internet_protocol import InvalidDomainNameError
-from pix_erase.domain.internet_protocol.values.domain_name import DomainName, MAX_DOMAIN_LENGTH
+from pix_erase.domain.internet_protocol.values.domain_name import MAX_DOMAIN_LENGTH, DomainName
 from tests.unit.factories.value_objects import create_domain_name
 
 
@@ -139,5 +139,3 @@ def test_domain_name_inequality() -> None:
 
     # Assert
     assert domain1 != domain2
-
-

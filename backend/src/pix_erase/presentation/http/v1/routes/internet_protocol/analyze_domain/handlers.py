@@ -1,24 +1,26 @@
-from datetime import datetime, UTC
-from typing import Final, Annotated
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Annotated, Final
 
 from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, Depends, status, Security
+from fastapi import APIRouter, Depends, Security, status
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
 from pix_erase.application.queries.internet_protocol.analyze_domain_info import (
+    AnalyzeDomainQuery,
     AnalyzeDomainQueryHandler,
-    AnalyzeDomainQuery
 )
-from pix_erase.application.common.views.internet_protocol.analyze_domain import AnalyzeDomainView
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 from pix_erase.presentation.http.v1.routes.internet_protocol.analyze_domain.schemas import (
+    AnalyzeDomainRequestSchema,
     AnalyzeDomainResponse,
-    AnalyzeDomainRequestSchema
 )
+
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.internet_protocol.analyze_domain import AnalyzeDomainView
 
 analyze_domain_router: Final[APIRouter] = APIRouter(
     tags=["IP"],
@@ -38,7 +40,7 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
         status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
-    }
+    },
 )
 @span(
     tracer=tracer,
@@ -49,17 +51,13 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         "http.route": "/ip/domain/",
         "feature": "domain",
         "action": "analyze",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def analyze_domain(
-        request_schema: Annotated[AnalyzeDomainRequestSchema, Depends()],
-        interactor: FromDishka[AnalyzeDomainQueryHandler]
+    request_schema: Annotated[AnalyzeDomainRequestSchema, Depends()], interactor: FromDishka[AnalyzeDomainQueryHandler]
 ) -> AnalyzeDomainResponse:
-    query: AnalyzeDomainQuery = AnalyzeDomainQuery(
-        domain=str(request_schema.domain),
-        timeout=request_schema.timeout
-    )
+    query: AnalyzeDomainQuery = AnalyzeDomainQuery(domain=str(request_schema.domain), timeout=request_schema.timeout)
 
     view: AnalyzeDomainView = await interactor(query)
 

@@ -1,18 +1,19 @@
+from unittest.mock import Mock
+
 import pytest
 
 from pix_erase.domain.user.entities.user import User
-from pix_erase.domain.user.values.user_role import UserRole
 from pix_erase.domain.user.errors.user import (
     RoleAssignmentNotPermittedError,
 )
-
 from pix_erase.domain.user.services.user_service import UserService
+from pix_erase.domain.user.values.user_role import UserRole
 from tests.unit.factories.user_entity import create_user
 from tests.unit.factories.value_objects import (
     create_password_hash,
     create_raw_password,
-    create_user_id,
     create_user_email,
+    create_user_id,
     create_username,
 )
 
@@ -22,9 +23,9 @@ from tests.unit.factories.value_objects import (
     [UserRole.USER, UserRole.ADMIN],
 )
 def test_creates_active_user_with_hashed_password(
-        role: UserRole,
-        user_id_generator,
-        password_hasher,
+    role: UserRole,
+    user_id_generator: Mock,
+    password_hasher: Mock,
 ) -> None:
     # Arrange
     email = create_user_email()
@@ -52,8 +53,8 @@ def test_creates_active_user_with_hashed_password(
 
 
 def test_fails_to_create_user_with_unassignable_role(
-        user_id_generator,
-        password_hasher,
+    user_id_generator: Mock,
+    password_hasher: Mock,
 ) -> None:
     email = create_user_email()
     username = create_username()
@@ -74,9 +75,9 @@ def test_fails_to_create_user_with_unassignable_role(
     [True, False],
 )
 def test_checks_password_authenticity(
-        is_valid: bool,
-        user_id_generator,
-        password_hasher,
+    is_valid: bool,
+    user_id_generator: Mock,
+    password_hasher: Mock,
 ) -> None:
     # Arrange
     user = create_user()
@@ -93,8 +94,8 @@ def test_checks_password_authenticity(
 
 
 def test_changes_password(
-        user_id_generator,
-        password_hasher,
+    user_id_generator: Mock,
+    password_hasher: Mock,
 ) -> None:
     # Arrange
     initial_hash = create_password_hash(b"old")

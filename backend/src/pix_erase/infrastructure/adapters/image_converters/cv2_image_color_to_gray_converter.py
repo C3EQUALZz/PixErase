@@ -1,6 +1,7 @@
+from typing import override
+
 import cv2
 import numpy as np
-from typing_extensions import override
 
 from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError

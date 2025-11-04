@@ -1,9 +1,11 @@
+# ruff: noqa: PLR2004
+
 import pytest
 
 from pix_erase.domain.common.errors.base import DomainFieldError
 from pix_erase.domain.internet_protocol.errors.internet_protocol import InvalidIPAddressError
 from pix_erase.domain.internet_protocol.values.ip_address import IPv4Address, IPv6Address
-from tests.unit.factories.value_objects import create_ipv4_address, create_ipv6_address
+from tests.unit.factories.value_objects import create_ipv4_address
 
 
 @pytest.mark.parametrize(
@@ -160,4 +162,3 @@ def test_ipv4_inequality() -> None:
 
     # Assert
     assert ip1 != ip2
-

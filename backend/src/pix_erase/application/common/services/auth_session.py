@@ -1,6 +1,7 @@
 import logging
 from typing import TYPE_CHECKING
 
+from pix_erase.application.errors.auth import AuthenticationError
 from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.infrastructure.auth.session.id_generator import AuthSessionIDGenerator
 from pix_erase.infrastructure.auth.session.model import AuthSession
@@ -8,7 +9,6 @@ from pix_erase.infrastructure.auth.session.ports.gateway import AuthSessionGatew
 from pix_erase.infrastructure.auth.session.ports.transaction_manager import AuthSessionTransactionManager
 from pix_erase.infrastructure.auth.session.ports.transport import AuthSessionTransport
 from pix_erase.infrastructure.auth.session.timer_utc import UtcAuthSessionTimer
-from pix_erase.application.errors.auth import AuthenticationError
 from pix_erase.infrastructure.errors.transaction_manager import RepoError
 
 if TYPE_CHECKING:

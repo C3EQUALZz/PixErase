@@ -15,8 +15,7 @@ def test_child_cannot_init_with_no_instance_fields() -> None:
     # Arrange
     @dataclass(frozen=True)
     class EmptyVO(BaseValueObject):
-        def _validate(self) -> None:
-            ...
+        def _validate(self) -> None: ...
 
         def __str__(self) -> str:
             return ""
@@ -33,8 +32,7 @@ def test_child_cannot_init_with_only_class_fields() -> None:
         foo: ClassVar[int] = 0
         bar: ClassVar[str] = "baz"
 
-        def _validate(self) -> None:
-            ...
+        def _validate(self) -> None: ...
 
         def __str__(self) -> str:
             return ""
@@ -51,11 +49,9 @@ def test_class_field_not_in_dataclass_fields() -> None:
         foo: ClassVar[int] = 0
         bar: str
 
-        def _validate(self) -> None:
-            ...
+        def _validate(self) -> None: ...
 
-        def __str__(self) -> str:
-            ...
+        def __str__(self) -> str: ...
 
     sut = MixedFieldsVO(bar="baz")
 
@@ -76,8 +72,7 @@ def test_class_field_not_broken_by_slots() -> None:
         foo: ClassVar[int] = 0
         bar: str
 
-        def _validate(self) -> None:
-            ...
+        def _validate(self) -> None: ...
 
         def __str__(self) -> str:
             return ""
@@ -138,8 +133,7 @@ def test_class_field_not_in_repr() -> None:
         foo: ClassVar[int] = 0
         bar: ClassVar[str] = "baz"
 
-        def _validate(self) -> None:
-            ...
+        def _validate(self) -> None: ...
 
         def __str__(self) -> str:
             return "baz"
@@ -162,8 +156,7 @@ def test_hidden_field_not_in_repr() -> None:
         visible: int
         hidden: int = field(repr=False)
 
-        def _validate(self) -> None:
-            ...
+        def _validate(self) -> None: ...
 
         def __str__(self) -> str:
             return str(self.hidden)
@@ -186,8 +179,7 @@ def test_all_fields_hidden_repr() -> None:
         hidden_1: int = field(repr=False)
         hidden_2: int = field(repr=False)
 
-        def _validate(self) -> None:
-            ...
+        def _validate(self) -> None: ...
 
         def __str__(self) -> str:
             return str(self.hidden_1) + str(self.hidden_2)

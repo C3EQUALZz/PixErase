@@ -8,17 +8,13 @@ from pix_erase.application.commands.user.delete_user_by_id import (
 )
 from pix_erase.application.errors.user import UserNotFoundByIDError
 from pix_erase.domain.user.values.user_id import UserID
-
 from tests.unit.factories.user_entity import create_user
 from tests.unit.factories.value_objects import create_user_id
 
 
 @pytest.mark.parametrize(
     "user_id",
-    [
-        create_user_id(),
-        create_user_id(),
-    ],
+    [create_user_id() for _ in range(3)],
 )
 async def test_delete_user_by_id_success(
     user_id: UserID,
@@ -74,7 +70,7 @@ async def test_delete_user_by_id_not_found(
     )
 
     command = DeleteUserByIDCommand(user_id=user_id)
-    with pytest.raises(UserNotFoundByIDError, match="Cant find user by ID"):
+    with pytest.raises(UserNotFoundByIDError, match="Can't find user by ID"):
         await handler(command)
 
     fake_current_user_service.get_current_user.assert_called_once()
@@ -82,4 +78,3 @@ async def test_delete_user_by_id_not_found(
     fake_user_command_gateway.delete_by_id.assert_not_called()
     fake_event_bus.publish.assert_not_called()
     fake_transaction.commit.assert_not_called()
-

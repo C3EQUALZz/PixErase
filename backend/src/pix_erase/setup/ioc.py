@@ -1,4 +1,5 @@
-from typing import Final, Iterable
+from collections.abc import Iterable
+from typing import Final
 
 from bazario.asyncio import Dispatcher, Registry
 from bazario.asyncio.resolvers.dishka import DishkaResolver
@@ -20,12 +21,6 @@ from pix_erase.application.commands.image.remove_background_image import RemoveB
 from pix_erase.application.commands.image.remove_watermark_from_image import RemoveWatermarkFromImageCommandHandler
 from pix_erase.application.commands.image.rotate_image import RotateImageCommandHandler
 from pix_erase.application.commands.image.upscale_image import UpscaleImageCommandHandler
-from pix_erase.application.queries.internet_protocol.analyze_domain_info import AnalyzeDomainQueryHandler
-from pix_erase.application.queries.internet_protocol.ping_internet_protocol import PingInternetProtocolQueryHandler
-from pix_erase.application.queries.internet_protocol.scan_common_ports import ScanCommonPortsQueryHandler
-from pix_erase.application.queries.internet_protocol.scan_port import ScanPortQueryHandler
-from pix_erase.application.queries.internet_protocol.scan_port_range import ScanPortRangeQueryHandler
-from pix_erase.application.queries.internet_protocol.scan_ports import ScanPortsQueryHandler
 from pix_erase.application.commands.user.activate_user import ActivateUserCommandHandler
 from pix_erase.application.commands.user.change_user_email import ChangeUserEmailCommandHandler
 from pix_erase.application.commands.user.change_user_name import ChangeUserNameByIDCommandHandler
@@ -48,7 +43,13 @@ from pix_erase.application.common.services.auth_session import AuthSessionServic
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.queries.images.read_by_id import ReadImageByIDQueryHandler
 from pix_erase.application.queries.images.read_exif_from_image_by_id import ReadExifFromImageByIDQueryHandler
+from pix_erase.application.queries.internet_protocol.analyze_domain_info import AnalyzeDomainQueryHandler
+from pix_erase.application.queries.internet_protocol.ping_internet_protocol import PingInternetProtocolQueryHandler
 from pix_erase.application.queries.internet_protocol.read_ip_info import ReadIPInfoQueryHandler
+from pix_erase.application.queries.internet_protocol.scan_common_ports import ScanCommonPortsQueryHandler
+from pix_erase.application.queries.internet_protocol.scan_port import ScanPortQueryHandler
+from pix_erase.application.queries.internet_protocol.scan_port_range import ScanPortRangeQueryHandler
+from pix_erase.application.queries.internet_protocol.scan_ports import ScanPortsQueryHandler
 from pix_erase.application.queries.tasks.read_task_by_id import ReadTaskByIDQueryHandler
 from pix_erase.application.queries.users.read_all import ReadAllUsersQueryHandler
 from pix_erase.application.queries.users.read_by_id import ReadUserByIDQueryHandler
@@ -56,11 +57,12 @@ from pix_erase.domain.image.ports.id_generator import ImageIdGenerator
 from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
 from pix_erase.domain.image.ports.image_background_remove_converter import ImageRemoveBackgroundConverter
 from pix_erase.domain.image.ports.image_color_to_gray_converter import ImageColorToCrayScaleConverter
-from pix_erase.domain.image.ports.image_compress_converter import ImageCompressConverter
 from pix_erase.domain.image.ports.image_comparer_converter import ImageComparerConverter
+from pix_erase.domain.image.ports.image_compress_converter import ImageCompressConverter
 from pix_erase.domain.image.ports.image_crop_converter import ImageCropConverter
-from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import \
-    ImageNearestNeighbourUpscalerConverter
+from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import (
+    ImageNearestNeighbourUpscalerConverter,
+)
 from pix_erase.domain.image.ports.image_resizer import ImageResizerConverter
 from pix_erase.domain.image.ports.image_rotation_converter import ImageRotationConverter
 from pix_erase.domain.image.ports.image_watermark_remover_converter import ImageWatermarkRemoverConverter
@@ -82,29 +84,33 @@ from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.infrastructure.adapters.auth.access_revoker import AuthSessionAccessRevoker
 from pix_erase.infrastructure.adapters.auth.identity_provider import AuthSessionIdentityProvider
 from pix_erase.infrastructure.adapters.auth.jwt_auth_session_transport import JwtCookieAuthSessionTransport
-from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtSecret, JwtAlgorithm, JwtAccessTokenProcessor
+from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtAccessTokenProcessor, JwtAlgorithm, JwtSecret
 from pix_erase.infrastructure.adapters.auth.secrets_auth_session_generator import SecretsAuthSessionIdGenerator
 from pix_erase.infrastructure.adapters.common.bazario_event_bus import BazarioEventBus
 from pix_erase.infrastructure.adapters.common.domain_id_generator import UUID4DomainIDGenerator
-from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper, BcryptPasswordHasher
+from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import BcryptPasswordHasher, PasswordPepper
 from pix_erase.infrastructure.adapters.common.uuid4_image_id_generator import UUID4ImageIdGenerator
 from pix_erase.infrastructure.adapters.common.uuid4_user_id_generator import UUID4UserIdGenerator
 from pix_erase.infrastructure.adapters.image_converters.cv2_edsr_upscale_converter import Cv2EDSRImageUpscaleConverter
-from pix_erase.infrastructure.adapters.image_converters.cv2_image_color_to_gray_converter import \
-    Cv2ImageColorToCrayScaleConverter
-from pix_erase.infrastructure.adapters.image_converters.cv2_image_compress_converter import Cv2ImageCompressConverter
+from pix_erase.infrastructure.adapters.image_converters.cv2_image_color_to_gray_converter import (
+    Cv2ImageColorToCrayScaleConverter,
+)
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_comparer_converter import Cv2ImageComparerConverter
+from pix_erase.infrastructure.adapters.image_converters.cv2_image_compress_converter import Cv2ImageCompressConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_crop_converter import Cv2ImageCropConverter
-from pix_erase.infrastructure.adapters.image_converters.cv2_image_nearest_neighbour_upscale_converter import \
-    Cv2ImageNearestNeighbourUpscalerConverter
+from pix_erase.infrastructure.adapters.image_converters.cv2_image_nearest_neighbour_upscale_converter import (
+    Cv2ImageNearestNeighbourUpscalerConverter,
+)
 from pix_erase.infrastructure.adapters.image_converters.cv2_image_resizer_converter import Cv2ImageResizerConverter
+from pix_erase.infrastructure.adapters.image_converters.cv2_image_rotation_converter import Cv2ImageRotationConverter
 from pix_erase.infrastructure.adapters.image_converters.cv2_watermark_remover import Cv2ImageWatermarkRemover
 from pix_erase.infrastructure.adapters.image_converters.exif_image_extractor import ExifImageInfoExtractor
-from pix_erase.infrastructure.adapters.image_converters.rembg_image_remove_background_converter import \
-    RembgImageRemoveBackgroundConverter
-from pix_erase.infrastructure.adapters.image_converters.сv2_image_rotation_converter import Cv2ImageRotationConverter
-from pix_erase.infrastructure.adapters.internet_protocol.crtsh_certificate_transparency_port import \
-    CrtShCertificateTransparencyPort
+from pix_erase.infrastructure.adapters.image_converters.rembg_image_remove_background_converter import (
+    RembgImageRemoveBackgroundConverter,
+)
+from pix_erase.infrastructure.adapters.internet_protocol.crtsh_certificate_transparency_port import (
+    CrtShCertificateTransparencyPort,
+)
 from pix_erase.infrastructure.adapters.internet_protocol.dns_python_resolver_port import DnsPythonResolverPort
 from pix_erase.infrastructure.adapters.internet_protocol.http_title_fetcher_port import HttpTitleFetcher
 from pix_erase.infrastructure.adapters.internet_protocol.ip_api_service_port import IPAPIServicePort
@@ -112,13 +118,15 @@ from pix_erase.infrastructure.adapters.internet_protocol.raw_socket_ping_service
 from pix_erase.infrastructure.adapters.internet_protocol.socket_port_scan_service_port import SocketPortScanServicePort
 from pix_erase.infrastructure.adapters.persistence.aiobotocore_file_storage import AiobotocoreS3ImageStorage
 from pix_erase.infrastructure.adapters.persistence.alchemy_auth_session_command_gateway import (
-    SQLAlchemyAuthSessionCommandGateway
+    SQLAlchemyAuthSessionCommandGateway,
 )
 from pix_erase.infrastructure.adapters.persistence.alchemy_auth_transaction_manager import (
-    SqlaAuthSessionTransactionManager
+    SqlaAuthSessionTransactionManager,
+)
+from pix_erase.infrastructure.adapters.persistence.alchemy_image_comparison_gateway import (
+    SqlAlchemyImageComparisonGateway,
 )
 from pix_erase.infrastructure.adapters.persistence.alchemy_main_transaction_manager import SqlAlchemyTransactionManager
-from pix_erase.infrastructure.adapters.persistence.alchemy_image_comparison_gateway import SqlAlchemyImageComparisonGateway
 from pix_erase.infrastructure.adapters.persistence.alchemy_user_command_gateway import SqlAlchemyUserCommandGateway
 from pix_erase.infrastructure.adapters.persistence.alchemy_user_query_gateway import SqlAlchemyUserQueryGateway
 from pix_erase.infrastructure.adapters.persistence.cached_user_query_gateway import CachedUserQueryGateway
@@ -130,20 +138,20 @@ from pix_erase.infrastructure.auth.session.ports.transport import AuthSessionTra
 from pix_erase.infrastructure.auth.session.timer_utc import (
     AuthSessionRefreshThreshold,
     AuthSessionTtlMin,
-    UtcAuthSessionTimer
+    UtcAuthSessionTimer,
 )
 from pix_erase.infrastructure.cache.cache_store import CacheStore
-from pix_erase.infrastructure.cache.provider import get_redis_pool, get_redis
+from pix_erase.infrastructure.cache.provider import get_redis, get_redis_pool
 from pix_erase.infrastructure.cache.redis_cache_store import RedisCacheStore
 from pix_erase.infrastructure.http.base import HttpClient
 from pix_erase.infrastructure.http.httpx_client import HttpxHttpClient
 from pix_erase.infrastructure.http.provider import get_httpx_client
 from pix_erase.infrastructure.persistence.provider import (
     get_engine,
-    get_sessionmaker,
-    get_session,
+    get_s3_client,
     get_s3_session,
-    get_s3_client
+    get_session,
+    get_sessionmaker,
 )
 from pix_erase.infrastructure.scheduler.task_iq_task_scheduler import TaskIQTaskScheduler
 from pix_erase.setup.bootstrap import setup_schedule_source
@@ -196,11 +204,7 @@ def cache_provider() -> Provider:
 def auth_ports_provider() -> Provider:
     provider: Final[Provider] = Provider(scope=Scope.REQUEST)
     provider.from_context(provides=Request, scope=Scope.REQUEST)
-    provider.provide_all(
-        CurrentUserService,
-        JwtAccessTokenProcessor,
-        UtcAuthSessionTimer
-    )
+    provider.provide_all(CurrentUserService, JwtAccessTokenProcessor, UtcAuthSessionTimer)
     provider.provide(source=SecretsAuthSessionIdGenerator, provides=AuthSessionIDGenerator)
     provider.provide(source=AuthSessionAccessRevoker, provides=AccessRevoker)
     provider.provide(source=AuthSessionIdentityProvider, provides=IdentityProvider)
@@ -317,7 +321,7 @@ def interactors_provider() -> Provider:
         ScanCommonPortsQueryHandler,
         ScanPortQueryHandler,
         ScanPortsQueryHandler,
-        AnalyzeDomainQueryHandler
+        AnalyzeDomainQueryHandler,
     )
 
     return provider
@@ -335,5 +339,5 @@ def setup_providers() -> Iterable[Provider]:
         event_bus_provider(),
         s3_provider(),
         application_ports_provider(),
-        http_client_provider()
+        http_client_provider(),
     )

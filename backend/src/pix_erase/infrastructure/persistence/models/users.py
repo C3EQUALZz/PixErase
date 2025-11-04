@@ -22,7 +22,7 @@ users_table: sa.Table = sa.Table(
         sa.ARRAY(sa.UUID(as_uuid=True)),
         nullable=False,
         default=[],
-        server_default="{}"
+        server_default="{}",
     ),
     sa.Column(
         "created_at",
@@ -57,5 +57,5 @@ def map_users_table() -> None:
             "created_at": users_table.c.created_at,
             "updated_at": users_table.c.updated_at,
         },
-        column_prefix="_"
+        column_prefix="_",
     )

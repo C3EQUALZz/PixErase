@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field, BeforeValidator, AfterValidator, ConfigDict
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, EmailStr, Field
 
 
 class ChangeUserEmailSchemaRequest(BaseModel):
@@ -10,9 +10,7 @@ class ChangeUserEmailSchemaRequest(BaseModel):
         EmailStr,
         BeforeValidator(lambda x: str.strip(str(x))),
         Field(
-            title="User email",
-            description="The email of the user to get.",
-            examples=["super-bagratus2013@gmail.com"]
+            title="User email", description="The email of the user to get.", examples=["super-bagratus2013@gmail.com"]
         ),
         AfterValidator(lambda x: str.strip(str(x))),
     ]

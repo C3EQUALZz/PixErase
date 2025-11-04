@@ -9,10 +9,10 @@ class DummyContext(PermissionContext):
 
 
 class AlwaysAllow(Permission[DummyContext]):
-    def is_satisfied_by(self, context: DummyContext) -> bool:
+    def is_satisfied_by(self, context: DummyContext) -> bool:  # noqa: ARG002
         return True
 
 
 class AlwaysDeny(Permission[DummyContext]):
-    def is_satisfied_by(self, context: DummyContext) -> bool:
+    def is_satisfied_by(self, context: DummyContext) -> bool:  # noqa: ARG002
         return False

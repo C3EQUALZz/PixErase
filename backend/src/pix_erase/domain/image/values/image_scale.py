@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-
-from typing_extensions import override
+from typing import override
 
 from pix_erase.domain.common.values.base import BaseValueObject
 from pix_erase.domain.image.errors.image import BadImageScaleError

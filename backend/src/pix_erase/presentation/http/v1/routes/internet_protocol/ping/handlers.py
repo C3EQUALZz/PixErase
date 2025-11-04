@@ -1,26 +1,26 @@
-from typing import Final, Annotated
+from datetime import UTC, datetime
 from inspect import getdoc
-from datetime import datetime, UTC
+from typing import TYPE_CHECKING, Annotated, Final
+
 from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, status, Depends, Security
+from fastapi import APIRouter, Depends, Security, status
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
 from pix_erase.application.queries.internet_protocol.ping_internet_protocol import (
+    PingInternetProtocolQuery,
     PingInternetProtocolQueryHandler,
-    PingInternetProtocolQuery
 )
-from pix_erase.application.common.views.internet_protocol.ping_internet_protocol import PingInternetProtocolView
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 from pix_erase.presentation.http.v1.routes.internet_protocol.ping.schemas import PingSchemaRequest, PingSchemaResponse
 
-ip_ping_router: Final[APIRouter] = APIRouter(
-    route_class=DishkaRoute,
-    tags=["IP"]
-)
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.internet_protocol.ping_internet_protocol import PingInternetProtocolView
+
+ip_ping_router: Final[APIRouter] = APIRouter(route_class=DishkaRoute, tags=["IP"])
 tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
@@ -39,8 +39,8 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         status.HTTP_408_REQUEST_TIMEOUT: {"model": ExceptionSchema},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -51,12 +51,11 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         "http.route": "/ip/ping/",
         "feature": "ip",
         "action": "ping",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def ping_handler(
-        request_schema: Annotated[PingSchemaRequest, Depends()],
-        interactor: FromDishka[PingInternetProtocolQueryHandler]
+    request_schema: Annotated[PingSchemaRequest, Depends()], interactor: FromDishka[PingInternetProtocolQueryHandler]
 ) -> PingSchemaResponse:
     command: PingInternetProtocolQuery = PingInternetProtocolQuery(
         destination_address=str(request_schema.destination_address),

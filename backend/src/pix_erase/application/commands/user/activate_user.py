@@ -1,23 +1,25 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final
+from typing import TYPE_CHECKING, Final, final
 from uuid import UUID
 
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.user import UserNotFoundByIDError
-from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.services.access_service import AccessService
 from pix_erase.domain.user.services.authorization.permission import (
     CanManageRole,
-    RoleManagementContext,
     CanManageSubordinate,
-    UserManagementContext
+    RoleManagementContext,
+    UserManagementContext,
 )
 from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.domain.user.values.user_role import UserRole
+
+if TYPE_CHECKING:
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -36,12 +38,12 @@ class ActivateUserCommandHandler:
     """
 
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            user_command_gateway: UserCommandGateway,
-            user_service: UserService,
-            transaction_manager: TransactionManager,
-            access_service: AccessService,
+        self,
+        current_user_service: CurrentUserService,
+        user_command_gateway: UserCommandGateway,
+        user_service: UserService,
+        transaction_manager: TransactionManager,
+        access_service: AccessService,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway
@@ -70,7 +72,7 @@ class ActivateUserCommandHandler:
         )
 
         if user_for_activation is None:
-            msg: str = f"Cant find user by ID: {data.user_id}"
+            msg: str = f"Can't find user by ID: {data.user_id}"
             raise UserNotFoundByIDError(msg)
 
         self._access_service.authorize(

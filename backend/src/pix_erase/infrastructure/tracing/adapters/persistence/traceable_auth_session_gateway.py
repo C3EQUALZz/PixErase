@@ -1,8 +1,7 @@
-from typing import Final
+from typing import Final, override
 
 from opentelemetry import trace
 from opentelemetry.trace import SpanKind, Status, StatusCode, Tracer
-from typing_extensions import override
 
 from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.infrastructure.auth.session.model import AuthSession
@@ -24,7 +23,7 @@ class TraceableAuthSessionGateway(AuthSessionGateway):
             try:
                 await self._auth_session_gateway.add(auth_session)
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -43,11 +42,12 @@ class TraceableAuthSessionGateway(AuthSessionGateway):
                 else:
                     span.set_attribute("db.query.result.found", False)
                 span.set_status(Status(StatusCode.OK))
-                return auth_session
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return auth_session
 
     @override
     async def update(self, auth_session: AuthSession) -> None:
@@ -58,7 +58,7 @@ class TraceableAuthSessionGateway(AuthSessionGateway):
             try:
                 await self._auth_session_gateway.update(auth_session)
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -72,7 +72,7 @@ class TraceableAuthSessionGateway(AuthSessionGateway):
             try:
                 await self._auth_session_gateway.delete(auth_session_id)
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -86,7 +86,7 @@ class TraceableAuthSessionGateway(AuthSessionGateway):
             try:
                 await self._auth_session_gateway.delete_all_for_user(user_id)
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -97,4 +97,3 @@ def _set_auth_session_attributes(span: trace.Span, auth_session: AuthSession) ->
     span.set_attribute("auth_session.id", auth_session.id_)
     span.set_attribute("user.id", str(auth_session.user_id))
     span.set_attribute("auth_session.expiration", auth_session.expiration.isoformat())
-

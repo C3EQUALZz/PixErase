@@ -1,12 +1,14 @@
 import logging
-from typing import final, Final
+from typing import TYPE_CHECKING, Final, final
 
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
 from pix_erase.application.common.services.auth_session import AuthSessionService
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.user.read_user_by_id import ReadUserByIDView
-from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.services.user_service import UserService
+
+if TYPE_CHECKING:
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -19,11 +21,11 @@ class ReadCurrentUserHandler:
     """
 
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            user_command_gateway: UserQueryGateway,
-            user_service: UserService,
-            auth_session_service: AuthSessionService,
+        self,
+        current_user_service: CurrentUserService,
+        user_command_gateway: UserQueryGateway,
+        user_service: UserService,
+        auth_session_service: AuthSessionService,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._user_command_gateway: Final[UserQueryGateway] = user_command_gateway

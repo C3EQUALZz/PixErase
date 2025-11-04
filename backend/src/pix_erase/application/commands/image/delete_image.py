@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final, cast
+from typing import TYPE_CHECKING, Final, cast, final
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
@@ -8,9 +8,11 @@ from pix_erase.application.common.ports.transaction_manager import TransactionMa
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.image import ImageDoesntBelongToThisUserError, ImageNotFoundError
-from pix_erase.domain.image.entities.image import Image
-from pix_erase.domain.image.values.image_id import ImageID
-from pix_erase.domain.user.entities.user import User
+
+if TYPE_CHECKING:
+    from pix_erase.domain.image.entities.image import Image
+    from pix_erase.domain.image.values.image_id import ImageID
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -23,11 +25,11 @@ class DeleteImageCommand:
 @final
 class DeleteImageCommandHandler:
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            image_storage: ImageStorage,
-            user_command_gateway: UserCommandGateway,
-            transaction_manager: TransactionManager,
+        self,
+        current_user_service: CurrentUserService,
+        image_storage: ImageStorage,
+        user_command_gateway: UserCommandGateway,
+        transaction_manager: TransactionManager,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._image_storage: Final[ImageStorage] = image_storage
@@ -44,7 +46,7 @@ class DeleteImageCommandHandler:
         current_user: User = await self._current_user_service.get_current_user()
         logger.info("Successfully got current user: %s", current_user)
 
-        typed_image_id: ImageID = cast(ImageID, data.image_id)
+        typed_image_id: ImageID = cast("ImageID", data.image_id)
 
         logger.info("Started searching for image with id: %s", typed_image_id)
         image: Image | None = await self._image_storage.read_by_id(typed_image_id)
@@ -56,7 +58,7 @@ class DeleteImageCommandHandler:
         logger.info("Successfully found image with id: %s", image)
 
         if typed_image_id not in current_user.images:
-            msg = "Photo with id: %s doesnt belong to current user"
+            msg = "Photo with id: %s doesn't belong to current user"
             raise ImageDoesntBelongToThisUserError(msg)
 
         current_user.images.remove(typed_image_id)

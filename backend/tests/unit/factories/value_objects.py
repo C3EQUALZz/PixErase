@@ -3,27 +3,26 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from pix_erase.domain.common.values.base import BaseValueObject
+from pix_erase.domain.internet_protocol.values.domain_id import DomainID
+from pix_erase.domain.internet_protocol.values.domain_name import DomainName
+from pix_erase.domain.internet_protocol.values.ip_address import IPv4Address, IPv6Address
+from pix_erase.domain.internet_protocol.values.packet_size import PacketSize
+from pix_erase.domain.internet_protocol.values.ping_result import PingResult
+from pix_erase.domain.internet_protocol.values.port import Port
+from pix_erase.domain.internet_protocol.values.time_to_live import TimeToLive
+from pix_erase.domain.internet_protocol.values.timeout import Timeout
 from pix_erase.domain.user.values.hashed_password import HashedPassword
 from pix_erase.domain.user.values.raw_password import RawPassword
-from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.domain.user.values.user_email import UserEmail
+from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.domain.user.values.user_name import Username
-from pix_erase.domain.internet_protocol.values.ip_address import IPv4Address, IPv6Address
-from pix_erase.domain.internet_protocol.values.domain_name import DomainName
-from pix_erase.domain.internet_protocol.values.port import Port
-from pix_erase.domain.internet_protocol.values.timeout import Timeout
-from pix_erase.domain.internet_protocol.values.packet_size import PacketSize
-from pix_erase.domain.internet_protocol.values.time_to_live import TimeToLive
-from pix_erase.domain.internet_protocol.values.ping_result import PingResult
-from pix_erase.domain.internet_protocol.values.domain_id import DomainID
 
 
 @dataclass(frozen=True, slots=True, repr=True)
 class SingleFieldVO(BaseValueObject):
     value: int
 
-    def _validate(self) -> None:
-        ...
+    def _validate(self) -> None: ...
 
     def __str__(self) -> str:
         return str(self.value)
@@ -34,8 +33,7 @@ class MultiFieldVO(BaseValueObject):
     value1: int
     value2: str
 
-    def _validate(self) -> None:
-        ...
+    def _validate(self) -> None: ...
 
     def __str__(self) -> str:
         return str(self.value1) + str(self.value2)
@@ -98,12 +96,14 @@ def create_time_to_live(value: int = 64) -> TimeToLive:
 
 
 def create_ping_result(
-    success: bool = True,
+    success: bool | None = None,
     response_time_ms: float | None = None,
     error_message: str | None = None,
     ttl: int | None = 64,
     packet_size: int | None = 56,
 ) -> PingResult:
+    if success is None:
+        success = True
     # Для successful ping нужен response_time_ms, для failed - не должен быть установлен
     if success and response_time_ms is None:
         response_time_ms = 10.5

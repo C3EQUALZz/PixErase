@@ -11,8 +11,7 @@ from pix_erase.application.consts import (
     AUTH_INVALID_PASSWORD,
     USER_NOT_FOUND,
 )
-from pix_erase.application.errors.auth import AlreadyAuthenticatedError
-from pix_erase.application.errors.auth import AuthenticationError
+from pix_erase.application.errors.auth import AlreadyAuthenticatedError, AuthenticationError
 from pix_erase.application.errors.user import UserNotFoundByEmailError
 from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.domain.user.values.raw_password import RawPassword
@@ -46,11 +45,11 @@ class LogInHandler:
     """
 
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            user_command_gateway: UserCommandGateway,
-            user_service: UserService,
-            auth_session_service: AuthSessionService,
+        self,
+        current_user_service: CurrentUserService,
+        user_command_gateway: UserCommandGateway,
+        user_service: UserService,
+        auth_session_service: AuthSessionService,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway

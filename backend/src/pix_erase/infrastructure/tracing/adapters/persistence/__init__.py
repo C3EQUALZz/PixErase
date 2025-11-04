@@ -15,10 +15,9 @@ from pix_erase.infrastructure.tracing.adapters.persistence.traceable_user_query_
 )
 
 __all__ = [
+    "TraceableAuthSessionGateway",
     "TraceableFileStorage",
+    "TraceableTransactionManager",
     "TraceableUserCommandGateway",
     "TraceableUserQueryGateway",
-    "TraceableAuthSessionGateway",
-    "TraceableTransactionManager",
 ]
-

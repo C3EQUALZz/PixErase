@@ -1,16 +1,18 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final
+from typing import TYPE_CHECKING, Final, final
 
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
 from pix_erase.application.common.query_params.pagination import Pagination
 from pix_erase.application.common.query_params.sorting import SortingOrder
-from pix_erase.application.common.query_params.user_filters import UserQueryFilters, UserListParams, UserListSorting
+from pix_erase.application.common.query_params.user_filters import UserListParams, UserListSorting, UserQueryFilters
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.user.read_user_by_id import ReadUserByIDView
 from pix_erase.application.errors.query_params import SortingError
-from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.services.access_service import AccessService
+
+if TYPE_CHECKING:
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -31,10 +33,10 @@ class ReadAllUsersQueryHandler:
     """
 
     def __init__(
-            self,
-            user_query_gateway: UserQueryGateway,
-            current_user_service: CurrentUserService,
-            access_service: AccessService,
+        self,
+        user_query_gateway: UserQueryGateway,
+        current_user_service: CurrentUserService,
+        access_service: AccessService,
     ) -> None:
         self._user_query_gateway: Final[UserQueryGateway] = user_query_gateway
         self._current_user_service: Final[CurrentUserService] = current_user_service
@@ -60,9 +62,7 @@ class ReadAllUsersQueryHandler:
             ),
         )
 
-        users: list[User] | None = await self._user_query_gateway.read_all_users(
-            user_list_params
-        )
+        users: list[User] | None = await self._user_query_gateway.read_all_users(user_list_params)
 
         if users is None:
             logger.error(
@@ -73,13 +73,7 @@ class ReadAllUsersQueryHandler:
             raise SortingError(msg)
 
         response: list[ReadUserByIDView] = [
-            ReadUserByIDView(
-                id=user.id,
-                email=str(user.email),
-                name=str(user.name),
-                role=user.role
-            )
-            for user in users
+            ReadUserByIDView(id=user.id, email=str(user.email), name=str(user.name), role=user.role) for user in users
         ]
 
         return response

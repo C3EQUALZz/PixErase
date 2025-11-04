@@ -1,7 +1,7 @@
 import pytest
 
 from pix_erase.domain.user.errors.raw_password import WeakPasswordWasProvidedError
-from pix_erase.domain.user.values.raw_password import RawPassword, MIN_PASSWORD_LENGTH
+from pix_erase.domain.user.values.raw_password import MIN_PASSWORD_LENGTH, RawPassword
 
 
 def test_accepts_boundary_length() -> None:

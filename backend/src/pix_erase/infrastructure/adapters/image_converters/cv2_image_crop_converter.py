@@ -1,6 +1,7 @@
+from typing import override
+
 import cv2
 import numpy as np
-from typing_extensions import override
 
 from pix_erase.domain.image.ports.image_crop_converter import ImageCropConverter
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
@@ -23,6 +24,6 @@ class Cv2ImageCropConverter(ImageCropConverter):
         resized_img: cv2.typing.MatLike = cv2.resize(img, (new_width, new_height))
 
         # Кодируем изображение обратно в байты
-        _, buffer = cv2.imencode('.jpg', resized_img)
+        _, buffer = cv2.imencode(".jpg", resized_img)
 
         return buffer.tobytes()

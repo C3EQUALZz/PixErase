@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final
+from typing import Final, final
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
@@ -25,10 +25,10 @@ class RemoveWatermarkFromImageCommandHandler:
     """
 
     def __init__(
-            self,
-            image_storage: ImageStorage,
-            task_scheduler: TaskScheduler,
-            current_user_service: CurrentUserService,
+        self,
+        image_storage: ImageStorage,
+        task_scheduler: TaskScheduler,
+        current_user_service: CurrentUserService,
     ) -> None:
         self._image_storage: Final[ImageStorage] = image_storage
         self._task_scheduler: Final[TaskScheduler] = task_scheduler
@@ -40,5 +40,3 @@ class RemoveWatermarkFromImageCommandHandler:
             data.image_id,
             data.use_ai,
         )
-
-

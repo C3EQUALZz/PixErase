@@ -1,5 +1,5 @@
 from typing import cast
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -22,7 +22,7 @@ def fake_transaction() -> TransactionManager:
     fake = Mock()
     fake.commit = AsyncMock()
     fake.flush = AsyncMock()
-    return cast(TransactionManager, fake)
+    return cast("TransactionManager", fake)
 
 
 @pytest.fixture
@@ -33,21 +33,21 @@ def fake_user_command_gateway() -> UserCommandGateway:
     fake.read_by_email = AsyncMock()
     fake.delete_by_id = AsyncMock()
     fake.update = AsyncMock()
-    return cast(UserCommandGateway, fake)
+    return cast("UserCommandGateway", fake)
 
 
 @pytest.fixture
 def fake_current_user_service() -> CurrentUserService:
     fake = Mock()
     fake.get_current_user = AsyncMock(return_value=create_user())
-    return cast(CurrentUserService, fake)
+    return cast("CurrentUserService", fake)
 
 
 @pytest.fixture
 def fake_event_bus() -> EventBus:
     fake = Mock()
     fake.publish = AsyncMock()
-    return cast(EventBus, fake)
+    return cast("EventBus", fake)
 
 
 @pytest.fixture
@@ -55,14 +55,14 @@ def fake_password_hasher() -> PasswordHasher:
     fake = Mock()
     fake.hash = Mock(return_value=HashedPassword(b"hashed_password"))
     fake.verify = Mock(return_value=True)
-    return cast(PasswordHasher, fake)
+    return cast("PasswordHasher", fake)
 
 
 @pytest.fixture
 def fake_user_id_generator() -> UserIdGenerator:
     fake = Mock()
     fake.return_value = create_user_id()
-    return cast(UserIdGenerator, fake)
+    return cast("UserIdGenerator", fake)
 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ def fake_user_service() -> UserService:
     fake.change_name = Mock()
     fake.change_password = Mock()
     fake.pull_events = Mock(return_value=[])
-    return cast(UserService, fake)
+    return cast("UserService", fake)
 
 
 @pytest.fixture
@@ -83,7 +83,7 @@ def fake_access_service() -> AccessService:
     fake.toggle_user_admin_role = Mock()
     fake.toggle_user_activation = Mock()
     fake.pull_events = Mock(return_value=[])
-    return cast(AccessService, fake)
+    return cast("AccessService", fake)
 
 
 @pytest.fixture
@@ -91,5 +91,4 @@ def fake_user_query_gateway() -> UserQueryGateway:
     fake = Mock()
     fake.read_user_by_id = AsyncMock()
     fake.read_all_users = AsyncMock()
-    return cast(UserQueryGateway, fake)
-
+    return cast("UserQueryGateway", fake)

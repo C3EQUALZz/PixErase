@@ -1,4 +1,4 @@
-from typing import override, Final
+from typing import Final, override
 
 from pix_erase.domain.user.services.authorization.base import (
     Permission,

@@ -1,9 +1,9 @@
-from pix_erase.domain.user.errors.access_service import AuthorizationError
 from pix_erase.domain.common.services.base import DomainService
 from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.errors.access_service import (
+    ActivationChangeNotPermittedError,
+    AuthorizationError,
     RoleChangeNotPermittedError,
-    ActivationChangeNotPermittedError
 )
 from pix_erase.domain.user.events import UserChangedRoleEvent, UserToggleActivationEvent
 from pix_erase.domain.user.services.authorization.base import (
@@ -57,10 +57,10 @@ class AccessService(DomainService):
 
     # noinspection PyMethodMayBeStatic
     def authorize[PC: PermissionContext](
-            self,
-            permission: Permission[PC],
-            *,
-            context: PC,
+        self,
+        permission: Permission[PC],
+        *,
+        context: PC,
     ) -> None:
         """
         :raises AuthorizationError:

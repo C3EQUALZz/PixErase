@@ -1,8 +1,8 @@
-from sqlalchemy import Select, select, or_, and_
+from typing import Final, override
+
+from sqlalchemy import Select, and_, or_, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing_extensions import override
-from typing import Final
 
 from pix_erase.application.common.ports.image.comparison_gateway import ImageComparisonGateway
 from pix_erase.domain.image.entities.image_comparison import ImageComparison
@@ -30,14 +30,11 @@ class SqlAlchemyImageComparisonGateway(ImageComparisonGateway):
         )
 
         try:
-            comparison: ImageComparison | None = (
-                await self._session.execute(select_stmt)
-            ).scalar_one_or_none()
-
-            return comparison
-
+            comparison: ImageComparison | None = (await self._session.execute(select_stmt)).scalar_one_or_none()
         except SQLAlchemyError as error:
             raise RepoError(DB_QUERY_FAILED) from error
+        else:
+            return comparison
 
     @override
     async def read_by_image_ids(
@@ -60,12 +57,9 @@ class SqlAlchemyImageComparisonGateway(ImageComparisonGateway):
         )
 
         try:
-            comparison: ImageComparison | None = (
-                await self._session.execute(select_stmt)
-            ).scalar_one_or_none()
-
-            return comparison
+            comparison: ImageComparison | None = (await self._session.execute(select_stmt)).scalar_one_or_none()
 
         except SQLAlchemyError as error:
             raise RepoError(DB_QUERY_FAILED) from error
-
+        else:
+            return comparison

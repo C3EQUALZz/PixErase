@@ -1,12 +1,14 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final
+from typing import TYPE_CHECKING, Final, final
 
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.internet_protocol.port_scan import PortScanSummaryView
 from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
 from pix_erase.domain.internet_protocol.values import IPAddress, Timeout
-from pix_erase.domain.user.entities.user import User
+
+if TYPE_CHECKING:
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -14,6 +16,7 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 @dataclass(frozen=True, slots=True, kw_only=True)
 class ScanCommonPortsQuery:
     """Command to scan common well-known ports on a target."""
+
     target: str
     timeout: float = 1.0
     max_concurrent: int = 100
@@ -24,12 +27,12 @@ class ScanCommonPortsQueryHandler:
     """
     Scan common well-known ports (1-1023) on a target IP address or hostname.
     It's useful for a quick security assessment of a target.
-    
+
     - Opens to everyone.
     - Async processing, non-blocking.
     - Scans common ports (1-1023) on target.
     """
-    
+
     def __init__(
         self,
         internet_protocol_service: InternetProtocolService,
@@ -41,10 +44,10 @@ class ScanCommonPortsQueryHandler:
     async def __call__(self, data: ScanCommonPortsQuery) -> PortScanSummaryView:
         """
         Execute common ports scan command using domain service.
-        
+
         Args:
             data: Common ports scan command data
-            
+
         Returns:
             PortScanSummaryView containing the scan summary
         """
@@ -103,4 +106,3 @@ class ScanCommonPortsQueryHandler:
 
         logger.info("Created view: %s", view)
         return view
-

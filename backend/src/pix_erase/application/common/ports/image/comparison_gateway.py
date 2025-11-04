@@ -25,4 +25,3 @@ class ImageComparisonGateway(Protocol):
     ) -> ImageComparison | None:
         """Read comparison by image IDs (order-independent)."""
         ...
-

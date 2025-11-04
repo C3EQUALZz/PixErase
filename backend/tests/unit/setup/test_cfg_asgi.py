@@ -38,5 +38,3 @@ def test_asgi_port_rejects_incorrect_value(port: int) -> None:
     # Act & Assert
     with pytest.raises(ValidationError):
         ASGIConfig.model_validate(data)
-
-

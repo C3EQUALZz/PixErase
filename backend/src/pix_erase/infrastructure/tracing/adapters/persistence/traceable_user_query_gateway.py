@@ -1,8 +1,7 @@
-from typing import Final
+from typing import Final, override
 
 from opentelemetry import trace
 from opentelemetry.trace import SpanKind, Status, StatusCode, Tracer
-from typing_extensions import override
 
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
 from pix_erase.application.common.query_params.user_filters import UserListParams
@@ -30,11 +29,12 @@ class TraceableUserQueryGateway(UserQueryGateway):
                 else:
                     span.set_attribute("db.query.result.found", False)
                 span.set_status(Status(StatusCode.OK))
-                return user
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return user
 
     @override
     async def read_all_users(self, user_list_params: UserListParams) -> list[User] | None:
@@ -51,11 +51,12 @@ class TraceableUserQueryGateway(UserQueryGateway):
                     span.set_attribute("db.query.result.found", False)
                     span.set_attribute("db.query.result.count", 0)
                 span.set_status(Status(StatusCode.OK))
-                return users
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return users
 
 
 def _set_user_attributes(span: trace.Span, user: User) -> None:
@@ -70,23 +71,10 @@ def _set_user_attributes(span: trace.Span, user: User) -> None:
 
 def _set_user_list_params_attributes(span: trace.Span, user_list_params: UserListParams) -> None:
     """Set user list query parameters attributes on a span."""
-
-    limit: int
-
-    if user_list_params.pagination.limit is None:
-        limit = 0
-    else:
-        limit = user_list_params.pagination.limit
-
-    offset: int
-
-    if user_list_params.pagination.offset is None:
-        offset = 0
-    else:
-        offset = user_list_params.pagination.offset
+    limit: int = 0 if user_list_params.pagination.limit is None else user_list_params.pagination.limit
+    offset: int = 0 if user_list_params.pagination.offset is None else user_list_params.pagination.offset
 
     span.set_attribute("db.query.sorting.field", user_list_params.sorting.sorting_field)
     span.set_attribute("db.query.sorting.order", user_list_params.sorting.sorting_order)
     span.set_attribute("db.query.pagination.limit", limit)
     span.set_attribute("db.query.pagination.offset", offset)
-

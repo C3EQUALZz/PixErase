@@ -19,9 +19,9 @@ class LogOutHandler:
     """
 
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            auth_session_service: AuthSessionService,
+        self,
+        current_user_service: CurrentUserService,
+        auth_session_service: AuthSessionService,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._auth_session_service: Final[AuthSessionService] = auth_session_service

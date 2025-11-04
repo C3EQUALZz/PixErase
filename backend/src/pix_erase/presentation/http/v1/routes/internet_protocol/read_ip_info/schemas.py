@@ -1,4 +1,4 @@
-from pydantic import BaseModel, networks, ConfigDict
+from pydantic import BaseModel, ConfigDict, networks
 
 
 class ReadIPInfoSchemaRequest(BaseModel):

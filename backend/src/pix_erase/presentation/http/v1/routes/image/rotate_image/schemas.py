@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, ConfigDict
 from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RotateImageSchemaRequest(BaseModel):
@@ -11,7 +12,7 @@ class RotateImageSchemaRequest(BaseModel):
             title="Angle for rotating",
             description="The angle value for rotating image",
             examples=[0, 360, 120, 180, -120],
-        )
+        ),
     ]
 
 
@@ -23,6 +24,6 @@ class RotateImageSchemaResponse(BaseModel):
             description="The unique task id that process request from user",
             examples=["rotate_image:75079971-fb0e-4e04-bf07-ceb57faebe84"],
             min_length=1,
-            pattern=r"^rotate_image:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-        )
+            pattern=r"^rotate_image:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+        ),
     ]

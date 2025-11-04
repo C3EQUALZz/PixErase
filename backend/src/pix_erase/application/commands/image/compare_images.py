@@ -2,18 +2,22 @@ import asyncio
 import logging
 from asyncio import Task
 from dataclasses import dataclass
-from typing import final, Final, cast, Coroutine, Any
+from typing import TYPE_CHECKING, Any, Final, cast, final
 from uuid import UUID
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.ports.scheduler.payloads.images import CompareImagesPayload
-from pix_erase.application.common.ports.scheduler.task_id import TaskKey, TaskID
+from pix_erase.application.common.ports.scheduler.task_id import TaskID, TaskKey
 from pix_erase.application.common.ports.scheduler.task_scheduler import TaskScheduler
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.image import ImageDoesntBelongToThisUserError, ImageNotFoundError
-from pix_erase.domain.image.entities.image import Image
-from pix_erase.domain.image.values.image_id import ImageID
-from pix_erase.domain.user.entities.user import User
+
+if TYPE_CHECKING:
+    from collections.abc import Coroutine
+
+    from pix_erase.domain.image.entities.image import Image
+    from pix_erase.domain.image.values.image_id import ImageID
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -31,11 +35,12 @@ class CompareImageCommandHandler:
     - Async processing, non-blocking.
     - Returns TaskID for tracking comparison progress.
     """
+
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            image_storage: ImageStorage,
-            scheduler: TaskScheduler,
+        self,
+        current_user_service: CurrentUserService,
+        image_storage: ImageStorage,
+        scheduler: TaskScheduler,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._image_storage: Final[ImageStorage] = image_storage
@@ -52,15 +57,15 @@ class CompareImageCommandHandler:
         current_user: User = await self._current_user_service.get_current_user()
         logger.info("Successfully got current user id: %s", current_user.id)
 
-        typed_first_image_id: ImageID = cast(ImageID, data.first_image)
-        typed_second_image_id: ImageID = cast(ImageID, data.second_image)
+        typed_first_image_id: ImageID = cast("ImageID", data.first_image)
+        typed_second_image_id: ImageID = cast("ImageID", data.second_image)
 
         if typed_first_image_id not in current_user.images:
-            msg = f"Image with id: {data.first_image} doesnt belong to this user."
+            msg = f"Image with id: {data.first_image} doesn't belong to this user."
             raise ImageDoesntBelongToThisUserError(msg)
 
         if typed_second_image_id not in current_user.images:
-            msg = f"Image with id: {data.second_image} doesnt belong to this user."
+            msg = f"Image with id: {data.second_image} doesn't belong to this user."
             raise ImageDoesntBelongToThisUserError(msg)
 
         first_image: Image | None = await self._image_storage.read_by_id(image_id=typed_first_image_id)
@@ -105,5 +110,3 @@ class CompareImageCommandHandler:
         )
 
         return task_id
-
-

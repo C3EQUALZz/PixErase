@@ -1,11 +1,11 @@
 import math
-from typing_extensions import override
+from typing import override
 
 import cv2
 import numpy as np
 
 from pix_erase.domain.image.ports.image_nearest_neighbour_upscale_converter import (
-    ImageNearestNeighbourUpscalerConverter
+    ImageNearestNeighbourUpscalerConverter,
 )
 from pix_erase.domain.image.values.image_scale import ImageScale
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError

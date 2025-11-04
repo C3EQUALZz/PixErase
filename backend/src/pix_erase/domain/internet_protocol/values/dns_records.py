@@ -16,7 +16,7 @@ class DnsRecordsDict(TypedDict):
 class DnsRecords:
     """
     Value object representing DNS records for a domain.
-    
+
     Contains different types of DNS records including A, AAAA, MX, NS, TXT, CNAME, and SOA.
     """
 

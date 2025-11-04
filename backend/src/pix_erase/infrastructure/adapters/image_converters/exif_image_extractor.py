@@ -1,6 +1,8 @@
 import logging
-from datetime import datetime
-from typing import override, Final, Any, Mapping, Literal, MutableMapping, cast
+from collections.abc import Mapping, MutableMapping
+from datetime import UTC, datetime
+from fractions import Fraction
+from typing import Any, Final, Literal, cast, override
 
 import cv2
 import exif
@@ -8,17 +10,17 @@ import numpy as np
 from exif import Image
 
 from pix_erase.application.common.ports.image.extractor import (
-    ImageInfoExtractor,
-    ImageInfo,
-    GPSInfo,
-    FlashInfo,
-    ExposureSettings,
     CameraSettings,
     DateTimeInfo,
-    Orientation,
+    ExposureSettings,
+    FlashInfo,
+    FlashMode,
+    GPSInfo,
+    ImageInfo,
+    ImageInfoExtractor,
     MeteringMode,
+    Orientation,
     WhiteBalance,
-    FlashMode
 )
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
 
@@ -33,7 +35,8 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         img = cv2.imdecode(buffer, cv2.IMREAD_COLOR)
 
         if img is None:
-            raise ImageDecodingError("Failed to decode image")
+            msg = "Failed to decode image"
+            raise ImageDecodingError(msg)
 
         height, width, _ = img.shape
 
@@ -60,7 +63,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
             exposure=exposure_settings,
             flash=flash_info,
             gps=gps_info,
-            datetime_info=datetime_info
+            datetime_info=datetime_info,
         )
 
     @staticmethod
@@ -74,12 +77,27 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
                 return exif_data
 
             attributes = [
-                "model", "orientation", "datetime", "make", "f_number",
-                "exposure_time", "focal_length", "flash", "metering_mode",
-                "photographic_sensitivity", "focal_length_in_35mm_film",
-                "max_aperture_value", "datetime_digitized", "exposure_bias_value",
-                "white_balance", "datetime_original", "aperture_value",
-                "gps_latitude_ref", "gps_latitude", "gps_longitude", "gps_longitude_ref"
+                "model",
+                "orientation",
+                "datetime",
+                "make",
+                "f_number",
+                "exposure_time",
+                "focal_length",
+                "flash",
+                "metering_mode",
+                "photographic_sensitivity",
+                "focal_length_in_35mm_film",
+                "max_aperture_value",
+                "datetime_digitized",
+                "exposure_bias_value",
+                "white_balance",
+                "datetime_original",
+                "aperture_value",
+                "gps_latitude_ref",
+                "gps_latitude",
+                "gps_longitude",
+                "gps_longitude_ref",
             ]
 
             for attr in attributes:
@@ -90,79 +108,76 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
                 except AttributeError:
                     continue
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to extract EXIF data: %s", e)
 
-        return cast(Mapping[str, Any], exif_data)
+        return cast("Mapping[str, Any]", exif_data)
 
     def _create_camera_settings(self, exif_data: Mapping[str, Any]) -> CameraSettings | None:
-        if not any([exif_data.get('make'), exif_data.get('model')]):
+        if not any([exif_data.get("make"), exif_data.get("model")]):
             return None
 
         return CameraSettings(
-            make=self._format_camera_make(exif_data.get('make')),
-            model=self._format_camera_model(exif_data.get('model')),
-            orientation=self._parse_orientation(exif_data.get('orientation')),
-            focal_length=self._format_focal_length(exif_data.get('focal_length')),
-            focal_length_35mm=self._format_focal_length(exif_data.get('focal_length_in_35mm_film')),
-            max_aperture=self._format_aperture(exif_data.get('max_aperture_value')),
-            aperture_value=self._format_aperture(exif_data.get('aperture_value'))
+            make=self._format_camera_make(exif_data.get("make")),
+            model=self._format_camera_model(exif_data.get("model")),
+            orientation=self._parse_orientation(exif_data.get("orientation")),
+            focal_length=self._format_focal_length(exif_data.get("focal_length")),
+            focal_length_35mm=self._format_focal_length(exif_data.get("focal_length_in_35mm_film")),
+            max_aperture=self._format_aperture(exif_data.get("max_aperture_value")),
+            aperture_value=self._format_aperture(exif_data.get("aperture_value")),
         )
 
     def _create_exposure_settings(self, exif_data: Mapping[str, Any]) -> ExposureSettings | None:
-        if not any([
-            exif_data.get('exposure_time'), exif_data.get('f_number'),
-            exif_data.get('photographic_sensitivity')
-        ]):
+        if not any(
+            [exif_data.get("exposure_time"), exif_data.get("f_number"), exif_data.get("photographic_sensitivity")]
+        ):
             return None
 
         return ExposureSettings(
-            exposure_time=self._format_exposure_time(exif_data.get('exposure_time')),
-            aperture=self._format_aperture(exif_data.get('f_number')),
-            iso=exif_data.get('photographic_sensitivity'),
-            exposure_bias=self._format_exposure_bias(exif_data.get('exposure_bias_value')),
-            metering_mode=self._parse_metering_mode(exif_data.get('metering_mode')),
-            white_balance=self._parse_white_balance(exif_data.get('white_balance'))
+            exposure_time=self._format_exposure_time(exif_data.get("exposure_time")),
+            aperture=self._format_aperture(exif_data.get("f_number")),
+            iso=exif_data.get("photographic_sensitivity"),
+            exposure_bias=self._format_exposure_bias(exif_data.get("exposure_bias_value")),
+            metering_mode=self._parse_metering_mode(exif_data.get("metering_mode")),
+            white_balance=self._parse_white_balance(exif_data.get("white_balance")),
         )
 
     def _create_flash_info(self, exif_data: Mapping[str, Any]) -> FlashInfo | None:
-        flash = exif_data.get('flash')
+        flash = exif_data.get("flash")
         if not flash:
             return None
 
         return FlashInfo(
-            fired=getattr(flash, 'flash_fired', False),
+            fired=getattr(flash, "flash_fired", False),
             mode=self._parse_flash_mode(flash),
-            return_light=getattr(flash, 'flash_return', False),
-            function_present=not getattr(flash, 'flash_function_not_present', True),
-            red_eye_reduction=getattr(flash, 'red_eye_reduction_supported', False)
+            return_light=getattr(flash, "flash_return", False),
+            function_present=not getattr(flash, "flash_function_not_present", True),
+            red_eye_reduction=getattr(flash, "red_eye_reduction_supported", False),
         )
 
     def _create_gps_info(self, exif_data: Mapping[str, Any]) -> GPSInfo | None:
-        latitude = exif_data.get('gps_latitude')
-        longitude = exif_data.get('gps_longitude')
+        latitude = exif_data.get("gps_latitude")
+        longitude = exif_data.get("gps_longitude")
 
         if not latitude or not longitude:
             return None
 
         lat_decimal, lon_decimal = self._convert_gps_to_decimal(
-            latitude, longitude,
-            exif_data.get('gps_latitude_ref', 'N'),
-            exif_data.get('gps_longitude_ref', 'E')
+            latitude, longitude, exif_data.get("gps_latitude_ref", "N"), exif_data.get("gps_longitude_ref", "E")
         )
 
         return GPSInfo(
             latitude=lat_decimal,
             longitude=lon_decimal,
-            latitude_ref=exif_data.get('gps_latitude_ref'),
-            longitude_ref=exif_data.get('gps_longitude_ref')
+            latitude_ref=exif_data.get("gps_latitude_ref"),
+            longitude_ref=exif_data.get("gps_longitude_ref"),
         )
 
     def _create_datetime_info(self, exif_data: Mapping[str, Any]) -> DateTimeInfo | None:
         return DateTimeInfo(
-            created=self._parse_datetime(exif_data.get('datetime')),
-            digitized=self._parse_datetime(exif_data.get('datetime_digitized')),
-            original=self._parse_datetime(exif_data.get('datetime_original'))
+            created=self._parse_datetime(exif_data.get("datetime")),
+            digitized=self._parse_datetime(exif_data.get("datetime_digitized")),
+            original=self._parse_datetime(exif_data.get("datetime_original")),
         )
 
     @staticmethod
@@ -170,7 +185,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         if orientation is None:
             return None
         try:
-            return Orientation(orientation.value if hasattr(orientation, 'value') else orientation)
+            return Orientation(orientation.value if hasattr(orientation, "value") else orientation)
         except (ValueError, TypeError):
             return None
 
@@ -179,7 +194,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         if metering_mode is None:
             return None
         try:
-            return MeteringMode(metering_mode.value if hasattr(metering_mode, 'value') else metering_mode)
+            return MeteringMode(metering_mode.value if hasattr(metering_mode, "value") else metering_mode)
         except (ValueError, TypeError):
             return None
 
@@ -188,7 +203,7 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         if white_balance is None:
             return None
         try:
-            return WhiteBalance(white_balance.value if hasattr(white_balance, 'value') else white_balance)
+            return WhiteBalance(white_balance.value if hasattr(white_balance, "value") else white_balance)
         except (ValueError, TypeError):
             return None
 
@@ -199,13 +214,13 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         try:
             # Создаем битовую маску для определения режима вспышки
             mode_value = 0
-            if getattr(flash, 'flash_fired', False):
+            if getattr(flash, "flash_fired", False):
                 mode_value |= 1
-            if getattr(flash, 'flash_return', 0):
+            if getattr(flash, "flash_return", 0):
                 mode_value |= 4
-            if getattr(flash, 'flash_mode', 0):
+            if getattr(flash, "flash_mode", 0):
                 mode_value |= 24
-            if getattr(flash, 'red_eye_reduction_supported', False):
+            if getattr(flash, "red_eye_reduction_supported", False):
                 mode_value |= 64
 
             return FlashMode(mode_value)
@@ -215,16 +230,16 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
     @staticmethod
     def _detect_format(data: bytes) -> Literal["JPEG", "PNG", "GIF", "WEBP", "UNKNOWN"]:
         """Определяет формат изображения по сигнатурам"""
-        if data.startswith(b'\xff\xd8\xff'):
+        if data.startswith(b"\xff\xd8\xff"):
             return "JPEG"
 
-        if data.startswith(b'\x89PNG\r\n\x1a\n'):
+        if data.startswith(b"\x89PNG\r\n\x1a\n"):
             return "PNG"
 
-        if data.startswith(b'GIF8'):
+        if data.startswith(b"GIF8"):
             return "GIF"
 
-        if data.startswith(b'RIFF') and data[8:12] == b'WEBP':
+        if data.startswith(b"RIFF") and data[8:12] == b"WEBP":
             return "WEBP"
 
         return "UNKNOWN"
@@ -246,11 +261,11 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         format_type = self._detect_format(data)
 
         if format_type == "GIF":
-            return data.count(b'\x21\xF9\x04') > 1
-        elif format_type == "PNG":
-            return b'acTL' in data
-        elif format_type == "WEBP":
-            return b'ANIM' in data
+            return data.count(b"\x21\xf9\x04") > 1
+        if format_type == "PNG":
+            return b"acTL" in data
+        if format_type == "WEBP":
+            return b"ANIM" in data
 
         return False
 
@@ -266,7 +281,6 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
                 return f"{numerator}/{denominator}s"
             if isinstance(value, float):
                 # Для десятичных значений (например, 0.0125)
-                from fractions import Fraction
                 frac = Fraction(value).limit_denominator(1000)
                 return f"{frac.numerator}/{frac.denominator}s"
             return str(value)
@@ -305,16 +319,13 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
         if not datetime_str:
             return None
         try:
-            return datetime.strptime(datetime_str, '%Y:%m:%d %H:%M:%S')
+            return datetime.strptime(datetime_str, "%Y:%m:%d %H:%M:%S").replace(tzinfo=UTC)
         except (ValueError, TypeError):
             return None
 
     @staticmethod
     def _convert_gps_to_decimal(
-            latitude: tuple[float, float, float],
-            longitude: tuple[float, float, float],
-            lat_ref: str,
-            lon_ref: str
+        latitude: tuple[float, float, float], longitude: tuple[float, float, float], lat_ref: str, lon_ref: str
     ) -> tuple[float, float]:
         """
         Конвертирует GPS координаты из формата (degrees, minutes, seconds) в десятичные градусы
@@ -349,19 +360,17 @@ class ExifImageInfoExtractor(ImageInfoExtractor):
                     decimal = float(degrees) + float(minutes) / 60 + float(seconds) / 3600
 
                     # Учитываем направление (N/S, E/W)
-                    if ref in ['S', 'W']:
+                    if ref in ["S", "W"]:
                         decimal = -decimal
 
                     return decimal
-                else:
-                    # Если координата уже в неправильном формате, пытаемся преобразовать как есть
-                    return float(coord) # type: ignore
-            except (TypeError, ValueError, ZeroDivisionError) as e:
-                logger.warning(f"Failed to convert GPS coordinate {coord}: {e}")
+                # Если координата уже в неправильном формате, пытаемся преобразовать как есть
+                return float(coord)  # type: ignore[arg-type]
+            except (TypeError, ValueError, ZeroDivisionError):
+                logger.warning("Failed to convert GPS coordinate %s", coord)
                 return 0.0
 
         lat_decimal = convert_single_coord(latitude, lat_ref)
         lon_decimal = convert_single_coord(longitude, lon_ref)
 
         return lat_decimal, lon_decimal
-

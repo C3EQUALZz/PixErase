@@ -1,8 +1,6 @@
 import logging
 import re
-from typing import Final
-
-from typing_extensions import override
+from typing import Final, override
 
 from pix_erase.domain.internet_protocol.ports.http_title_fetcher_port import HttpTitleFetcherPort
 from pix_erase.infrastructure.errors.http import HttpError
@@ -24,7 +22,7 @@ class HttpTitleFetcher(HttpTitleFetcherPort):
             url: str = f"{scheme}://{host}"
             try:
                 resp: HttpResponse = await self._http.get(url, timeout=5.0)
-                html: str = resp.text
+                html: str = resp.text()
                 match: re.Match[str] | None = _TITLE_RE.search(html)
                 if match:
                     return match.group(1).strip()[:256]

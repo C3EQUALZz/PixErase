@@ -1,8 +1,7 @@
-from typing import Final
+from typing import Final, override
 
 from opentelemetry import trace
 from opentelemetry.trace import SpanKind, Status, StatusCode, Tracer
-from typing_extensions import override
 
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
 
@@ -25,7 +24,7 @@ class TraceableTransactionManager(TransactionManager):
             try:
                 await self._transaction_manager.commit()
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -38,7 +37,7 @@ class TraceableTransactionManager(TransactionManager):
             try:
                 await self._transaction_manager.flush()
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -55,7 +54,7 @@ class TraceableTransactionManager(TransactionManager):
             try:
                 await self._transaction_manager.rollback()
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise

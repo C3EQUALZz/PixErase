@@ -4,7 +4,7 @@ from functools import lru_cache
 from types import TracebackType
 from typing import Any, Final
 
-from asgi_monitor.integrations.fastapi import TracingConfig, setup_tracing, MetricsConfig, setup_metrics
+from asgi_monitor.integrations.fastapi import MetricsConfig, TracingConfig, setup_metrics, setup_tracing
 from asgi_monitor.logging import configure_logging
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,11 +13,11 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from taskiq import AsyncBroker, TaskiqScheduler, async_shared_broker, ScheduleSource, PrometheusMiddleware
+from taskiq import AsyncBroker, PrometheusMiddleware, ScheduleSource, TaskiqScheduler, async_shared_broker
 from taskiq.middlewares import SmartRetryMiddleware
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
-from taskiq_redis import RedisAsyncResultBackend, ListRedisScheduleSource
+from taskiq_redis import ListRedisScheduleSource, RedisAsyncResultBackend
 
 from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_sessions_table
 from pix_erase.infrastructure.persistence.models.image_comparisons import map_image_comparisons_table
@@ -35,7 +35,6 @@ from pix_erase.presentation.http.v1.routes.task import task_router
 from pix_erase.presentation.http.v1.routes.user import user_router
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
-
 from pix_erase.setup.config.obversability import ObservabilityConfig
 from pix_erase.setup.config.rabbit import RabbitConfig
 from pix_erase.setup.config.settings import AppConfig
@@ -93,7 +92,7 @@ def setup_http_middlewares(app: FastAPI, /, api_config: ASGIConfig) -> None:
             f"http://localhost:{api_config.port}",
             f"https://{api_config.host}:{api_config.port}",
             f"http://127.0.0.1:{api_config.port}",
-            f"http://127.0.0.1"
+            "http://127.0.0.1",
         ],
         allow_credentials=api_config.allow_credentials,
         allow_methods=api_config.allow_methods,
@@ -109,11 +108,7 @@ def setup_http_observability(
     /,
     observability_config: ObservabilityConfig,
 ) -> None:  # pragma: no cover
-    configure_logging(
-        level=logging.INFO,
-        json_format=True,
-        include_trace=True
-    )
+    configure_logging(level=logging.INFO, json_format=True, include_trace=True)
     sys.excepthook = global_exception_handler_with_traceback
 
     resource = Resource.create(
@@ -126,9 +121,7 @@ def setup_http_observability(
     trace.set_tracer_provider(tracer_provider)
     tracer_provider.add_span_processor(
         BatchSpanProcessor(
-            OTLPSpanExporter(
-                endpoint=observability_config.tracing_grpc_uri
-            ),
+            OTLPSpanExporter(endpoint=observability_config.tracing_grpc_uri),
         ),
     )
     trace_config = TracingConfig(tracer_provider=tracer_provider)
@@ -165,20 +158,19 @@ def setup_http_routes(app: FastAPI, /) -> None:
 
 
 def setup_task_manager(
-        taskiq_config: TaskIQWorkerConfig, rabbitmq_config: RabbitConfig, redis_config: RedisConfig
+    taskiq_config: TaskIQWorkerConfig, rabbitmq_config: RabbitConfig, redis_config: RedisConfig
 ) -> AsyncBroker:
     logger.debug("Creating taskiq broker for task management....")
-    broker: AsyncBroker = (
-        AioPikaBroker(
-            url=rabbitmq_config.uri,
-            declare_exchange=taskiq_config.declare_exchange,
-            declare_queues_kwargs={"durable": taskiq_config.durable_queue},
-            declare_exchange_kwargs={"durable": taskiq_config.durable_exchange},
-        )
-        .with_result_backend(RedisAsyncResultBackend(
+    broker: AsyncBroker = AioPikaBroker(
+        url=rabbitmq_config.uri,
+        declare_exchange=taskiq_config.declare_exchange,
+        declare_queues_kwargs={"durable": taskiq_config.durable_queue},
+        declare_exchange_kwargs={"durable": taskiq_config.durable_exchange},
+    ).with_result_backend(
+        RedisAsyncResultBackend(
             redis_url=redis_config.worker_uri,
             result_ex_time=1000,
-        ))
+        )
     )
     logger.debug("Set async shared broker")
     async_shared_broker.default_broker(broker)
@@ -187,9 +179,7 @@ def setup_task_manager(
     return broker
 
 
-def setup_task_manager_middlewares(
-        broker: AsyncBroker, taskiq_config: TaskIQWorkerConfig
-) -> AsyncBroker:
+def setup_task_manager_middlewares(broker: AsyncBroker, taskiq_config: TaskIQWorkerConfig) -> AsyncBroker:
     logger.debug("Start setup broker middlewares")
     return broker.with_middlewares(
         SmartRetryMiddleware(
@@ -200,9 +190,8 @@ def setup_task_manager_middlewares(
             max_delay_exponent=taskiq_config.max_delay_component,
         ),
         PrometheusMiddleware(
-            server_addr=taskiq_config.prometheus_server_address,
-            server_port=taskiq_config.prometheus_server_port
-        )
+            server_addr=taskiq_config.prometheus_server_address, server_port=taskiq_config.prometheus_server_port
+        ),
     )
 
 
@@ -238,9 +227,9 @@ def setup_exc_handlers(app: FastAPI, /) -> None:
 
 
 def global_exception_handler_with_traceback(
-        exc_type: type[BaseException],
-        value: BaseException,
-        traceback: TracebackType | None,
+    exc_type: type[BaseException],
+    value: BaseException,
+    traceback: TracebackType | None,
 ) -> Any:  # noqa: ANN401
     root_logger: logging.Logger = logging.getLogger()
     root_logger.exception("Error", exc_info=(exc_type, value, traceback))

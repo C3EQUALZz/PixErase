@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field, BeforeValidator, AfterValidator, ConfigDict
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field
 
 
 class ChangeUserPasswordRequestSchema(BaseModel):
@@ -14,7 +14,7 @@ class ChangeUserPasswordRequestSchema(BaseModel):
             max_length=255,
             title="The password of the user to get",
             description="The password of the user to get.",
-            examples=["super-bagratus"]
+            examples=["super-bagratus"],
         ),
         AfterValidator(lambda x: str.strip(str(x))),
     ]

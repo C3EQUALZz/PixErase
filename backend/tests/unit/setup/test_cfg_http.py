@@ -140,5 +140,3 @@ def test_http_keepalive_expiry_rejects_incorrect_value(keepalive_expiry: float) 
     # Act & Assert
     with pytest.raises(ValidationError):
         HttpClientConfig.model_validate(data)
-
-

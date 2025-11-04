@@ -5,7 +5,7 @@ from pix_erase.domain.user.services.authorization.permission import (
     UserManagementContext,
 )
 from pix_erase.domain.user.values.user_role import UserRole
-from tests.unit.domain.user.services.authorization.permissions_stubs import AlwaysDeny, AlwaysAllow, DummyContext
+from tests.unit.domain.user.services.authorization.permissions_stubs import AlwaysAllow, AlwaysDeny, DummyContext
 from tests.unit.factories.user_entity import create_user
 from tests.unit.factories.value_objects import create_user_id
 
@@ -104,4 +104,3 @@ def test_any_of_denies_if_all_deny() -> None:
 def test_any_of_empty_returns_false() -> None:
     sut: AnyOf[DummyContext] = AnyOf()
     assert not sut.is_satisfied_by(DummyContext())
-

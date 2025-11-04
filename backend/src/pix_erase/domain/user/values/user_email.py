@@ -26,7 +26,7 @@ class UserEmail(BaseValueObject):
         if not EMAIL_REGEX_COMPILED_PATTERN.fullmatch(self.value) or not parseaddr(self.value)[1]:
             msg = "Please provide a valid email address"
             raise WrongUserAccountEmailFormatError(msg)
-        
+
         # Additional validation: check for consecutive dots
         if ".." in self.value:
             msg = "Please provide a valid email address"

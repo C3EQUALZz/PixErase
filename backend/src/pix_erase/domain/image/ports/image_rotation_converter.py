@@ -4,5 +4,4 @@ from typing import Protocol
 
 class ImageRotationConverter(Protocol):
     @abstractmethod
-    def convert(self, data: bytes, angle: int = 90) -> bytes:
-        ...
+    def convert(self, data: bytes, angle: int = 90) -> bytes: ...

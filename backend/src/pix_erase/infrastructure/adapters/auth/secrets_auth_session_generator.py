@@ -1,6 +1,5 @@
 import secrets
-
-from typing_extensions import override
+from typing import override
 
 from pix_erase.infrastructure.auth.session.id_generator import AuthSessionIDGenerator
 

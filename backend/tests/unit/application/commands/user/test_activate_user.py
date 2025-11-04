@@ -12,11 +12,11 @@ from tests.unit.factories.value_objects import create_user_id
 
 
 async def test_activate_user_success(
-        fake_transaction: Mock,
-        fake_user_command_gateway: Mock,
-        fake_user_service: Mock,
-        fake_current_user_service: Mock,
-        fake_access_service: Mock,
+    fake_transaction: Mock,
+    fake_user_command_gateway: Mock,
+    fake_user_service: Mock,
+    fake_current_user_service: Mock,
+    fake_access_service: Mock,
 ) -> None:
     """Test successful user activation."""
     user_id = create_user_id()
@@ -36,18 +36,16 @@ async def test_activate_user_success(
 
     fake_current_user_service.get_current_user.assert_called_once()
     fake_user_command_gateway.read_by_id.assert_called_once()
-    fake_access_service.toggle_user_activation.assert_called_once_with(
-        target_user, is_active=True
-    )
+    fake_access_service.toggle_user_activation.assert_called_once_with(target_user, is_active=True)
     fake_transaction.commit.assert_called_once()
 
 
 async def test_activate_user_not_found(
-        fake_transaction: Mock,
-        fake_user_command_gateway: Mock,
-        fake_user_service: Mock,
-        fake_current_user_service: Mock,
-        fake_access_service: Mock,
+    fake_transaction: Mock,
+    fake_user_command_gateway: Mock,
+    fake_user_service: Mock,
+    fake_current_user_service: Mock,
+    fake_access_service: Mock,
 ) -> None:
     """Test activation fails when user not found."""
     user_id = create_user_id()
@@ -62,7 +60,7 @@ async def test_activate_user_not_found(
     )
 
     command = ActivateUserCommand(user_id=user_id)
-    with pytest.raises(UserNotFoundByIDError, match="Cant find user by ID"):
+    with pytest.raises(UserNotFoundByIDError, match="Can't find user by ID"):
         await handler(command)
 
     fake_current_user_service.get_current_user.assert_called_once()

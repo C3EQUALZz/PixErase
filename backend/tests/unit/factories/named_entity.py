@@ -8,8 +8,7 @@ from pix_erase.domain.common.values.base import BaseValueObject
 class NamedEntityId(BaseValueObject):
     value: int
 
-    def _validate(self) -> None:
-        ...
+    def _validate(self) -> None: ...
 
     def __str__(self) -> str:
         return str(self.value)

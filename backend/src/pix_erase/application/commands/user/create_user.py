@@ -33,13 +33,13 @@ class CreateUserCommand:
 @final
 class CreateUserCommandHandler:
     def __init__(
-            self,
-            transaction_manager: TransactionManager,
-            user_command_gateway: UserCommandGateway,
-            user_service: UserService,
-            event_bus: EventBus,
-            current_user_service: CurrentUserService,
-            access_service: AccessService,
+        self,
+        transaction_manager: TransactionManager,
+        user_command_gateway: UserCommandGateway,
+        user_service: UserService,
+        event_bus: EventBus,
+        current_user_service: CurrentUserService,
+        access_service: AccessService,
     ) -> None:
         self._transaction_manager: Final[TransactionManager] = transaction_manager
         self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway

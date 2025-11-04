@@ -1,12 +1,10 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 from pix_erase.infrastructure.persistence.models.base import metadata
-from pix_erase.setup.bootstrap import setup_map_tables, setup_configs
+from pix_erase.setup.bootstrap import setup_configs, setup_map_tables
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -70,9 +68,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

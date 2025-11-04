@@ -21,8 +21,8 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 async def get_engine(
-        postgres_config: PostgresConfig,
-        alchemy_config: SQLAlchemyConfig,
+    postgres_config: PostgresConfig,
+    alchemy_config: SQLAlchemyConfig,
 ) -> AsyncIterator[AsyncEngine]:
     """Creates and manages the lifecycle of an async SQLAlchemy engine.
 
@@ -60,8 +60,8 @@ async def get_engine(
 
 
 async def get_sessionmaker(
-        engine: AsyncEngine,
-        alchemy_config: SQLAlchemyConfig,
+    engine: AsyncEngine,
+    alchemy_config: SQLAlchemyConfig,
 ) -> async_sessionmaker[AsyncSession]:
     """Creates an async session factory bound to an engine.
 
@@ -90,7 +90,7 @@ async def get_sessionmaker(
 
 
 async def get_session(
-        session_factory: async_sessionmaker[AsyncSession],
+    session_factory: async_sessionmaker[AsyncSession],
 ) -> AsyncIterator[AsyncSession]:
     """Provides an async database session context manager.
 

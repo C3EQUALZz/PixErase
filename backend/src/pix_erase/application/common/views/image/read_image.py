@@ -1,7 +1,7 @@
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
-from typing import AsyncGenerator
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

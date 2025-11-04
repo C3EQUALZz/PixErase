@@ -2,6 +2,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Final, override
 
+from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.services.authorization.base import (
     Permission,
     PermissionContext,
@@ -9,7 +10,6 @@ from pix_erase.domain.user.services.authorization.base import (
 from pix_erase.domain.user.services.authorization.role_hierarchy import (
     SUBORDINATE_ROLES,
 )
-from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.values.user_role import UserRole
 
 
@@ -26,8 +26,8 @@ class CanManageSelf(Permission[UserManagementContext]):
 
 class CanManageSubordinate(Permission[UserManagementContext]):
     def __init__(
-            self,
-            role_hierarchy: Mapping[UserRole, set[UserRole]] = SUBORDINATE_ROLES,
+        self,
+        role_hierarchy: Mapping[UserRole, set[UserRole]] = SUBORDINATE_ROLES,
     ) -> None:
         self._role_hierarchy: Final[Mapping[UserRole, set[UserRole]]] = role_hierarchy
 
@@ -45,8 +45,8 @@ class RoleManagementContext(PermissionContext):
 
 class CanManageRole(Permission[RoleManagementContext]):
     def __init__(
-            self,
-            role_hierarchy: Mapping[UserRole, set[UserRole]] = SUBORDINATE_ROLES,
+        self,
+        role_hierarchy: Mapping[UserRole, set[UserRole]] = SUBORDINATE_ROLES,
     ) -> None:
         self._role_hierarchy: Final[Mapping[UserRole, set[UserRole]]] = role_hierarchy
 

@@ -6,5 +6,4 @@ from pix_erase.domain.image.values.image_id import ImageID
 
 class ImageIdGenerator(Protocol):
     @abstractmethod
-    def __call__(self) -> ImageID:
-        ...
+    def __call__(self) -> ImageID: ...

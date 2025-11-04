@@ -12,8 +12,7 @@ from pix_erase.domain.internet_protocol.errors.internet_protocol import InvalidD
 # Hyphens cannot be at the beginning or end of a label
 # TLD must be at least 2 characters
 DOMAIN_NAME_REGEX: Final[re.Pattern[str]] = re.compile(
-    r'^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$',
-    re.IGNORECASE
+    r"^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$", re.IGNORECASE
 )
 
 # Maximum domain name length (including dots)
@@ -24,7 +23,7 @@ MAX_DOMAIN_LENGTH: Final[int] = 253
 class DomainName(BaseValueObject):
     """
     Value object representing a valid domain name.
-    
+
     Validates domain names according to RFC 1123 specifications:
     - Total length up to 253 characters
     - Each label (part between dots) can be 1-63 characters
@@ -45,10 +44,7 @@ class DomainName(BaseValueObject):
 
         # Check total length
         if len(self.value) > MAX_DOMAIN_LENGTH:
-            msg = (
-                f"Domain name too long: {len(self.value)} characters "
-                f"(maximum {MAX_DOMAIN_LENGTH})"
-            )
+            msg = f"Domain name too long: {len(self.value)} characters (maximum {MAX_DOMAIN_LENGTH})"
             raise InvalidDomainNameError(msg)
 
         # Convert to lowercase for validation (domain names are case-insensitive)
@@ -56,34 +52,29 @@ class DomainName(BaseValueObject):
 
         # Check regex pattern
         if not DOMAIN_NAME_REGEX.fullmatch(lower_value):
-            raise InvalidDomainNameError(
-                f"Invalid domain name format: {self.value}. "
-                "Domain must contain at least one dot and valid TLD"
-            )
+            msg = f"Invalid domain name format: {self.value}. Domain must contain at least one dot and valid TLD"
+            raise InvalidDomainNameError(msg)
 
         # Additional validation: check each label
-        labels = lower_value.split('.')
+        labels = lower_value.split(".")
 
         # Check minimum TLD length
         tld = labels[-1]
         if len(tld) < 2:
-            raise InvalidDomainNameError(
-                f"Invalid domain name: TLD '{tld}' must be at least 2 characters"
-            )
+            msg = f"Invalid domain name: TLD '{tld}' must be at least 2 characters"
+            raise InvalidDomainNameError(msg)
 
         # Validate each label
-        for i, label in enumerate(labels):
+        for _i, label in enumerate(labels):
             # Check label length
             if len(label) > 63:
-                raise InvalidDomainNameError(
-                    f"Invalid domain name: label '{label}' exceeds 63 characters"
-                )
+                msg = f"Invalid domain name: label '{label}' exceeds 63 characters"
+                raise InvalidDomainNameError(msg)
 
             # Check that label doesn't start or end with hyphen
-            if label.startswith('-') or label.endswith('-'):
-                raise InvalidDomainNameError(
-                    f"Invalid domain name: label '{label}' cannot start or end with hyphen"
-                )
+            if label.startswith("-") or label.endswith("-"):
+                msg = f"Invalid domain name: label '{label}' cannot start or end with hyphen"
+                raise InvalidDomainNameError(msg)
 
     @override
     def __str__(self) -> str:
@@ -93,7 +84,7 @@ class DomainName(BaseValueObject):
     @property
     def labels(self) -> list[str]:
         """Get all domain labels (parts separated by dots)."""
-        return self.value.lower().split('.')
+        return self.value.lower().split(".")
 
     @property
     def tld(self) -> str:
@@ -104,13 +95,10 @@ class DomainName(BaseValueObject):
     def root_domain(self) -> str:
         """Get the root domain (last two labels)."""
         if len(self.labels) >= 2:
-            return '.'.join(self.labels[-2:])
+            return ".".join(self.labels[-2:])
         return self.value
 
     @property
     def is_subdomain(self) -> bool:
         """Check if this is a subdomain (has more than 2 labels)."""
         return len(self.labels) > 2
-
-
-

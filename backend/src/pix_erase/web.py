@@ -2,7 +2,7 @@ import logging
 import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Final, cast
+from typing import TYPE_CHECKING, Final, cast
 
 import uvicorn
 from asgi_monitor.logging.uvicorn import build_uvicorn_log_config
@@ -13,26 +13,28 @@ from fastapi.responses import ORJSONResponse
 from sqlalchemy.orm import clear_mappers
 from taskiq import AsyncBroker
 
-from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtSecret, JwtAlgorithm
+from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtAlgorithm, JwtSecret
 from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper
 from pix_erase.infrastructure.auth.cookie_params import CookieParams
-from pix_erase.infrastructure.auth.session.timer_utc import AuthSessionTtlMin, AuthSessionRefreshThreshold
+from pix_erase.infrastructure.auth.session.timer_utc import AuthSessionRefreshThreshold, AuthSessionTtlMin
 from pix_erase.setup.bootstrap import (
+    setup_configs,
     setup_exc_handlers,
     setup_http_middlewares,
-    setup_http_routes,
-    setup_configs,
-    setup_map_tables,
     setup_http_observability,
-    setup_task_manager
+    setup_http_routes,
+    setup_map_tables,
+    setup_task_manager,
 )
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
-from pix_erase.setup.config.database import SQLAlchemyConfig, PostgresConfig
+from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
 from pix_erase.setup.config.http import HttpClientConfig
 from pix_erase.setup.config.s3 import S3Config
-from pix_erase.setup.config.settings import AppConfig
 from pix_erase.setup.ioc import setup_providers
+
+if TYPE_CHECKING:
+    from pix_erase.setup.config.settings import AppConfig
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -101,13 +103,11 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
         default_response_class=ORJSONResponse,
         version="1.0.0",
         root_path="/api",
-        debug=configs.asgi.fastapi_debug
+        debug=configs.asgi.fastapi_debug,
     )
 
     task_manager: AsyncBroker = setup_task_manager(
-        taskiq_config=configs.worker,
-        rabbitmq_config=configs.rabbitmq,
-        redis_config=configs.redis
+        taskiq_config=configs.worker, rabbitmq_config=configs.rabbitmq, redis_config=configs.redis
     )
     app.state.task_manager = task_manager
 

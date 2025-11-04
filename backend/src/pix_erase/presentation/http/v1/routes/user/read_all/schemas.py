@@ -10,21 +10,10 @@ from pix_erase.presentation.http.v1.routes.user.read.schemas import ReadUserByID
 class ReadAllUsersRequestSchema(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    limit: int = Field(
-        default=20,
-        ge=1,
-        description="Limit for pagination",
-        title="Pagination",
-        validate_default=True
-    )
+    limit: int = Field(default=20, ge=1, description="Limit for pagination", title="Pagination", validate_default=True)
 
     offset: int = Field(
-        default=0,
-        ge=0,
-        le=100,
-        description="Offset for pagination",
-        title="Pagination",
-        validate_default=True
+        default=0, ge=0, le=100, description="Offset for pagination", title="Pagination", validate_default=True
     )
 
     sorting_field: Annotated[

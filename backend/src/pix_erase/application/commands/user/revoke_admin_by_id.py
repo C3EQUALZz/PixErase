@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Final, final
+from typing import TYPE_CHECKING, Final, final
 from uuid import UUID
 
 from pix_erase.application.common.ports.event_bus import EventBus
@@ -8,12 +8,14 @@ from pix_erase.application.common.ports.transaction_manager import TransactionMa
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.user import UserNotFoundByIDError
-from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.services.access_service import AccessService
 from pix_erase.domain.user.services.authorization.permission import CanManageRole, RoleManagementContext
 from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.domain.user.values.user_role import UserRole
+
+if TYPE_CHECKING:
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -32,13 +34,13 @@ class RevokeAdminByIDCommandHandler:
     """
 
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            user_command_gateway: UserCommandGateway,
-            user_service: UserService,
-            transaction_manager: TransactionManager,
-            access_service: AccessService,
-            event_bus: EventBus,
+        self,
+        current_user_service: CurrentUserService,
+        user_command_gateway: UserCommandGateway,
+        user_service: UserService,
+        transaction_manager: TransactionManager,
+        access_service: AccessService,
+        event_bus: EventBus,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway
@@ -68,7 +70,7 @@ class RevokeAdminByIDCommandHandler:
         )
 
         if user_for_revoke_admin is None:
-            msg: str = f"Cant find user by ID: {data.user_id}"
+            msg: str = f"Can't find user by ID: {data.user_id}"
             raise UserNotFoundByIDError(msg)
 
         self._access_service.toggle_user_admin_role(user_for_revoke_admin, is_admin=False)

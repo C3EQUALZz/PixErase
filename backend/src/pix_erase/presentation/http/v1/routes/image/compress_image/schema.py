@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CompressImageRequestSchema(BaseModel):
@@ -13,8 +13,8 @@ class CompressImageRequestSchema(BaseModel):
             description="The quality of image in percents, value must be positive",
             examples=[0, 30, 60, 90],
             ge=0,
-            le=100
-        )
+            le=100,
+        ),
     ]
 
 
@@ -28,6 +28,6 @@ class CompressImageResponseSchema(BaseModel):
             description="The unique task id that process request from user",
             examples=["compress_image:75079971-fb0e-4e04-bf07-ceb57faebe84"],
             min_length=1,
-            pattern=r"^compress_image:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-        )
+            pattern=r"^compress_image:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+        ),
     ]

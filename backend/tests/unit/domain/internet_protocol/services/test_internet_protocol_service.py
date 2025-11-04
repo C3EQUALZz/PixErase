@@ -1,22 +1,28 @@
+from datetime import UTC, datetime
+
 import pytest
 
 from pix_erase.domain.internet_protocol.errors.internet_protocol import InvalidIPAddressError
-from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
-from pix_erase.domain.internet_protocol.values.ip_address import IPv4Address, IPv6Address
-from pix_erase.domain.internet_protocol.values.ping_result import PingResult
-from pix_erase.domain.internet_protocol.values.port import Port
-from pix_erase.domain.internet_protocol.values.port import PortRange
 from pix_erase.domain.internet_protocol.ports.ip_info_service_port import IPInfoServicePort
 from pix_erase.domain.internet_protocol.ports.ping_service_port import PingServicePort
 from pix_erase.domain.internet_protocol.ports.port_scan_service_port import PortScanServicePort
+from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import (
+    PortScanResult,
+    PortScanSummary,
+    PortStatus,
+)
+from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
+from pix_erase.domain.internet_protocol.values import IPInfo
+from pix_erase.domain.internet_protocol.values.ip_address import IPAddress, IPv4Address, IPv6Address
+from pix_erase.domain.internet_protocol.values.port import PortRange
 from tests.unit.factories.value_objects import (
     create_ipv4_address,
     create_ipv6_address,
     create_packet_size,
     create_ping_result,
     create_port,
-    create_timeout,
     create_time_to_live,
+    create_timeout,
 )
 
 
@@ -30,7 +36,7 @@ from tests.unit.factories.value_objects import (
 )
 def test_create_returns_correct_ip_address_type(
     address: str,
-    expected_type: type,
+    expected_type: type[IPAddress],
     ping_service: PingServicePort,
     ip_info_service: IPInfoServicePort,
     port_scan_service: PortScanServicePort,
@@ -174,7 +180,6 @@ async def test_get_ip_info_calls_service(
     port_scan_service: PortScanServicePort,
 ) -> None:
     # Arrange
-    from pix_erase.domain.internet_protocol.values.ip_info import IPInfo
 
     expected_info = IPInfo(ip_address="192.168.1.1")
     ip_info_service.get_ip_info.return_value = expected_info
@@ -202,8 +207,6 @@ async def test_scan_port_calls_service(
     port_scan_service: PortScanServicePort,
 ) -> None:
     # Arrange
-    from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import PortScanResult, PortStatus
-
     expected_result = PortScanResult(
         port=create_port(),
         status=PortStatus.CLOSED,
@@ -240,7 +243,6 @@ async def test_scan_ports_calls_service(
     port_scan_service: PortScanServicePort,
 ) -> None:
     # Arrange
-    from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import PortScanResult, PortStatus
 
     expected_results = [
         PortScanResult(port=create_port(80), status=PortStatus.OPEN, response_time=10.0),
@@ -278,8 +280,6 @@ async def test_scan_port_range_calls_service(
     port_scan_service: PortScanServicePort,
 ) -> None:
     # Arrange
-    from datetime import datetime
-    from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import PortScanSummary
 
     expected_summary = PortScanSummary(
         target="192.168.1.1",
@@ -289,8 +289,8 @@ async def test_scan_port_range_calls_service(
         closed_ports=0,
         filtered_ports=0,
         scan_duration=10.0,
-        started_at=datetime.now(),
-        completed_at=datetime.now(),
+        started_at=datetime.now(UTC),
+        completed_at=datetime.now(UTC),
         results=[],
     )
     port_scan_service.scan_port_range.return_value = expected_summary
@@ -325,8 +325,6 @@ async def test_scan_common_ports_calls_service(
     port_scan_service: PortScanServicePort,
 ) -> None:
     # Arrange
-    from datetime import datetime
-    from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import PortScanSummary
 
     expected_summary = PortScanSummary(
         target="192.168.1.1",
@@ -336,8 +334,8 @@ async def test_scan_common_ports_calls_service(
         closed_ports=0,
         filtered_ports=0,
         scan_duration=100.0,
-        started_at=datetime.now(),
-        completed_at=datetime.now(),
+        started_at=datetime.now(UTC),
+        completed_at=datetime.now(UTC),
         results=[],
     )
     port_scan_service.scan_common_ports.return_value = expected_summary
@@ -361,4 +359,3 @@ async def test_scan_common_ports_calls_service(
         timeout=4.0,
         max_concurrent=100,
     )
-

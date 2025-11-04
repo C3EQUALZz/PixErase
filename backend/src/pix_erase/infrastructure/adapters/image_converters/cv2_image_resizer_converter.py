@@ -18,5 +18,5 @@ class Cv2ImageResizerConverter(ImageResizerConverter):
             raise ImageDecodingError(msg)
 
         resized_image = cv2.resize(img, (image_width, image_height))
-        _, buffer = cv2.imencode('.jpg', resized_image)
+        _, buffer = cv2.imencode(".jpg", resized_image)
         return buffer.tobytes()

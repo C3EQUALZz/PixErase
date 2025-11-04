@@ -2,13 +2,13 @@
 
 import io
 import logging
-from datetime import datetime
-from typing import Final, Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
+from typing import Any, Final, override
 
 from aiobotocore.client import AioBaseClient
-from botocore.exceptions import EndpointConnectionError, ClientError
+from botocore.exceptions import ClientError, EndpointConnectionError
 from tenacity import retry, stop_after_attempt, wait_exponential
-from typing_extensions import override
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.query_models.image import ImageStreamQueryModel
@@ -17,9 +17,10 @@ from pix_erase.domain.image.values.image_id import ImageID
 from pix_erase.domain.image.values.image_name import ImageName
 from pix_erase.domain.image.values.image_size import ImageSize
 from pix_erase.infrastructure.adapters.persistence.constants import (
-    UPLOAD_FILE_FAILED,
+    DELETE_FILE_FAILED,
     DOWNLOAD_FILE_FAILED,
-    DELETE_FILE_FAILED, STREAM_FILE_FAILED
+    STREAM_FILE_FAILED,
+    UPLOAD_FILE_FAILED,
 )
 from pix_erase.infrastructure.errors.file_storage import FileStorageError
 from pix_erase.setup.config.s3 import S3Config
@@ -55,7 +56,7 @@ class AiobotocoreS3ImageStorage(ImageStorage):
                         "updated_at": image.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                     },
                     "ContentType": "application/octet-stream",
-                }
+                },
             )
 
         except EndpointConnectionError as e:
@@ -103,8 +104,8 @@ class AiobotocoreS3ImageStorage(ImageStorage):
                 id=image_id,
                 name=ImageName(original_filename),
                 data=file_data,
-                created_at=datetime.strptime(metadata.get("created_at"), "%Y-%m-%dT%H:%M:%S.%fZ"),
-                updated_at=datetime.strptime(metadata.get("updated_at"), "%Y-%m-%dT%H:%M:%S.%fZ"),
+                created_at=datetime.strptime(metadata.get("created_at"), "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=UTC),
+                updated_at=datetime.strptime(metadata.get("updated_at"), "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=UTC),
                 width=ImageSize(int(metadata.get("width"))),
                 height=ImageSize(int(metadata.get("height"))),
             )
@@ -158,7 +159,7 @@ class AiobotocoreS3ImageStorage(ImageStorage):
                         "updated_at": image.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                     },
                     "ContentType": "application/octet-stream",
-                }
+                },
             )
 
         except EndpointConnectionError as e:
@@ -182,30 +183,23 @@ class AiobotocoreS3ImageStorage(ImageStorage):
     )
     @override
     async def stream_by_id(self, image_id: ImageID) -> ImageStreamQueryModel | None:
-        """
-        Получает изображение из S3 в виде стрима
-        Возвращает DTO с генератором байтов и метаданными
-        """
         s3_key: str = f"images/{image_id!s}"
         logger.debug("Build s3 key for storage: %s", s3_key)
 
         try:
             # Получаем объект из S3
-            response = await self._client.get_object(
-                Bucket=self._bucket_name,
-                Key=s3_key
-            )
+            response = await self._client.get_object(Bucket=self._bucket_name, Key=s3_key)
 
             # Извлекаем метаданные
             metadata: dict[str, Any] = response.get("Metadata", {})
             original_filename: ImageName = ImageName(metadata.get("original_filename", str(image_id)))
-            content_length = response['ContentLength']
-            content_type = response.get('ContentType', 'application/octet-stream')
-            etag = response.get('ETag')
+            content_length = response["ContentLength"]
+            content_type = response.get("ContentType", "application/octet-stream")
+            etag = response.get("ETag")
             width = ImageSize(int(metadata.get("width")))
             height = ImageSize(int(metadata.get("height")))
-            created_at = datetime.strptime(metadata.get("created_at"), "%Y-%m-%dT%H:%M:%S.%fZ")
-            updated_at = datetime.strptime(metadata.get("updated_at"), "%Y-%m-%dT%H:%M:%S.%fZ")
+            created_at = datetime.strptime(metadata.get("created_at"), "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=UTC)
+            updated_at = datetime.strptime(metadata.get("updated_at"), "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=UTC)
 
             # Создаем асинхронный генератор для стриминга
             async def chunk_generator() -> AsyncGenerator[bytes, None]:
@@ -219,8 +213,8 @@ class AiobotocoreS3ImageStorage(ImageStorage):
                         if not chunk:
                             break
                         yield chunk
-                except Exception as e:
-                    logger.error("Error during streaming chunk: %s", e)
+                except Exception:
+                    logger.exception("Error during streaming chunk")
                     raise
 
         except ClientError as e:

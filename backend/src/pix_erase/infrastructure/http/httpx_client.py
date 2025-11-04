@@ -13,8 +13,8 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 class HttpxHttpClient(HttpClient):
     def __init__(
-            self,
-            httpx_client: httpx.AsyncClient,
+        self,
+        httpx_client: httpx.AsyncClient,
     ) -> None:
         self._client: Final[httpx.AsyncClient] = httpx_client
 
@@ -24,12 +24,12 @@ class HttpxHttpClient(HttpClient):
     )
     @override
     async def get(
-            self,
-            url: str,
-            *,
-            params: QueryParams | None = None,
-            headers: HttpHeaders | None = None,
-            timeout: float | None = None,
+        self,
+        url: str,
+        *,
+        params: QueryParams | None = None,
+        headers: HttpHeaders | None = None,
+        timeout: float | None = None,
     ) -> HttpResponse:
         try:
             logger.debug(
@@ -57,9 +57,9 @@ class HttpxHttpClient(HttpClient):
                 content=response.content,
             )
         except (httpx.TransportError, httpx.HTTPError) as exc:
-            msg = f"Cant request url: {url} for get method"
+            msg = f"Can't request url: {url} for get method"
             msg_for_log = (
-                f"Cant request {url} for get method with request to url: "
+                f"Can't request {url} for get method with request to url: "
                 f"%s with params: %s and headers: %s and timeout: %s"
             )
             logger.exception(msg_for_log)
@@ -71,14 +71,14 @@ class HttpxHttpClient(HttpClient):
     )
     @override
     async def post(
-            self,
-            url: str,
-            *,
-            params: QueryParams | None = None,
-            headers: HttpHeaders | None = None,
-            json_like: Any | None = None,
-            data: Any | None = None,
-            timeout: float | None = None,
+        self,
+        url: str,
+        *,
+        params: QueryParams | None = None,
+        headers: HttpHeaders | None = None,
+        json_like: Any | None = None,
+        data: Any | None = None,
+        timeout: float | None = None,
     ) -> HttpResponse:
         try:
             response: Response = await self._client.post(
@@ -96,9 +96,9 @@ class HttpxHttpClient(HttpClient):
                 content=response.content,
             )
         except (httpx.TransportError, httpx.HTTPError) as exc:
-            msg = f"Cant request url {url} for post method"
+            msg = f"Can't request url {url} for post method"
             msg_for_log = (
-                f"Cant request {url} for post method with request to url: "
+                f"Can't request {url} for post method with request to url: "
                 f"%s with params: %s and headers: %s and timeout: %s"
             )
             logger.exception(msg_for_log)
@@ -110,14 +110,14 @@ class HttpxHttpClient(HttpClient):
     )
     @override
     async def put(
-            self,
-            url: str,
-            *,
-            params: QueryParams | None = None,
-            headers: HttpHeaders | None = None,
-            json_like: Any | None = None,
-            data: Any | None = None,
-            timeout: float | None = None,
+        self,
+        url: str,
+        *,
+        params: QueryParams | None = None,
+        headers: HttpHeaders | None = None,
+        json_like: Any | None = None,
+        data: Any | None = None,
+        timeout: float | None = None,
     ) -> HttpResponse:
         try:
             response: Response = await self._client.put(
@@ -135,9 +135,9 @@ class HttpxHttpClient(HttpClient):
                 content=response.content,
             )
         except (httpx.TransportError, httpx.HTTPError) as exc:
-            msg = f"Cant request {url} for put method"
+            msg = f"Can't request {url} for put method"
             msg_for_log = (
-                f"Cant request {url} for put method with request to url: "
+                f"Can't request {url} for put method with request to url: "
                 f"%s with params: %s and headers: %s and timeout: %s"
             )
             logger.exception(msg_for_log)
@@ -149,12 +149,12 @@ class HttpxHttpClient(HttpClient):
     )
     @override
     async def delete(
-            self,
-            url: str,
-            *,
-            params: QueryParams | None = None,
-            headers: HttpHeaders | None = None,
-            timeout: float | None = None,
+        self,
+        url: str,
+        *,
+        params: QueryParams | None = None,
+        headers: HttpHeaders | None = None,
+        timeout: float | None = None,
     ) -> HttpResponse:
         try:
             response: Response = await self._client.delete(
@@ -170,9 +170,9 @@ class HttpxHttpClient(HttpClient):
                 content=response.content,
             )
         except (httpx.TransportError, httpx.HTTPError) as exc:
-            msg = f"Cant request {url} for delete method"
+            msg = f"Can't request {url} for delete method"
             msg_for_log = (
-                f"Cant request {url} for delete method with request to url: "
+                f"Can't request {url} for delete method with request to url: "
                 f"%s with params: %s and headers: %s and timeout: %s"
             )
             logger.exception(msg_for_log)

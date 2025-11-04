@@ -113,5 +113,4 @@ class ImageInfo:
 
 class ImageInfoExtractor(Protocol):
     @abstractmethod
-    async def extract(self, data: bytes) -> ImageInfo:
-        ...
+    async def extract(self, data: bytes) -> ImageInfo: ...

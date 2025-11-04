@@ -1,19 +1,21 @@
+from datetime import UTC, datetime
 from inspect import getdoc
-from typing import Final, Annotated
-from datetime import datetime, UTC
-from asgi_monitor.tracing import span
+from typing import TYPE_CHECKING, Annotated, Final
 from uuid import UUID
 
+from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, status, Path
+from fastapi import APIRouter, Path, status
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 from starlette.responses import StreamingResponse
 
-from pix_erase.application.common.views.image.read_image import ReadImageByIDView
-from pix_erase.application.queries.images.read_by_id import ReadImageByIDQueryHandler, ReadImageByIDQuery
+from pix_erase.application.queries.images.read_by_id import ReadImageByIDQuery, ReadImageByIDQueryHandler
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
+
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.image.read_image import ReadImageByIDView
 
 read_image_router: Final[APIRouter] = APIRouter(
     route_class=DishkaRoute,
@@ -40,8 +42,8 @@ ImageIDPathParameter = Path(
         status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -52,12 +54,11 @@ ImageIDPathParameter = Path(
         "http.route": "/image/id/{image_id}/",
         "feature": "image",
         "action": "read_by_id",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def read_image_by_id_handler(
-        image_id: Annotated[UUID, ImageIDPathParameter],
-        interactor: FromDishka[ReadImageByIDQueryHandler]
+    image_id: Annotated[UUID, ImageIDPathParameter], interactor: FromDishka[ReadImageByIDQueryHandler]
 ) -> StreamingResponse:
     query: ReadImageByIDQuery = ReadImageByIDQuery(
         image_id=image_id,
@@ -70,9 +71,9 @@ async def read_image_by_id_handler(
         media_type=view.content_type,
         headers={
             "Content-Length": str(view.content_length),
-            "Content-Disposition": f"inline; filename=\"{view.name}\"",
+            "Content-Disposition": f'inline; filename="{view.name}"',
             "Last-Modified": view.updated_at.strftime("%a, %d %b %Y %H:%M:%S GMT"),
             "ETag": view.etag or "",
-            "Cache-Control": "public, max-age=3600"
-        }
+            "Cache-Control": "public, max-age=3600",
+        },
     )

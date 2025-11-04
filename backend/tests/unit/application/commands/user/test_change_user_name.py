@@ -8,9 +8,8 @@ from pix_erase.application.commands.user.change_user_name import (
 )
 from pix_erase.application.errors.user import UserNotFoundByIDError
 from pix_erase.domain.user.values.user_id import UserID
-
 from tests.unit.factories.user_entity import create_user
-from tests.unit.factories.value_objects import create_username, create_user_id
+from tests.unit.factories.value_objects import create_user_id, create_username
 
 
 @pytest.mark.parametrize(
@@ -48,9 +47,7 @@ async def test_change_user_name_success(
 
     fake_current_user_service.get_current_user.assert_called_once()
     fake_user_command_gateway.read_by_id.assert_called_once()
-    fake_user_service.change_name.assert_called_once_with(
-        user=target_user, new_user_name=create_username(new_name)
-    )
+    fake_user_service.change_name.assert_called_once_with(user=target_user, new_user_name=create_username(new_name))
     fake_event_bus.publish.assert_called_once()
     fake_transaction.commit.assert_called_once()
 
@@ -77,7 +74,7 @@ async def test_change_user_name_not_found(
     )
 
     command = ChangeUserNameByIDCommand(user_id=user_id, new_name="NewName")
-    with pytest.raises(UserNotFoundByIDError, match="Cant find user by ID"):
+    with pytest.raises(UserNotFoundByIDError, match="Can't find user by ID"):
         await handler(command)
 
     fake_current_user_service.get_current_user.assert_called_once()
@@ -85,4 +82,3 @@ async def test_change_user_name_not_found(
     fake_user_service.change_name.assert_not_called()
     fake_event_bus.publish.assert_not_called()
     fake_transaction.commit.assert_not_called()
-

@@ -1,4 +1,4 @@
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import httpx
 
@@ -31,5 +31,3 @@ async def get_httpx_client(http_client_config: HttpClientConfig) -> AsyncIterato
         trust_env=False,
     ) as client:
         yield client
-
-

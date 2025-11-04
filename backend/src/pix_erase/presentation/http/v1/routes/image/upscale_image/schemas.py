@@ -1,6 +1,6 @@
-from typing import Literal, Annotated
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UpscaleImageRequestSchema(BaseModel):
@@ -20,6 +20,6 @@ class UpscaleImageSchemeResponse(BaseModel):
             description="The unique task id that process request from user",
             examples=["upscale_image:75079971-fb0e-4e04-bf07-ceb57faebe84"],
             min_length=1,
-            pattern=r"^upscale_image:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-        )
+            pattern=r"^upscale_image:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+        ),
     ]

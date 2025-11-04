@@ -1,12 +1,14 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final
+from typing import TYPE_CHECKING, Final, final
 
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.internet_protocol.port_scan import PortScanView
 from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
 from pix_erase.domain.internet_protocol.values import IPAddress, Port, Timeout
-from pix_erase.domain.user.entities.user import User
+
+if TYPE_CHECKING:
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -14,6 +16,7 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 @dataclass(frozen=True, slots=True, kw_only=True)
 class ScanPortsQuery:
     """Command to scan multiple ports on a target."""
+
     target: str
     ports: list[int]
     timeout: float = 1.0
@@ -24,12 +27,12 @@ class ScanPortsQuery:
 class ScanPortsQueryHandler:
     """
     Handler for scanning multiple ports.
-    
+
     - Opens to everyone.
     - Async processing, non-blocking.
     - Scans multiple ports on target.
     """
-    
+
     def __init__(
         self,
         internet_protocol_service: InternetProtocolService,
@@ -41,10 +44,10 @@ class ScanPortsQueryHandler:
     async def __call__(self, data: ScanPortsQuery) -> list[PortScanView]:
         """
         Execute multiple port scan command using domain service.
-        
+
         Args:
             data: Multiple port scan command data
-            
+
         Returns:
             List of PortScanView containing the scan results
         """
@@ -97,4 +100,3 @@ class ScanPortsQueryHandler:
 
         logger.info("Created %s views", len(views))
         return views
-

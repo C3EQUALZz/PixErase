@@ -12,7 +12,7 @@ from pix_erase.domain.user.services.authorization.composite import AnyOf
 from pix_erase.domain.user.services.authorization.permission import (
     CanManageSelf,
     CanManageSubordinate,
-    UserManagementContext
+    UserManagementContext,
 )
 from pix_erase.domain.user.values.user_id import UserID
 
@@ -35,10 +35,10 @@ class ReadUserByIDQueryHandler:
     """
 
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            user_query_gateway: UserQueryGateway,
-            access_service: AccessService,
+        self,
+        current_user_service: CurrentUserService,
+        user_query_gateway: UserQueryGateway,
+        access_service: AccessService,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._user_query_gateway: Final[UserQueryGateway] = user_query_gateway

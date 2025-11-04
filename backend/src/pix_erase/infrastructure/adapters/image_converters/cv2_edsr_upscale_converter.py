@@ -1,11 +1,10 @@
 import logging
-from typing import Final
+from pathlib import Path
+from typing import Final, override
 
 import cv2
 import numpy as np
-from pathlib import Path
 from cv2 import dnn_superres
-from typing_extensions import override
 
 from pix_erase.domain.image.ports.image_ai_upscaler_converter import ImageAIUpscaleConverter
 from pix_erase.domain.image.values.image_scale import ImageScale

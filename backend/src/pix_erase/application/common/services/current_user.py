@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Final
 from pix_erase.application.common.ports.access_revoker import AccessRevoker
 from pix_erase.application.common.ports.identity_provider import IdentityProvider
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
-from pix_erase.domain.user.errors.access_service import AuthorizationError
 from pix_erase.domain.user.entities.user import User
+from pix_erase.domain.user.errors.access_service import AuthorizationError
 
 if TYPE_CHECKING:
     from pix_erase.domain.user.values.user_id import UserID
@@ -15,10 +15,10 @@ logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 class CurrentUserService:
     def __init__(
-            self,
-            identity_provider: IdentityProvider,
-            user_command_gateway: UserCommandGateway,
-            access_revoker: AccessRevoker,
+        self,
+        identity_provider: IdentityProvider,
+        user_command_gateway: UserCommandGateway,
+        access_revoker: AccessRevoker,
     ) -> None:
         self._identity_provider: Final[IdentityProvider] = identity_provider
         self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway

@@ -13,7 +13,7 @@ class ASGIConfig(BaseModel):
 
     host: str = Field(
         alias="UVICORN_HOST",
-        default="0.0.0.0",
+        default="0.0.0.0", # nosec B104
         description="Interface to bind the server to (e.g., '0.0.0.0' or 'localhost').",
         validate_default=True,
     )

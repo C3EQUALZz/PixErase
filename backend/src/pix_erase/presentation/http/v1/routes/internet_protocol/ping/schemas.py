@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, networks, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, networks
 
 
 class PingSchemaRequest(BaseModel):

@@ -41,7 +41,7 @@ class User(BaseAggregateRoot[UserID]):
     hashed_password: HashedPassword
     role: UserRole = field(default_factory=lambda: UserRole.USER)
     is_active: bool = field(default_factory=lambda: True)
-    images: list[ImageID] = field(default_factory=lambda: [])
+    images: list[ImageID] = field(default_factory=list)
 
     def serialize(self) -> SerializedUser:
         return {
@@ -51,7 +51,7 @@ class User(BaseAggregateRoot[UserID]):
             "role": self.role,
             "is_active": self.is_active,
             "images": [str(img_id) for img_id in self.images],
-            "password": self.hashed_password.value
+            "password": self.hashed_password.value,
         }
 
     @classmethod
@@ -63,5 +63,5 @@ class User(BaseAggregateRoot[UserID]):
             hashed_password=HashedPassword(data["password"]),
             role=UserRole(data["role"]),
             is_active=data["is_active"],
-            images=[ImageID(UUID(img_id)) for img_id in data["images"]]
+            images=[ImageID(UUID(img_id)) for img_id in data["images"]],
         )

@@ -1,4 +1,5 @@
-from typing import Final, Iterable
+from collections.abc import Iterable
+from typing import Final
 
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter

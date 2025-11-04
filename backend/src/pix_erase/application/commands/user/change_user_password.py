@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final
+from typing import TYPE_CHECKING, Final, final
 from uuid import UUID
 
 from pix_erase.application.common.ports.event_bus import EventBus
@@ -8,17 +8,19 @@ from pix_erase.application.common.ports.transaction_manager import TransactionMa
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.user import UserNotFoundByIDError
-from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.services.access_service import AccessService
 from pix_erase.domain.user.services.authorization.composite import AnyOf
 from pix_erase.domain.user.services.authorization.permission import (
     CanManageSelf,
     CanManageSubordinate,
-    UserManagementContext
+    UserManagementContext,
 )
 from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.domain.user.values.raw_password import RawPassword
 from pix_erase.domain.user.values.user_id import UserID
+
+if TYPE_CHECKING:
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -39,13 +41,13 @@ class ChangeUserPasswordCommandHandler:
     """
 
     def __init__(
-            self,
-            transaction_manager: TransactionManager,
-            user_command_gateway: UserCommandGateway,
-            user_service: UserService,
-            current_user_service: CurrentUserService,
-            event_bus: EventBus,
-            access_service: AccessService,
+        self,
+        transaction_manager: TransactionManager,
+        user_command_gateway: UserCommandGateway,
+        user_service: UserService,
+        current_user_service: CurrentUserService,
+        event_bus: EventBus,
+        access_service: AccessService,
     ) -> None:
         self._transaction_manager: Final[TransactionManager] = transaction_manager
         self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway
@@ -64,7 +66,7 @@ class ChangeUserPasswordCommandHandler:
         )
 
         if user_for_update_password is None:
-            msg: str = f"Cant find user by ID: {data.user_id}"
+            msg: str = f"Can't find user by ID: {data.user_id}"
             raise UserNotFoundByIDError(msg)
 
         self._access_service.authorize(
@@ -75,7 +77,7 @@ class ChangeUserPasswordCommandHandler:
             context=UserManagementContext(
                 subject=current_user,
                 target=user_for_update_password,
-            )
+            ),
         )
 
         validated_password: RawPassword = RawPassword(data.password)

@@ -1,8 +1,9 @@
-from sqlalchemy import Delete, delete, select, Select, update
+from typing import Final, override
+
+from sqlalchemy import Delete, Select, delete, select, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing_extensions import override
-from typing import Final
+
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.values.user_email import UserEmail
@@ -27,28 +28,23 @@ class SqlAlchemyUserCommandGateway(UserCommandGateway):
         select_stmt: Select[tuple[User]] = select(User).where(User.id == user_id)  # type: ignore
 
         try:
-            user: User | None = (
-                await self._session.execute(select_stmt)
-            ).scalar_one_or_none()
-
-            return user
-
+            user: User | None = (await self._session.execute(select_stmt)).scalar_one_or_none()
         except SQLAlchemyError as error:
             raise RepoError(DB_QUERY_FAILED) from error
+        else:
+            return user
 
     @override
     async def read_by_email(self, email: UserEmail) -> User | None:
         select_stmt: Select[tuple[User]] = select(User).where(User.email == email)  # type: ignore
 
         try:
-            user: User | None = (
-                await self._session.execute(select_stmt)
-            ).scalar_one_or_none()
-
-            return user
+            user: User | None = (await self._session.execute(select_stmt)).scalar_one_or_none()
 
         except SQLAlchemyError as error:
             raise RepoError(DB_QUERY_FAILED) from error
+        else:
+            return user
 
     @override
     async def delete_by_id(self, user_id: UserID) -> None:
@@ -63,7 +59,7 @@ class SqlAlchemyUserCommandGateway(UserCommandGateway):
     async def update(self, user: User) -> None:
         update_stmt = (
             update(User)
-            .where(User.id == user.id) # type: ignore
+            .where(User.id == user.id)  # type: ignore
             .values(
                 email=user.email,
                 name=user.name,
@@ -71,7 +67,7 @@ class SqlAlchemyUserCommandGateway(UserCommandGateway):
                 role=user.role,
                 is_active=user.is_active,
                 images=user.images,
-                updated_at=user.updated_at
+                updated_at=user.updated_at,
             )
         )
 

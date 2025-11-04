@@ -8,7 +8,6 @@ from pix_erase.application.commands.user.create_user import (
 )
 from pix_erase.application.errors.user import UserAlreadyExistsError
 from pix_erase.domain.user.values.user_role import UserRole
-
 from tests.unit.factories.user_entity import create_user
 from tests.unit.factories.value_objects import (
     create_user_email,
@@ -108,4 +107,3 @@ async def test_create_user_already_exists(
     fake_transaction.flush.assert_not_called()
     fake_event_bus.publish.assert_not_called()
     fake_transaction.commit.assert_not_called()
-

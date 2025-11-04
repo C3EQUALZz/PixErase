@@ -3,15 +3,15 @@ from dishka.integrations.taskiq import setup_dishka
 from sqlalchemy.orm import clear_mappers
 from taskiq import AsyncBroker, TaskiqEvents, TaskiqState
 
-from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtSecret, JwtAlgorithm
+from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtAlgorithm, JwtSecret
 from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper
 from pix_erase.infrastructure.auth.cookie_params import CookieParams
 from pix_erase.infrastructure.auth.session.timer_utc import AuthSessionRefreshThreshold, AuthSessionTtlMin
 from pix_erase.setup.bootstrap import (
     setup_map_tables,
     setup_task_manager,
+    setup_task_manager_middlewares,
     setup_task_manager_tasks,
-    setup_task_manager_middlewares
 )
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig

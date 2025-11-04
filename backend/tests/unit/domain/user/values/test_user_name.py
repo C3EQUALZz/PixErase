@@ -2,16 +2,12 @@ import pytest
 
 from pix_erase.domain.common.errors.base import DomainFieldError
 from pix_erase.domain.user.errors.user import (
-    TooSmallUserAccountNameError,
+    BadUserNameError,
     TooBigUserAccountNameError,
+    TooSmallUserAccountNameError,
     UserAccountNameCantBeEmptyError,
-    BadUserNameError
 )
-from pix_erase.domain.user.values.user_name import (
-    Username,
-    MAX_LENGTH_OF_USERNAME,
-    MIN_LENGTH_OF_USERNAME
-)
+from pix_erase.domain.user.values.user_name import MAX_LENGTH_OF_USERNAME, MIN_LENGTH_OF_USERNAME, Username
 
 
 @pytest.mark.parametrize(

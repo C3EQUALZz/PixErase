@@ -1,3 +1,5 @@
+# ruff: noqa: PLR2004
+
 import pytest
 
 from pix_erase.domain.common.errors.base import DomainError

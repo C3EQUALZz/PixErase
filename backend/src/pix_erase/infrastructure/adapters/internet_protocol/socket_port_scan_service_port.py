@@ -1,29 +1,32 @@
 import asyncio
 import socket
-from datetime import datetime
-from typing import Final, Coroutine, Mapping
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Final
 
 from pix_erase.domain.internet_protocol.errors.internet_protocol import (
-    PortScanTimeoutError,
-    PortScanPermissionError,
-    PortScanNetworkError,
-    PortScanConnectionError,
     InvalidPortRangeError,
+    PortScanConnectionError,
+    PortScanNetworkError,
+    PortScanPermissionError,
+    PortScanTimeoutError,
 )
 from pix_erase.domain.internet_protocol.ports import PortScanServicePort
-from pix_erase.domain.internet_protocol.values.ip_address import IPAddress
-from pix_erase.domain.internet_protocol.values.port import Port, PortRange, COMMON_PORTS
 from pix_erase.domain.internet_protocol.services.contracts.port_scan_result import (
     PortScanResult,
     PortScanSummary,
     PortStatus,
 )
+from pix_erase.domain.internet_protocol.values.ip_address import IPAddress
+from pix_erase.domain.internet_protocol.values.port import COMMON_PORTS, Port, PortRange
+
+if TYPE_CHECKING:
+    from collections.abc import Coroutine, Mapping
 
 
 class SocketPortScanServicePort(PortScanServicePort):
     """
     Socket-based implementation of port scanning service.
-    
+
     This implementation uses raw sockets to perform port scanning,
     similar to the provided example code but integrated with the domain architecture.
     """
@@ -32,22 +35,22 @@ class SocketPortScanServicePort(PortScanServicePort):
         self._max_concurrent: Final[int] = 100
 
     async def scan_port(
-            self,
-            target: IPAddress,
-            port: Port,
-            timeout: float = 1.0,
+        self,
+        target: IPAddress,
+        port: Port,
+        timeout: float = 1.0,
     ) -> PortScanResult:
         """
         Scan a single port on a target using socket connection.
-        
+
         Args:
             target: The target IP address to scan
             port: The port number to scan
             timeout: Timeout in seconds for the connection attempt
-            
+
         Returns:
             PortScanResult containing the scan result
-            
+
         Raises:
             PortScanTimeoutError: If the scan times out
             PortScanPermissionError: If elevated permissions are required
@@ -55,7 +58,7 @@ class SocketPortScanServicePort(PortScanServicePort):
             PortScanConnectionError: If connection to target fails
         """
         try:
-            start_time = datetime.now()
+            start_time = datetime.now(UTC)
 
             # Create socket and set timeout
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,7 +67,7 @@ class SocketPortScanServicePort(PortScanServicePort):
             try:
                 # Attempt to connect
                 result = sock.connect_ex((target.value, port.value))
-                end_time = datetime.now()
+                end_time = datetime.now(UTC)
                 response_time = (end_time - start_time).total_seconds()
 
                 if result == 0:
@@ -87,36 +90,38 @@ class SocketPortScanServicePort(PortScanServicePort):
             finally:
                 sock.close()
 
-        except socket.timeout:
-            raise PortScanTimeoutError(f"Port scan timed out for {target.value}:{port.value}")
+        except TimeoutError as e:
+            msg = f"Port scan timed out for {target.value}:{port.value}"
+            raise PortScanTimeoutError(msg) from e
         except PermissionError as e:
-            raise PortScanPermissionError(f"Permission denied for port scan: {e}")
+            msg = f"Permission denied for port scan: {e}"
+            raise PortScanPermissionError(msg) from e
         except socket.gaierror as e:
-            raise PortScanConnectionError(f"Hostname resolution failed: {e}")
+            msg = f"Hostname resolution failed: {e}"
+            raise PortScanConnectionError(msg) from e
         except OSError as e:
             if e.errno == 13:  # Permission denied
-                raise PortScanPermissionError(f"Permission denied for port scan: {e}")
-            else:
-                raise PortScanNetworkError(f"Network error during port scan: {e}")
-        except Exception as e:
-            raise PortScanNetworkError(f"Unexpected error during port scan: {e}")
+                msg = f"Permission denied for port scan: {e}"
+                raise PortScanPermissionError(msg) from e
+            msg = f"Network error during port scan: {e}"
+            raise PortScanNetworkError(msg) from e
 
     async def scan_ports(
-            self,
-            target: IPAddress,
-            ports: list[Port],
-            timeout: float = 1.0,
-            max_concurrent: int = 100,
+        self,
+        target: IPAddress,
+        ports: list[Port],
+        timeout: float = 1.0,
+        max_concurrent: int = 100,
     ) -> list[PortScanResult]:
         """
         Scan multiple ports on a target concurrently.
-        
+
         Args:
             target: The target IP address to scan
             ports: List of ports to scan
             timeout: Timeout in seconds for each connection attempt
             max_concurrent: Maximum number of concurrent scans
-            
+
         Returns:
             List of PortScanResult objects in the same order as ports
         """
@@ -130,28 +135,29 @@ class SocketPortScanServicePort(PortScanServicePort):
         return await asyncio.gather(*tasks)
 
     async def scan_port_range(
-            self,
-            target: IPAddress,
-            port_range: PortRange,
-            timeout: float = 1.0,
-            max_concurrent: int = 100,
+        self,
+        target: IPAddress,
+        port_range: PortRange,
+        timeout: float = 1.0,
+        max_concurrent: int = 100,
     ) -> PortScanSummary:
         """
         Scan a range of ports on a target.
-        
+
         Args:
             target: The target IP address to scan
             port_range: Range of ports to scan
             timeout: Timeout in seconds for each connection attempt
             max_concurrent: Maximum number of concurrent scans
-            
+
         Returns:
             PortScanSummary containing the complete scan results
         """
         if port_range.start.value > port_range.end.value:
-            raise InvalidPortRangeError(f"Invalid port range: {port_range}")
+            msg = f"Invalid port range: {port_range}"
+            raise InvalidPortRangeError(msg)
 
-        start_time = datetime.now()
+        start_time = datetime.now(UTC)
 
         # Convert port range to list of ports
         ports = list(port_range)
@@ -164,7 +170,7 @@ class SocketPortScanServicePort(PortScanServicePort):
             max_concurrent=max_concurrent,
         )
 
-        end_time = datetime.now()
+        end_time = datetime.now(UTC)
         scan_duration = (end_time - start_time).total_seconds()
 
         # Count results by status
@@ -186,19 +192,19 @@ class SocketPortScanServicePort(PortScanServicePort):
         )
 
     async def scan_common_ports(
-            self,
-            target: IPAddress,
-            timeout: float = 1.0,
-            max_concurrent: int = 100,
+        self,
+        target: IPAddress,
+        timeout: float = 1.0,
+        max_concurrent: int = 100,
     ) -> PortScanSummary:
         """
         Scan common well-known ports (1-1023) on a target.
-        
+
         Args:
             target: The target IP address to scan
             timeout: Timeout in seconds for each connection attempt
             max_concurrent: Maximum number of concurrent scans
-            
+
         Returns:
             PortScanSummary containing the scan results
         """
@@ -213,10 +219,10 @@ class SocketPortScanServicePort(PortScanServicePort):
     def _detect_service(port: Port) -> str | None:
         """
         Detect the service running on a port based on common port numbers.
-        
+
         Args:
             port: The port number
-            
+
         Returns:
             Service name if known, None otherwise
         """

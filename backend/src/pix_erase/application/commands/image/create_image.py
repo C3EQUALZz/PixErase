@@ -1,19 +1,21 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final
+from typing import TYPE_CHECKING, Final, final
 
-from pix_erase.application.common.ports.image.extractor import ImageInfoExtractor, ImageInfo
+from pix_erase.application.common.ports.image.extractor import ImageInfo, ImageInfoExtractor
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.image.create_image import CreateImageView
-from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.image.services.image_service import ImageService
 from pix_erase.domain.image.values.image_name import ImageName
 from pix_erase.domain.image.values.image_size import ImageSize
-from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.services.user_service import UserService
+
+if TYPE_CHECKING:
+    from pix_erase.domain.image.entities.image import Image
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -33,14 +35,14 @@ class CreateImageCommandHandler:
     """
 
     def __init__(
-            self,
-            current_user_service: CurrentUserService,
-            image_storage: ImageStorage,
-            image_extractor: ImageInfoExtractor,
-            image_service: ImageService,
-            user_service: UserService,
-            transaction_manager: TransactionManager,
-            user_command_gateway: UserCommandGateway,
+        self,
+        current_user_service: CurrentUserService,
+        image_storage: ImageStorage,
+        image_extractor: ImageInfoExtractor,
+        image_service: ImageService,
+        user_service: UserService,
+        transaction_manager: TransactionManager,
+        user_command_gateway: UserCommandGateway,
     ) -> None:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._image_storage: Final[ImageStorage] = image_storage
@@ -58,9 +60,7 @@ class CreateImageCommandHandler:
         logger.info("Current user is: %s", current_user.id)
 
         logger.info("Started getting metadata from image with name: %s", data.filename)
-        metadata_from_image: ImageInfo = await self._image_extractor.extract(
-            data=data.data
-        )
+        metadata_from_image: ImageInfo = await self._image_extractor.extract(data=data.data)
         logger.info("Successfully got metadata from image with name: %s", data.filename)
 
         logger.info("Creating a new image entity with name: %s", data.filename)
@@ -68,7 +68,7 @@ class CreateImageCommandHandler:
             image_name=ImageName(data.filename),
             image_height=ImageSize(metadata_from_image.height),
             image_width=ImageSize(metadata_from_image.width),
-            data=data.data
+            data=data.data,
         )
         logger.info("Got index for new image entity: %s with name: %s", new_image.id, new_image.name)
 
@@ -78,11 +78,7 @@ class CreateImageCommandHandler:
 
         self._user_service.add_image(user=current_user, image=new_image)
 
-        logger.info(
-            "Added image to user: %s, images from this user: %s",
-            current_user.id,
-            current_user.images
-        )
+        logger.info("Added image to user: %s, images from this user: %s", current_user.id, current_user.images)
 
         await self._user_command_gateway.update(user=current_user)
         await self._transaction_manager.flush()

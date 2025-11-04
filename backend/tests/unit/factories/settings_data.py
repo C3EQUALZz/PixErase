@@ -34,8 +34,8 @@ def create_auth_settings_data(
         "RS384",
         "RS512",
     ] = "RS256",
-    session_ttl_min: int | float = 2,
-    session_refresh_threshold: int | float = 0.5,
+    session_ttl_min: float = 2,
+    session_refresh_threshold: float = 0.5,
 ) -> AuthSettingsData:
     return AuthSettingsData(
         JWT_SECRET=jwt_secret,
@@ -47,7 +47,7 @@ def create_auth_settings_data(
 
 def create_postgres_settings_data(
     user: str = "user",
-    password: str = "password",
+    password: str = "password",  # noqa: S107
     db: str = "db",
     host: str = "localhost",
     port: int = 5432,
@@ -75,15 +75,30 @@ class SQLAlchemySettingsData(TypedDict):
 
 
 def create_sqlalchemy_settings_data(
-    pool_pre_ping: bool = True,
+    pool_pre_ping: bool | None = None,
     pool_recycle: int = 3600,
     pool_size: int = 10,
     max_overflow: int = 20,
-    echo: bool = False,
-    auto_flush: bool = False,
-    expire_on_commit: bool = False,
-    future: bool = True,
+    echo: bool | None = None,
+    auto_flush: bool | None = None,
+    expire_on_commit: bool | None = None,
+    future: bool | None = None,
 ) -> SQLAlchemySettingsData:
+    if pool_pre_ping is None:
+        pool_pre_ping = True
+
+    if echo is None:
+        echo = False
+
+    if auto_flush is None:
+        auto_flush = False
+
+    if expire_on_commit is None:
+        expire_on_commit = False
+
+    if future is None:
+        future = True
+
     return SQLAlchemySettingsData(
         DB_POOL_PRE_PING=pool_pre_ping,
         DB_POOL_RECYCLE=pool_recycle,
@@ -111,7 +126,7 @@ def create_redis_settings_data(
     host: str = "localhost",
     port: int = 6379,
     user: str = "default",
-    password: str = "password",
+    password: str = "password",  # noqa: S107
     cache_db: int = 0,
     worker_db: int = 1,
     schedule_source_db: int = 2,
@@ -140,7 +155,7 @@ def create_rabbit_settings_data(
     host: str = "localhost",
     port: int = 5672,
     user: str = "guest",
-    password: str = "guest",
+    password: str = "guest",  # noqa: S107
 ) -> RabbitSettingsData:
     return RabbitSettingsData(
         RABBITMQ_HOST=host,
@@ -158,11 +173,17 @@ class ASGISettingsData(TypedDict):
 
 
 def create_asgi_settings_data(
-    host: str = "0.0.0.0",
+    host: str = "0.0.0.0",  # noqa: S104
     port: int = 8080,
-    fastapi_debug: bool = True,
-    allow_credentials: bool = False,
+    fastapi_debug: bool | None = None,
+    allow_credentials: bool | None = None,
 ) -> ASGISettingsData:
+    if allow_credentials is None:
+        allow_credentials = False
+
+    if fastapi_debug is None:
+        fastapi_debug = True
+
     return ASGISettingsData(
         UVICORN_HOST=host,
         UVICORN_PORT=port,
@@ -183,7 +204,7 @@ def create_s3_settings_data(
     host: str = "localhost",
     port: int = 9000,
     aws_access_key_id: str = "minioadmin",
-    aws_secret_access_key: str = "minioadmin",
+    aws_secret_access_key: str = "minioadmin",  # noqa: S107
     images_bucket_name: str = "images",
 ) -> S3SettingsData:
     return S3SettingsData(
@@ -225,9 +246,9 @@ class HttpClientSettingsData(TypedDict):
 
 def create_http_client_settings_data(
     default_timeout: float = 30.0,
-    verify: bool | str = True,
-    follow_redirects: bool = True,
-    http2: bool = False,
+    verify: bool | str | None = None,
+    follow_redirects: bool | None = None,
+    http2: bool | None = None,
     client_cert_path: str | None = None,
     client_key_path: str | None = None,
     proxy: str | None = None,
@@ -235,6 +256,15 @@ def create_http_client_settings_data(
     max_keepalive_connections: int = 20,
     keepalive_expiry: float = 5.0,
 ) -> HttpClientSettingsData:
+    if verify is None:
+        verify = True
+
+    if follow_redirects is None:
+        follow_redirects = True
+
+    if http2 is None:
+        http2 = False
+
     return HttpClientSettingsData(
         DEFAULT_HTTP_TIMEOUT=default_timeout,
         DEFAULT_HTTP_VERIFY=verify,
@@ -265,15 +295,30 @@ class TaskIQWorkerSettingsData(TypedDict):
 def create_taskiq_worker_settings_data(
     default_retry_count: int = 5,
     default_delay: int = 10,
-    use_jitter: bool = True,
-    use_delay_exponent: bool = True,
+    use_jitter: bool | None = None,
+    use_delay_exponent: bool | None = None,
     max_delay_component: int = 120,
-    durable_queue: bool = True,
-    durable_exchange: bool = True,
-    declare_exchange: bool = True,
-    prometheus_server_address: str = "0.0.0.0",
+    durable_queue: bool | None = None,
+    durable_exchange: bool | None = None,
+    declare_exchange: bool | None = None,
+    prometheus_server_address: str = "0.0.0.0",  # noqa: S104
     prometheus_server_port: int = 9090,
 ) -> TaskIQWorkerSettingsData:
+    if use_jitter is None:
+        use_jitter = True
+
+    if use_delay_exponent is None:
+        use_delay_exponent = True
+
+    if durable_queue is None:
+        durable_queue = True
+
+    if durable_exchange is None:
+        durable_exchange = True
+
+    if declare_exchange is None:
+        declare_exchange = True
+
     return TaskIQWorkerSettingsData(
         default_retry_count=default_retry_count,
         default_delay=default_delay,

@@ -1,3 +1,5 @@
+# ruff: noqa: PLR2004
+
 import pytest
 
 from pix_erase.domain.common.errors.base import DomainError
@@ -116,5 +118,3 @@ def test_ping_result_str_failed() -> None:
     # Assert
     assert "failed" in result.lower()
     assert "Timeout" in result
-
-

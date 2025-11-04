@@ -14,7 +14,7 @@ from tests.unit.factories.settings_data import create_auth_settings_data
         pytest.param(2.5, timedelta(minutes=2.5), id="ordinary"),
     ],
 )
-def test_auth_converts_ttl_to_timedelta(ttl: int | float, expected: timedelta) -> None:
+def test_auth_converts_ttl_to_timedelta(ttl: float, expected: timedelta) -> None:
     # Arrange
     data = create_auth_settings_data(session_ttl_min=ttl)
 

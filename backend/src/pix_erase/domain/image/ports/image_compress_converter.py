@@ -4,5 +4,4 @@ from typing import Protocol
 
 class ImageCompressConverter(Protocol):
     @abstractmethod
-    def convert(self, data: bytes, quality: int = 90) -> bytes:
-        ...
+    def convert(self, data: bytes, quality: int = 90) -> bytes: ...

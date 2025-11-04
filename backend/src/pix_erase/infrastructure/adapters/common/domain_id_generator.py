@@ -1,7 +1,5 @@
-from typing import cast
+from typing import cast, override
 from uuid import uuid4
-
-from typing_extensions import override
 
 from pix_erase.domain.internet_protocol.ports.domain_id_generator import DomainIdGenerator
 from pix_erase.domain.internet_protocol.values.domain_id import DomainID

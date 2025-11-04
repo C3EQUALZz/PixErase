@@ -1,4 +1,6 @@
-from typing import Any, Final, MutableMapping, override
+import logging
+from collections.abc import MutableMapping
+from typing import Any, Final, override
 
 from opentelemetry import trace
 from opentelemetry.propagate import inject
@@ -7,6 +9,7 @@ from opentelemetry.trace import SpanKind, Status, StatusCode
 from pix_erase.infrastructure.http.base import HttpClient, HttpHeaders, HttpResponse, QueryParams
 
 tracer: Final[trace.Tracer] = trace.get_tracer(__name__)
+logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 class TraceableHttpClient(HttpClient):
@@ -34,11 +37,12 @@ class TraceableHttpClient(HttpClient):
                     timeout=timeout,
                 )
                 _set_response_attributes(span, response)
-                return response
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return response
 
     @override
     async def post(
@@ -69,11 +73,12 @@ class TraceableHttpClient(HttpClient):
                     timeout=timeout,
                 )
                 _set_response_attributes(span, response)
-                return response
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return response
 
     @override
     async def put(
@@ -100,11 +105,12 @@ class TraceableHttpClient(HttpClient):
                     timeout=timeout,
                 )
                 _set_response_attributes(span, response)
-                return response
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return response
 
     @override
     async def delete(
@@ -127,37 +133,35 @@ class TraceableHttpClient(HttpClient):
                     timeout=timeout,
                 )
                 _set_response_attributes(span, response)
-                return response
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return response
 
 
 def _prepare_headers_with_context(headers: HttpHeaders | None) -> MutableMapping[str, str]:
     # Create a mutable copy for propagation
     out: MutableMapping[str, str]
-    if headers is None:
-        out = {}
-    else:
-        out = dict(headers)
+    out = {} if headers is None else dict(headers)
     inject(out)
     return out
 
 
-def _set_common_request_attributes(span: trace.Span, *, method: str, url: str, params: QueryParams | None, timeout: float | None) -> None:
+def _set_common_request_attributes(
+    span: trace.Span, *, method: str, url: str, params: QueryParams | None, timeout: float | None
+) -> None:
     span.set_attribute("external_http.request.method", method)
     span.set_attribute("url.full", url)
     if timeout is not None:
         span.set_attribute("timeout.ms", int(timeout * 1000))
     if params is not None:
         try:
-            if isinstance(params, dict):
+            if isinstance(params, (dict, list, tuple)):
                 span.set_attribute("http.request.params.count", len(params))
-            elif isinstance(params, (list, tuple)):
-                span.set_attribute("http.request.params.count", len(params))
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception:
+            logger.exception("Can't set common attrs")
 
 
 def _set_response_attributes(span: trace.Span, response: HttpResponse) -> None:
@@ -166,10 +170,5 @@ def _set_response_attributes(span: trace.Span, response: HttpResponse) -> None:
     span.set_attribute("server.address", response.url)
     if response.content is not None:
         span.set_attribute("http.response.body.size", len(response.content))
-    if 400 <= response.status_code:
+    if response.status_code >= 400:
         span.set_status(Status(StatusCode.ERROR))
-
-
-
-
-

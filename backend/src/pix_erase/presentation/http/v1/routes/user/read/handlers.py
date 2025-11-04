@@ -1,9 +1,9 @@
+from datetime import UTC, datetime
 from inspect import getdoc
 from typing import TYPE_CHECKING, Annotated, Final
-from datetime import datetime, UTC
-from asgi_monitor.tracing import span
 from uuid import UUID
 
+from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Path, Security, status
@@ -44,8 +44,8 @@ UserIDPathParameter = Path(
         status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -56,11 +56,11 @@ UserIDPathParameter = Path(
         "http.route": "/user/id/{user_id}/",
         "feature": "user",
         "action": "read_by_id",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def read_user_by_id_handler(
-        user_id: Annotated[UUID, UserIDPathParameter], interactor: FromDishka[ReadUserByIDQueryHandler]
+    user_id: Annotated[UUID, UserIDPathParameter], interactor: FromDishka[ReadUserByIDQueryHandler]
 ) -> ReadUserByIDResponse:
     query: ReadUserByIDQuery = ReadUserByIDQuery(
         user_id=user_id,

@@ -1,12 +1,14 @@
+from datetime import UTC, datetime
 from inspect import getdoc
 from typing import Final
-from datetime import datetime, UTC
+
 from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
+
 from pix_erase.application.auth.log_in import LogInData, LogInHandler
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.routes.auth.log_in.schemas import LoginSchemaRequest
@@ -29,8 +31,8 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
         status.HTTP_400_BAD_REQUEST: {"model": ExceptionSchema},
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -41,8 +43,8 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         "http.route": "/auth/login/",
         "feature": "auth",
         "action": "login",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def login_handler(request_schema: LoginSchemaRequest, interactor: FromDishka[LogInHandler]) -> None:
     """

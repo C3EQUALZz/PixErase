@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from pix_erase.domain.common.entities.base_aggregate import BaseAggregateRoot
-from pix_erase.domain.internet_protocol.values import DomainName, DnsRecords
+from pix_erase.domain.internet_protocol.values import DnsRecords, DomainName
 from pix_erase.domain.internet_protocol.values.domain_id import DomainID
 
 
@@ -9,10 +9,10 @@ from pix_erase.domain.internet_protocol.values.domain_id import DomainID
 class InternetDomain(BaseAggregateRoot[DomainID]):
     """
     Aggregate representing a domain for internet protocol operations.
-    
+
     This entity encapsulates domain-related data and provides domain-specific
     business logic for OSINT operations, DNS queries, and domain analysis.
-    
+
     Attributes:
         domain_name: The validated domain name value object
         dns_records: Cached DNS records for the domain (optional)
@@ -61,10 +61,10 @@ class InternetDomain(BaseAggregateRoot[DomainID]):
     def update_dns_records(self, dns_records: DnsRecords) -> None:
         """
         Update DNS records for the domain.
-        
+
         Args:
             dns_records: Dictionary of DNS record types to values
-            
+
         Note:
             This method mutates the entity and should be called within
             a domain service that handles business rules and events.
@@ -76,10 +76,10 @@ class InternetDomain(BaseAggregateRoot[DomainID]):
     def add_subdomains(self, subdomains: list[DomainName]) -> None:
         """
         Add discovered subdomains to the domain.
-        
+
         Args:
             subdomains: List of subdomain names to add
-            
+
         Note:
             - Prevents duplicates
             - Should be called within a domain service
@@ -95,10 +95,10 @@ class InternetDomain(BaseAggregateRoot[DomainID]):
     def update_title(self, title: str) -> None:
         """
         Update the HTTP title of the domain.
-        
+
         Args:
             title: The HTTP title text
-            
+
         Note:
             Should be called within a domain service
         """
@@ -109,7 +109,7 @@ class InternetDomain(BaseAggregateRoot[DomainID]):
     def mark_as_analyzed(self) -> None:
         """
         Mark the domain as analyzed.
-        
+
         Note:
             Should be called when OSINT analysis is complete
         """

@@ -9,21 +9,23 @@ from pix_erase.domain.internet_protocol.errors.internet_protocol import BadTimeO
 class Timeout(BaseValueObject):
     """
     Value object for ping timeout.
-    
+
     Represents the timeout duration for ping operations in seconds.
     """
-    
+
     value: float
-    
+
     @override
     def _validate(self) -> None:
         """Validate that timeout is positive."""
         if self.value <= 0:
-            raise BadTimeOutError("Timeout must be positive")
-        
+            msg = "Timeout must be positive"
+            raise BadTimeOutError(msg)
+
         if self.value > 300:  # 5 minutes max
-            raise BadTimeOutError("Timeout cannot exceed 300 seconds")
-    
+            msg = "Timeout cannot exceed 300 seconds"
+            raise BadTimeOutError(msg)
+
     @override
     def __str__(self) -> str:
         return f"{self.value} s"

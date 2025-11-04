@@ -1,3 +1,5 @@
+# ruff: noqa: PLR2004
+
 import pytest
 
 from pix_erase.domain.internet_protocol.entities.internet_domain import InternetDomain
@@ -138,4 +140,3 @@ async def test_analyze_domain_handles_no_subdomains(
     # Assert
     assert result.subdomains == []
     assert result.title == "Example"
-

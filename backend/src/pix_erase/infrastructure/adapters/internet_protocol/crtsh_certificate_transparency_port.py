@@ -1,7 +1,5 @@
 import logging
-from typing import Final, Any
-
-from typing_extensions import override
+from typing import Any, Final, override
 
 from pix_erase.domain.internet_protocol.ports.certificate_transparency_port import CertificateTransparencyPort
 from pix_erase.infrastructure.errors.http import HttpError
@@ -37,7 +35,7 @@ class CrtShCertificateTransparencyPort(CertificateTransparencyPort):
                 logger.warning("Got response with status code: %s for CrtSh", resp.status_code)
                 return []
 
-            rows: list[dict[str, Any]] = resp.json
+            rows: list[dict[str, Any]] = resp.json()
 
             logger.debug("Got all rows: %s from json", rows)
 
@@ -49,10 +47,7 @@ class CrtShCertificateTransparencyPort(CertificateTransparencyPort):
                 if not value:
                     continue
 
-                names |= {
-                    name.strip().lower() for name in str(value).split()
-                    if name.endswith(domain)
-                }
+                names |= {name.strip().lower() for name in str(value).split() if name.endswith(domain)}
 
             return sorted(names)
 

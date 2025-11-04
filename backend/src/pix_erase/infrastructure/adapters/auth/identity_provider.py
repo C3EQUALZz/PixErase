@@ -7,8 +7,8 @@ from pix_erase.domain.user.values.user_id import UserID
 
 class AuthSessionIdentityProvider(IdentityProvider):
     def __init__(
-            self,
-            auth_session_service: AuthSessionService,
+        self,
+        auth_session_service: AuthSessionService,
     ) -> None:
         self._auth_session_service: Final[AuthSessionService] = auth_session_service
 

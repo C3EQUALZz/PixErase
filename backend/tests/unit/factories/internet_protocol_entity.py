@@ -11,8 +11,11 @@ def create_internet_domain(
     dns_records: DnsRecords | None = None,
     subdomains: list[DomainName] | None = None,
     title: str | None = None,
-    is_analyzed: bool = False,
+    is_analyzed: bool | None = None,
 ) -> InternetDomain:
+    if is_analyzed is None:
+        is_analyzed = False
+
     return InternetDomain(
         id=domain_id or create_domain_id(),
         domain_name=domain_name or create_domain_name(),
@@ -21,5 +24,3 @@ def create_internet_domain(
         title=title,
         is_analyzed=is_analyzed,
     )
-
-

@@ -1,8 +1,7 @@
-from typing import Final
+from typing import Final, override
 
 from opentelemetry import trace
 from opentelemetry.trace import SpanKind, Status, StatusCode, Tracer
-from typing_extensions import override
 
 from pix_erase.application.common.ports.image.storage import ImageStorage
 from pix_erase.application.common.query_models.image import ImageStreamQueryModel
@@ -25,7 +24,7 @@ class TraceableFileStorage(ImageStorage):
             try:
                 await self._image_storage.add(image)
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -40,11 +39,12 @@ class TraceableFileStorage(ImageStorage):
                 image = await self._image_storage.read_by_id(image_id)
                 _set_image_attributes(span, image)
                 span.set_status(Status(StatusCode.OK))
-                return image
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return image
 
     @override
     async def delete_by_id(self, image_id: ImageID) -> None:
@@ -55,7 +55,7 @@ class TraceableFileStorage(ImageStorage):
             try:
                 await self._image_storage.delete_by_id(image_id)
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -69,7 +69,7 @@ class TraceableFileStorage(ImageStorage):
             try:
                 await self._image_storage.update(image)
                 span.set_status(Status(StatusCode.OK))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
@@ -87,11 +87,12 @@ class TraceableFileStorage(ImageStorage):
                 else:
                     span.set_attribute("image.stream.exists", False)
                 span.set_status(Status(StatusCode.OK))
-                return stream
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 span.record_exception(exc)
                 span.set_status(Status(StatusCode.ERROR))
                 raise
+            else:
+                return stream
 
 
 def _set_image_attributes(span: trace.Span, image: Image) -> None:

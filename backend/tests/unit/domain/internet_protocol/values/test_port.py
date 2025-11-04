@@ -1,14 +1,16 @@
+# ruff: noqa: PLR2004
+
 import pytest
 
 from pix_erase.domain.common.errors.base import DomainFieldError
 from pix_erase.domain.internet_protocol.errors.internet_protocol import BadPortError, BadPortRangeError
 from pix_erase.domain.internet_protocol.values.port import (
+    ALL_PORTS,
+    COMMON_PORTS,
+    DYNAMIC_PORTS,
+    REGISTERED_PORTS,
     Port,
     PortRange,
-    COMMON_PORTS,
-    REGISTERED_PORTS,
-    DYNAMIC_PORTS,
-    ALL_PORTS,
 )
 from tests.unit.factories.value_objects import create_port
 
@@ -223,5 +225,3 @@ def test_all_ports_constant() -> None:
     # Assert
     assert sut.start.value == 1
     assert sut.end.value == 65535
-
-

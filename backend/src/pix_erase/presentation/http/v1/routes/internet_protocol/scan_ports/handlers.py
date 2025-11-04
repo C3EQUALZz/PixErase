@@ -1,16 +1,19 @@
+from datetime import UTC, datetime
 from inspect import getdoc
-from typing import Final, cast, Literal, TYPE_CHECKING, Annotated
-from datetime import datetime, UTC
+from typing import TYPE_CHECKING, Annotated, Final, Literal, cast
+
 from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, status, Security
+from fastapi import APIRouter, Security, status
 from fastapi.params import Depends
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
 if TYPE_CHECKING:
     from pydantic import IPvAnyAddress
+
+    from pix_erase.application.common.views.internet_protocol.port_scan import PortScanSummaryView, PortScanView
 
 from pix_erase.application.queries.internet_protocol.scan_common_ports import (
     ScanCommonPortsQuery,
@@ -28,24 +31,18 @@ from pix_erase.application.queries.internet_protocol.scan_ports import (
     ScanPortsQuery,
     ScanPortsQueryHandler,
 )
-from pix_erase.application.common.views.internet_protocol.port_scan import PortScanSummaryView, PortScanView
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
-
 from pix_erase.presentation.http.v1.routes.internet_protocol.scan_ports.schemas import (
-    PortScanRequestSchema,
+    PortScanCommonRequest,
     PortScanMultipleRequest,
     PortScanRangeRequest,
-    PortScanCommonRequest,
+    PortScanRequestSchema,
     PortScanResultResponseSchema,
     PortScanSummaryResponse,
 )
 
-scan_ports_router: Final[APIRouter] = APIRouter(
-    prefix="/scan-ports",
-    tags=["IP"],
-    route_class=DishkaRoute
-)
+scan_ports_router: Final[APIRouter] = APIRouter(prefix="/scan-ports", tags=["IP"], route_class=DishkaRoute)
 tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
@@ -64,8 +61,8 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         status.HTTP_408_REQUEST_TIMEOUT: {"model": ExceptionSchema},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -76,12 +73,12 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         "http.route": "/ip/scan-ports/single/",
         "feature": "ip",
         "action": "scan_port",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def scan_port(
-        request: Annotated[PortScanRequestSchema, Depends()],
-        handler: FromDishka[ScanPortQueryHandler],
+    request: Annotated[PortScanRequestSchema, Depends()],
+    handler: FromDishka[ScanPortQueryHandler],
 ) -> PortScanResultResponseSchema:
     command: ScanPortQuery = ScanPortQuery(
         target=str(request.target),
@@ -93,7 +90,7 @@ async def scan_port(
 
     response: PortScanResultResponseSchema = PortScanResultResponseSchema(
         port=result.port,
-        status=cast(Literal["open", "closed"], result.status),
+        status=cast("Literal['open', 'closed']", result.status),
         response_time=result.response_time,
         service=result.service,
         error_message=result.error_message,
@@ -118,8 +115,8 @@ async def scan_port(
         status.HTTP_408_REQUEST_TIMEOUT: {"model": ExceptionSchema},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -130,12 +127,12 @@ async def scan_port(
         "http.route": "/ip/scan-ports/multiple/",
         "feature": "ip",
         "action": "scan_ports",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def scan_ports(
-        request: Annotated[PortScanMultipleRequest, Depends()],
-        handler: FromDishka[ScanPortsQueryHandler],
+    request: Annotated[PortScanMultipleRequest, Depends()],
+    handler: FromDishka[ScanPortsQueryHandler],
 ) -> list[PortScanResultResponseSchema]:
     command: ScanPortsQuery = ScanPortsQuery(
         target=str(request.target),
@@ -149,7 +146,7 @@ async def scan_ports(
     response: list[PortScanResultResponseSchema] = [
         PortScanResultResponseSchema(
             port=result.port,
-            status=cast(Literal["open", "closed"], result.status),
+            status=cast("Literal['open', 'closed']", result.status),
             response_time=result.response_time,
             service=result.service,
             error_message=result.error_message,
@@ -176,8 +173,8 @@ async def scan_ports(
         status.HTTP_408_REQUEST_TIMEOUT: {"model": ExceptionSchema},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -188,12 +185,12 @@ async def scan_ports(
         "http.route": "/ip/scan-ports/range/",
         "feature": "ip",
         "action": "scan_port_range",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def scan_port_range(
-        request: Annotated[PortScanRangeRequest, Depends()],
-        handler: FromDishka[ScanPortRangeQueryHandler],
+    request: Annotated[PortScanRangeRequest, Depends()],
+    handler: FromDishka[ScanPortRangeQueryHandler],
 ) -> PortScanSummaryResponse:
     command: ScanPortRangeQuery = ScanPortRangeQuery(
         target=str(request.target),
@@ -247,8 +244,8 @@ async def scan_port_range(
         status.HTTP_408_REQUEST_TIMEOUT: {"model": ExceptionSchema},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -259,12 +256,12 @@ async def scan_port_range(
         "http.route": "/ip/scan-ports/common/",
         "feature": "ip",
         "action": "scan_common_ports",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def scan_common_ports(
-        request: Annotated[PortScanCommonRequest, Depends()],
-        handler: FromDishka[ScanCommonPortsQueryHandler],
+    request: Annotated[PortScanCommonRequest, Depends()],
+    handler: FromDishka[ScanCommonPortsQueryHandler],
 ) -> PortScanSummaryResponse:
     command: ScanCommonPortsQuery = ScanCommonPortsQuery(
         target=str(request.target),

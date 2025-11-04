@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RemoveBackgroundSchemaResponse(BaseModel):
@@ -13,6 +13,6 @@ class RemoveBackgroundSchemaResponse(BaseModel):
             description="The unique task id that process request from user",
             examples=["remove_background_image:75079971-fb0e-4e04-bf07-ceb57faebe84"],
             min_length=1,
-            pattern=r"^remove_background_image:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-        )
+            pattern=r"^remove_background_image:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+        ),
     ]

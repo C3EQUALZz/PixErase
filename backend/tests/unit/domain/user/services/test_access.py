@@ -1,8 +1,8 @@
 import pytest
 
 from pix_erase.domain.user.errors.access_service import (
-    RoleChangeNotPermittedError,
     ActivationChangeNotPermittedError,
+    RoleChangeNotPermittedError,
 )
 from pix_erase.domain.user.services.access_service import AccessService
 from pix_erase.domain.user.values.user_role import UserRole
@@ -17,8 +17,8 @@ from tests.unit.factories.user_entity import create_user
     ],
 )
 def test_toggles_activation_state(
-        initial_state: bool,
-        target_state: bool,
+    initial_state: bool,
+    target_state: bool,
 ) -> None:
     # Arrange
     user = create_user(is_active=initial_state)
@@ -36,7 +36,7 @@ def test_toggles_activation_state(
     [True, False],
 )
 def test_preserves_super_admin_activation_state(
-        is_active: bool,
+    is_active: bool,
 ) -> None:
     # Arrange
     user = create_user(role=UserRole.SUPER_ADMIN, is_active=not is_active)
@@ -57,9 +57,9 @@ def test_preserves_super_admin_activation_state(
     ],
 )
 def test_toggles_role(
-        initial_role: UserRole,
-        target_is_admin: bool,
-        expected_role: UserRole,
+    initial_role: UserRole,
+    target_is_admin: bool,
+    expected_role: UserRole,
 ) -> None:
     # Arrange
     user = create_user(role=initial_role)
@@ -77,7 +77,7 @@ def test_toggles_role(
     [True, False],
 )
 def test_preserves_super_admin_role(
-        is_admin: bool,
+    is_admin: bool,
 ) -> None:
     # Arrange
     user = create_user(role=UserRole.SUPER_ADMIN)
@@ -88,5 +88,3 @@ def test_preserves_super_admin_role(
         sut.toggle_user_admin_role(user, is_admin=is_admin)
 
     assert user.role == UserRole.SUPER_ADMIN
-
-

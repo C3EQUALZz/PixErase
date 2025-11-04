@@ -1,8 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Final
-
-from typing_extensions import override
+from typing import Final, override
 
 from pix_erase.domain.common.values.base import BaseValueObject
 from pix_erase.domain.image.errors.image import BadImageNameError

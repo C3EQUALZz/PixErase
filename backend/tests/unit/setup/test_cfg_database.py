@@ -18,7 +18,7 @@ from tests.unit.factories.settings_data import (
 
 
 def test_postgres_host_overridden_by_env_variable(
-        monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # Arrange
     env_host = "changed"

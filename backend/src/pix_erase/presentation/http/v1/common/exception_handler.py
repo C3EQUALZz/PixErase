@@ -9,49 +9,58 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.requests import Request
 from fastapi.responses import ORJSONResponse
 
-from pix_erase.application.errors.auth import AuthenticationError, AlreadyAuthenticatedError
+from pix_erase.application.errors.auth import AlreadyAuthenticatedError, AuthenticationError
 from pix_erase.application.errors.base import ApplicationError
-from pix_erase.application.errors.image import ImageNotFoundError, ImageDoesntBelongToThisUserError
-from pix_erase.application.errors.user import UserNotFoundByIDError, UserNotFoundByEmailError, UserAlreadyExistsError
+from pix_erase.application.errors.image import ImageDoesntBelongToThisUserError, ImageNotFoundError
 from pix_erase.application.errors.query_params import PaginationError, SortingError
+from pix_erase.application.errors.user import UserAlreadyExistsError, UserNotFoundByEmailError, UserNotFoundByIDError
 from pix_erase.domain.common.errors.base import (
     AppError,
     DomainError,
     DomainFieldError,
 )
 from pix_erase.domain.image.errors.image import BadImageNameError, BadImageSizeError
-from pix_erase.domain.user.errors.access_service import AuthorizationError, ActivationChangeNotPermittedError, \
-    RoleChangeNotPermittedError
-from pix_erase.domain.user.errors.raw_password import EmptyPasswordWasProvidedError, WeakPasswordWasProvidedError
-from pix_erase.domain.user.errors.user import WrongUserAccountEmailFormatError, PasswordCantBeEmptyError, \
-    UserAccountNameCantBeEmptyError, TooBigUserAccountNameError, RoleAssignmentNotPermittedError, BadUserNameError, \
-    TooSmallUserAccountNameError
 from pix_erase.domain.internet_protocol.errors.internet_protocol import (
+    BadPackageSizeError,
+    BadTimeOutError,
+    BadTimeToLiveError,
     InternetProtocolError,
     InvalidIPAddressError,
     InvalidPingResultError,
-    PingTimeoutError,
-    PingDestinationUnreachableError,
-    PingTimeExceededError,
-    PingPermissionError,
-    PingNetworkError,
-    BadTimeOutError,
-    BadPackageSizeError,
-    BadTimeToLiveError,
-    IPInfoConnectionError,
-    IPInfoServiceError,
-    IPInfoNotFoundError,
-    PortScanError,
-    PortScanTimeoutError,
-    PortScanPermissionError,
-    PortScanNetworkError,
-    PortScanConnectionError,
     InvalidPortRangeError,
+    IPInfoConnectionError,
+    IPInfoNotFoundError,
+    IPInfoServiceError,
+    PingDestinationUnreachableError,
+    PingNetworkError,
+    PingPermissionError,
+    PingTimeExceededError,
+    PingTimeoutError,
     PortScanCancelledError,
+    PortScanConnectionError,
+    PortScanError,
+    PortScanNetworkError,
+    PortScanPermissionError,
+    PortScanTimeoutError,
+)
+from pix_erase.domain.user.errors.access_service import (
+    ActivationChangeNotPermittedError,
+    AuthorizationError,
+    RoleChangeNotPermittedError,
+)
+from pix_erase.domain.user.errors.raw_password import EmptyPasswordWasProvidedError, WeakPasswordWasProvidedError
+from pix_erase.domain.user.errors.user import (
+    BadUserNameError,
+    PasswordCantBeEmptyError,
+    RoleAssignmentNotPermittedError,
+    TooBigUserAccountNameError,
+    TooSmallUserAccountNameError,
+    UserAccountNameCantBeEmptyError,
+    WrongUserAccountEmailFormatError,
 )
 from pix_erase.infrastructure.errors.base import InfrastructureError
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
-from pix_erase.infrastructure.errors.transaction_manager import RepoError, EntityAddError, RollbackError
+from pix_erase.infrastructure.errors.transaction_manager import EntityAddError, RepoError, RollbackError
 from pix_erase.presentation.errors.image import BadFileFormatError
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
@@ -136,7 +145,7 @@ class ExceptionHandler:
             # 503
             RepoError: status.HTTP_503_SERVICE_UNAVAILABLE,
             RollbackError: status.HTTP_503_SERVICE_UNAVAILABLE,
-            IPInfoConnectionError: status.HTTP_503_SERVICE_UNAVAILABLE
+            IPInfoConnectionError: status.HTTP_503_SERVICE_UNAVAILABLE,
         }
     )
 

@@ -1,29 +1,28 @@
 from dataclasses import asdict
 from inspect import getdoc
-from typing import Final, Annotated
+from typing import TYPE_CHECKING, Annotated, Final
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, status, Path
+from fastapi import APIRouter, Path, status
 
-from pix_erase.application.common.views.tasks.read_task_by_id import ReadTaskByIDView
-from pix_erase.application.queries.tasks.read_task_by_id import ReadTaskByIDQueryHandler, ReadTaskByIDQuery
+from pix_erase.application.queries.tasks.read_task_by_id import ReadTaskByIDQuery, ReadTaskByIDQueryHandler
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.routes.task.read_task.schemas import TaskSchemaResponse
 
-read_task_router: Final[APIRouter] = APIRouter(
-    route_class=DishkaRoute,
-    tags=["Task"]
-)
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.tasks.read_task_by_id import ReadTaskByIDView
+
+read_task_router: Final[APIRouter] = APIRouter(route_class=DishkaRoute, tags=["Task"])
 
 TaskIDPath = Path(
     title="The ID of the task returned before",
     description="The ID of the image. We using UUID id's",
     examples=[
         "compress_image:19178bf6-8f84-406e-b213-102ec84fab9f",
-        "resize_image:75079971-fb0e-4e04-bf07-ceb57faebe84"
+        "resize_image:75079971-fb0e-4e04-bf07-ceb57faebe84",
     ],
-    pattern=r"^[a-zA-Z_]+:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    pattern=r"^[a-zA-Z_]+:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
 )
 
 
@@ -38,12 +37,11 @@ TaskIDPath = Path(
         status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
         status.HTTP_404_NOT_FOUND: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 async def read_task_by_id_handler(
-        task_id: Annotated[str, TaskIDPath],
-        interactor: FromDishka[ReadTaskByIDQueryHandler]
+    task_id: Annotated[str, TaskIDPath], interactor: FromDishka[ReadTaskByIDQueryHandler]
 ) -> TaskSchemaResponse:
     query: ReadTaskByIDQuery = ReadTaskByIDQuery(
         task_id=task_id,

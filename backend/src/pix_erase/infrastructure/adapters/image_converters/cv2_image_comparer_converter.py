@@ -1,8 +1,9 @@
+from typing import override
+
 import cv2
 import numpy as np
-from typing_extensions import override
 
-from pix_erase.domain.image.ports.image_comparer_converter import ScoresDTO, ImageComparerConverter
+from pix_erase.domain.image.ports.image_comparer_converter import ImageComparerConverter, ScoresDTO
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
 
 
@@ -13,40 +14,36 @@ def _calculate_ssim(img1: cv2.typing.MatLike, img2: cv2.typing.MatLike) -> float
     Returns a value between -1 and 1, where 1 means identical images.
     """
     # Convert to grayscale if needed
-    if len(img1.shape) == 3:
-        img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-    else:
-        img1_gray = img1
+    img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY) if len(img1.shape) == 3 else img1
 
-    if len(img2.shape) == 3:
-        img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-    else:
-        img2_gray = img2
+    img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY) if len(img2.shape) == 3 else img2
 
     # Resize images to same size if needed
     if img1_gray.shape != img2_gray.shape:
         img2_gray = cv2.resize(img2_gray, (img1_gray.shape[1], img1_gray.shape[0]))
 
     # Constants for SSIM calculation
-    C1 = (0.01 * 255) ** 2
-    C2 = (0.03 * 255) ** 2
+    c1 = (0.01 * 255) ** 2
+    c2 = (0.03 * 255) ** 2
 
     # Calculate means
     mu1 = cv2.GaussianBlur(img1_gray.astype(np.float64), (11, 11), 1.5)
     mu2 = cv2.GaussianBlur(img2_gray.astype(np.float64), (11, 11), 1.5)
 
-    mu1_sq = mu1 ** 2
-    mu2_sq = mu2 ** 2
+    mu1_sq = mu1**2
+    mu2_sq = mu2**2
     mu1_mu2 = mu1 * mu2
 
     # Calculate variances and covariance
     sigma1_sq = cv2.GaussianBlur((img1_gray.astype(np.float64) - mu1) ** 2, (11, 11), 1.5)
     sigma2_sq = cv2.GaussianBlur((img2_gray.astype(np.float64) - mu2) ** 2, (11, 11), 1.5)
-    sigma12 = cv2.GaussianBlur((img1_gray.astype(np.float64) - mu1) * (img2_gray.astype(np.float64) - mu2), (11, 11), 1.5)
+    sigma12 = cv2.GaussianBlur(
+        (img1_gray.astype(np.float64) - mu1) * (img2_gray.astype(np.float64) - mu2), (11, 11), 1.5
+    )
 
     # Calculate SSIM
-    ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2))
-    return float(np.mean(ssim_map))
+    ssim_map = ((2 * mu1_mu2 + c1) * (2 * sigma12 + c2)) / ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
+    return float(np.mean(ssim_map)) # type: ignore[arg-type]
 
 
 def _calculate_mse(img1: cv2.typing.MatLike, img2: cv2.typing.MatLike) -> float:
@@ -74,8 +71,8 @@ def _calculate_psnr(img1: cv2.typing.MatLike, img2: cv2.typing.MatLike) -> float
     """
     mse = _calculate_mse(img1, img2)
     if mse == 0:
-        return float('inf')
-    
+        return float("inf")
+
     max_pixel_value = 255.0
     psnr = 20 * np.log10(max_pixel_value / np.sqrt(mse))
     return float(psnr)
@@ -85,8 +82,7 @@ class Cv2ImageComparerConverter(ImageComparerConverter):
     @override
     def compare_by_histograms(self, first_image: bytes, second_image: bytes) -> ScoresDTO:
         cv2_first_image: cv2.typing.MatLike | None = cv2.imdecode(
-            np.frombuffer(first_image, dtype=np.uint8),
-            cv2.IMREAD_COLOR
+            np.frombuffer(first_image, dtype=np.uint8), cv2.IMREAD_COLOR
         )
 
         if cv2_first_image is None:
@@ -94,8 +90,7 @@ class Cv2ImageComparerConverter(ImageComparerConverter):
             raise ImageDecodingError(msg)
 
         cv2_second_image: cv2.typing.MatLike | None = cv2.imdecode(
-            np.frombuffer(second_image, dtype=np.uint8),
-            cv2.IMREAD_COLOR
+            np.frombuffer(second_image, dtype=np.uint8), cv2.IMREAD_COLOR
         )
 
         if cv2_second_image is None:
@@ -124,10 +119,10 @@ class Cv2ImageComparerConverter(ImageComparerConverter):
             "PSNR": 0.0,
             "SSIM": 0.0,
         }
-        
+
         # Calculate histogram comparison methods
         for method in ["CORREL", "CHISQR", "INTERSECT", "BHATTACHARYYA"]:
-            score = cv2.compareHist(hist1, hist2, getattr(cv2, f'HISTCMP_{method}'))
+            score = cv2.compareHist(hist1, hist2, getattr(cv2, f"HISTCMP_{method}"))
             methods_and_scores[method] = score  # type: ignore[literal-required]
 
         # Calculate additional metrics

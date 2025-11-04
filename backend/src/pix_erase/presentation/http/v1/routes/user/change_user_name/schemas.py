@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, BeforeValidator, AfterValidator, ConfigDict
 from typing import Annotated
+
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field
 
 
 class ChangeUserNameRequestSchema(BaseModel):
@@ -8,11 +9,6 @@ class ChangeUserNameRequestSchema(BaseModel):
     name: Annotated[
         str,
         BeforeValidator(lambda x: str.strip(str(x))),
-        Field(
-            title="User name",
-            description="The name of the user to get.",
-            examples=["super-bagratus"],
-            min_length=5
-        ),
+        Field(title="User name", description="The name of the user to get.", examples=["super-bagratus"], min_length=5),
         AfterValidator(lambda x: str.strip(str(x))),
     ]

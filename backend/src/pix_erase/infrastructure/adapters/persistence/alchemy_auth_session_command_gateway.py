@@ -1,8 +1,8 @@
+from typing import Final, override
+
 from sqlalchemy import Delete, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Final
-from typing_extensions import override
 
 from pix_erase.domain.user.values.user_id import UserID
 from pix_erase.infrastructure.adapters.persistence.constants import DB_QUERY_FAILED
@@ -45,7 +45,7 @@ class SQLAlchemyAuthSessionCommandGateway(AuthSessionGateway):
     @override
     async def delete(self, auth_session_id: str) -> None:
         delete_stmt: Delete = delete(AuthSession).where(
-            AuthSession.user_id == auth_session_id,  # type: ignore # noqa: PGH003
+            AuthSession.user_id == auth_session_id,  # type: ignore
         )
 
         try:
@@ -56,7 +56,7 @@ class SQLAlchemyAuthSessionCommandGateway(AuthSessionGateway):
     @override
     async def delete_all_for_user(self, user_id: UserID) -> None:
         delete_stmt: Delete = delete(AuthSession).where(
-            AuthSession.user_id == user_id,  # type: ignore # noqa: PGH003
+            AuthSession.user_id == user_id,  # type: ignore
         )
 
         try:

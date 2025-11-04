@@ -1,28 +1,27 @@
 from dataclasses import asdict
+from datetime import UTC, datetime
 from inspect import getdoc
-from typing import Final, Annotated
-from datetime import datetime, UTC
-from asgi_monitor.tracing import span
+from typing import TYPE_CHECKING, Annotated, Final
 
+from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, status, Security, Depends
+from fastapi import APIRouter, Depends, Security, status
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
-from pix_erase.application.common.views.internet_protocol.ip_info import IPInfoView
-from pix_erase.application.queries.internet_protocol.read_ip_info import ReadIPInfoQueryHandler, ReadIPInfoQuery
+from pix_erase.application.queries.internet_protocol.read_ip_info import ReadIPInfoQuery, ReadIPInfoQueryHandler
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionSchema, ExceptionSchemaRich
 from pix_erase.presentation.http.v1.common.fastapi_openapi_markers import cookie_scheme
 from pix_erase.presentation.http.v1.routes.internet_protocol.read_ip_info.schemas import (
     ReadIPInfoSchemaRequest,
-    ReadIPInfoSchemaResponse
+    ReadIPInfoSchemaResponse,
 )
 
-read_ip_info_router: Final[APIRouter] = APIRouter(
-    route_class=DishkaRoute,
-    tags=["IP"]
-)
+if TYPE_CHECKING:
+    from pix_erase.application.common.views.internet_protocol.ip_info import IPInfoView
+
+read_ip_info_router: Final[APIRouter] = APIRouter(route_class=DishkaRoute, tags=["IP"])
 tracer: Final[Tracer] = trace.get_tracer(__name__)
 
 
@@ -41,8 +40,8 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         status.HTTP_408_REQUEST_TIMEOUT: {"model": ExceptionSchema},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -53,12 +52,11 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         "http.route": "/ip/",
         "feature": "ip",
         "action": "read_ip_info",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def read_ip_info_handler(
-        request_schema: Annotated[ReadIPInfoSchemaRequest, Depends()],
-        interactor: FromDishka[ReadIPInfoQueryHandler]
+    request_schema: Annotated[ReadIPInfoSchemaRequest, Depends()], interactor: FromDishka[ReadIPInfoQueryHandler]
 ) -> ReadIPInfoSchemaResponse:
     query: ReadIPInfoQuery = ReadIPInfoQuery(
         ip_address=str(request_schema.destination_address),

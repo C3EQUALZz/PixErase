@@ -1,11 +1,11 @@
+from datetime import UTC, datetime
 from inspect import getdoc
 from typing import TYPE_CHECKING, Final
-from datetime import datetime, UTC
-from asgi_monitor.tracing import span
 
+from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import Security, APIRouter
+from fastapi import APIRouter, Security
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 from starlette import status
@@ -36,7 +36,7 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         status.HTTP_401_UNAUTHORIZED: {"model": ExceptionSchema},
         status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-    }
+    },
 )
 @span(
     tracer=tracer,
@@ -47,12 +47,10 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         "http.route": "/auth/me/",
         "feature": "auth",
         "action": "read_me",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
-async def read_user_by_id_handler(
-        interactor: FromDishka[ReadCurrentUserHandler]
-) -> ReadUserByIDResponse:
+async def read_user_by_id_handler(interactor: FromDishka[ReadCurrentUserHandler]) -> ReadUserByIDResponse:
     view: ReadUserByIDView = await interactor()
 
     return ReadUserByIDResponse(

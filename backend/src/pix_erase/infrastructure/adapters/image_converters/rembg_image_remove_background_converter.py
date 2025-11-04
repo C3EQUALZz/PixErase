@@ -1,7 +1,8 @@
+from typing import override
+
 import cv2
 import numpy as np
 from rembg import remove
-from typing_extensions import override
 
 from pix_erase.domain.image.ports.image_background_remove_converter import ImageRemoveBackgroundConverter
 from pix_erase.infrastructure.errors.image_converters import ImageDecodingError
@@ -19,6 +20,6 @@ class RembgImageRemoveBackgroundConverter(ImageRemoveBackgroundConverter):
         # Конвертируем в RGB для работы
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         cleared_from_background_image = remove(data=img_rgb)
-        _, buffer = cv2.imencode('.jpg', cleared_from_background_image)
+        _, buffer = cv2.imencode(".jpg", cleared_from_background_image)
 
         return buffer.tobytes()

@@ -6,10 +6,11 @@ from pix_erase.domain.image.entities.image import Image
 from pix_erase.domain.user.entities.user import User
 from pix_erase.domain.user.errors.user import RoleAssignmentNotPermittedError
 from pix_erase.domain.user.events import (
+    UserAddedPhotoEvent,
     UserChangedEmailEvent,
     UserChangedNameEvent,
     UserChangedPasswordEvent,
-    UserCreatedEvent, UserAddedPhotoEvent,
+    UserCreatedEvent,
 )
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
 from pix_erase.domain.user.ports.password_hasher import PasswordHasher
@@ -29,20 +30,20 @@ class UserService(DomainService):
     """
 
     def __init__(
-            self,
-            password_hash_service: PasswordHasher,
-            user_id_generator: UserIdGenerator,
+        self,
+        password_hash_service: PasswordHasher,
+        user_id_generator: UserIdGenerator,
     ) -> None:
         super().__init__()
         self._password_hasher: Final[PasswordHasher] = password_hash_service
         self._user_id_generator: Final[UserIdGenerator] = user_id_generator
 
     def create(
-            self,
-            email: UserEmail,
-            name: Username,
-            raw_password: RawPassword,
-            role: UserRole = UserRole.USER,
+        self,
+        email: UserEmail,
+        name: Username,
+        raw_password: RawPassword,
+        role: UserRole = UserRole.USER,
     ) -> User:
         """
         Fabric method that creates a new user.

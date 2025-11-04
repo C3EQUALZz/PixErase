@@ -1,15 +1,17 @@
 import logging
 from dataclasses import dataclass
-from typing import final, Final
+from typing import TYPE_CHECKING, Final, final
 
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.common.views.internet_protocol.ping_internet_protocol import PingInternetProtocolView
 from pix_erase.domain.internet_protocol.services.internet_protocol_service import InternetProtocolService
-from pix_erase.domain.internet_protocol.values import IPAddress, PingResult
 from pix_erase.domain.internet_protocol.values.packet_size import PacketSize
 from pix_erase.domain.internet_protocol.values.time_to_live import TimeToLive
 from pix_erase.domain.internet_protocol.values.timeout import Timeout
-from pix_erase.domain.user.entities.user import User
+
+if TYPE_CHECKING:
+    from pix_erase.domain.internet_protocol.values import IPAddress, PingResult
+    from pix_erase.domain.user.entities.user import User
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -29,10 +31,11 @@ class PingInternetProtocolQueryHandler:
     - Async processing, non-blocking.
     - Pings IP with ICMP packets.
     """
+
     def __init__(
-            self,
-            ping_service: InternetProtocolService,
-            current_user_service: CurrentUserService,
+        self,
+        ping_service: InternetProtocolService,
+        current_user_service: CurrentUserService,
     ) -> None:
         self._internet_service: Final[InternetProtocolService] = ping_service
         self._current_user_service: Final[CurrentUserService] = current_user_service
@@ -40,10 +43,10 @@ class PingInternetProtocolQueryHandler:
     async def __call__(self, data: PingInternetProtocolQuery) -> PingInternetProtocolView:
         """
         Execute ping command using domain service.
-        
+
         Args:
             data: Ping command data
-            
+
         Returns:
             PingResult containing the ping result information
         """
@@ -99,7 +102,3 @@ class PingInternetProtocolQueryHandler:
         logger.info("Finished processing view: %s", view)
 
         return view
-
-
-
-

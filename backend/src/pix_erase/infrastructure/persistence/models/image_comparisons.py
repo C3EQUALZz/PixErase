@@ -55,4 +55,3 @@ def map_image_comparisons_table() -> None:
         },
         column_prefix="_",
     )
-

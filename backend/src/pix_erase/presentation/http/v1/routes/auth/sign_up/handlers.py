@@ -1,8 +1,8 @@
+from datetime import UTC, datetime
 from inspect import getdoc
 from typing import TYPE_CHECKING, Final
-from datetime import datetime, UTC
-from asgi_monitor.tracing import span
 
+from asgi_monitor.tracing import span
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status
@@ -37,8 +37,8 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         status.HTTP_403_FORBIDDEN: {"model": ExceptionSchema},
         status.HTTP_409_CONFLICT: {"model": ExceptionSchema},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ExceptionSchema},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich}
-    }
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ExceptionSchemaRich},
+    },
 )
 @span(
     tracer=tracer,
@@ -49,11 +49,11 @@ tracer: Final[Tracer] = trace.get_tracer(__name__)
         "http.route": "/auth/signup/",
         "feature": "auth",
         "action": "signup",
-        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "time": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 )
 async def signup_handler(
-        request_schema: SignUpUserSchemaRequest, interactor: FromDishka[SignUpHandler]
+    request_schema: SignUpUserSchemaRequest, interactor: FromDishka[SignUpHandler]
 ) -> SignUpUserSchemaResponse:
     """
     Create a new user record in the system. This handler works for all roles.
