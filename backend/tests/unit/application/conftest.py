@@ -1,5 +1,5 @@
 from typing import cast
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, create_autospec
 
 import pytest
 
@@ -8,6 +8,8 @@ from pix_erase.application.common.ports.transaction_manager import TransactionMa
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
 from pix_erase.application.common.services.current_user import CurrentUserService
+from pix_erase.domain.internet_protocol.services import InternetProtocolService
+from pix_erase.domain.internet_protocol.services.internet_domain_service import InternetDomainService
 from pix_erase.domain.user.ports.id_generator import UserIdGenerator
 from pix_erase.domain.user.ports.password_hasher import PasswordHasher
 from pix_erase.domain.user.services.access_service import AccessService
@@ -92,3 +94,12 @@ def fake_user_query_gateway() -> UserQueryGateway:
     fake.read_user_by_id = AsyncMock()
     fake.read_all_users = AsyncMock()
     return cast("UserQueryGateway", fake)
+
+@pytest.fixture
+def fake_internet_service() -> InternetProtocolService:
+    return cast("InternetProtocolService", create_autospec(InternetProtocolService))
+
+
+@pytest.fixture
+def fake_internet_domain_service() -> InternetDomainService:
+    return cast("InternetDomainService", create_autospec(InternetDomainService))

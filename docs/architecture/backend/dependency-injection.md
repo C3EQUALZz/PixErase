@@ -10,16 +10,16 @@ The PixErase uses the **Dishka** framework for **dependency injection** (DI), en
 
 ## Implementation
 
-- **Framework**: Dishka (`src/cats/ioc.py`, `src/cats/bootstrap.py`)
-- **Entry Point**: `src/cats/web.py` initializes the application and injects dependencies.
-- **Usage**: Dependencies are injected into use cases and routers (e.g., `CatGateway`, `Transaction`).
+- **Framework**: Dishka (`src/pix_erase/setup/ioc.py`, `src/pix_erase/setup/bootstrap.py`)
+- **Entry Point**: `src/pix_erase/web.py` initializes the application and injects dependencies.
+- **Usage**: Dependencies are injected into use cases and routers (e.g., `UserCommandGateway`, `Transaction`).
 
 ## Configuration
 
-Dependencies are defined in src/cats/ioc.py and wired in src/cats/bootstrap.py. For example:
+Dependencies are defined in src/pix_erase/setup/ioc.py and wired in src/pix_erase/setup/bootstrap.py. For example:
 
-- Database adapters (src/cats/infrastructure/persistence/adapters).
-- HTTP routers (src/cats/presentation/http/v1/routes).
+- Database adapters (src/pix_erase/infrastructure/persistence/adapters).
+- HTTP routers (src/pix_erase/presentation/http/v1/routes).
 
 ## Benefits
 
