@@ -15,7 +15,7 @@ from pix_erase.setup.config.worker import TaskIQWorkerConfig
 
 
 class AppConfig(BaseModel):
-    load_dotenv(r"D:\PycharmProjects\PixErase\backend\.env")
+    # load_dotenv(r"D:\PycharmProjects\PixErase\backend\.env")
 
     postgres: PostgresConfig = Field(
         default_factory=lambda: PostgresConfig(**os.environ),
