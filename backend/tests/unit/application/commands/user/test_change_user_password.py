@@ -28,6 +28,7 @@ async def test_change_user_password_success(
     fake_current_user_service: Mock,
     fake_event_bus: Mock,
     fake_access_service: Mock,
+    fake_auth_session_service: Mock,
 ) -> None:
     """Test successful user password change."""
     target_user = create_user(user_id=user_id)
@@ -40,6 +41,7 @@ async def test_change_user_password_success(
         fake_current_user_service,
         fake_event_bus,
         fake_access_service,
+        fake_auth_session_service,
     )
 
     command = ChangeUserPasswordCommand(user_id=user_id, password=password)
@@ -52,6 +54,7 @@ async def test_change_user_password_success(
     )
     fake_event_bus.publish.assert_called_once()
     fake_transaction.commit.assert_called_once()
+    fake_auth_session_service.invalidate_current_session.assert_called_once()
 
 
 async def test_change_user_password_not_found(
@@ -61,6 +64,7 @@ async def test_change_user_password_not_found(
     fake_current_user_service: Mock,
     fake_event_bus: Mock,
     fake_access_service: Mock,
+    fake_auth_session_service: Mock,
 ) -> None:
     """Test password change fails when user not found."""
     user_id = create_user_id()
@@ -73,6 +77,7 @@ async def test_change_user_password_not_found(
         fake_current_user_service,
         fake_event_bus,
         fake_access_service,
+        fake_auth_session_service,
     )
 
     command = ChangeUserPasswordCommand(user_id=user_id, password="new_password")
@@ -84,3 +89,4 @@ async def test_change_user_password_not_found(
     fake_user_service.change_password.assert_not_called()
     fake_event_bus.publish.assert_not_called()
     fake_transaction.commit.assert_not_called()
+    fake_auth_session_service.invalidate_current_session.assert_not_called()

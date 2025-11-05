@@ -102,4 +102,3 @@ class DomainName(BaseValueObject):
     def is_subdomain(self) -> bool:
         """Check if this is a subdomain (has more than 2 labels)."""
         return len(self.labels) > 2
-

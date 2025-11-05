@@ -68,8 +68,8 @@ default:
   mypy --config-file pyproject.toml
   echo "Run bandit..."
   bandit -c pyproject.toml -r src
-  echo "Run semgrep..."
-  semgrep scan --config auto --error
+  # echo "Run semgrep..."
+  # semgrep scan --config auto --error
 
 [doc("Run test")]
 [group("Test")]

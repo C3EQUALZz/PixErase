@@ -264,4 +264,3 @@ def test_user_can_be_used_in_set() -> None:
     assert user1 in user_set
     assert user2 in user_set
     assert user3 in user_set
-

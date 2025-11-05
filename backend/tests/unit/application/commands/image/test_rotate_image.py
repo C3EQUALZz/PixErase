@@ -83,4 +83,3 @@ async def test_rotate_image_not_found(
     )
     with pytest.raises(ImageNotFoundError):
         await sut(RotateImageCommand(image_id=image_id, angle=90))
-

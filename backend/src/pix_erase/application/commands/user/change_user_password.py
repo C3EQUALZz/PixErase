@@ -6,6 +6,7 @@ from uuid import UUID
 from pix_erase.application.common.ports.event_bus import EventBus
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
+from pix_erase.application.common.services.auth_session import AuthSessionService
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.application.errors.user import UserNotFoundByIDError
 from pix_erase.domain.user.services.access_service import AccessService
@@ -48,6 +49,7 @@ class ChangeUserPasswordCommandHandler:
         current_user_service: CurrentUserService,
         event_bus: EventBus,
         access_service: AccessService,
+        auth_session_service: AuthSessionService,
     ) -> None:
         self._transaction_manager: Final[TransactionManager] = transaction_manager
         self._user_command_gateway: Final[UserCommandGateway] = user_command_gateway
@@ -55,6 +57,7 @@ class ChangeUserPasswordCommandHandler:
         self._current_user_service: Final[CurrentUserService] = current_user_service
         self._event_bus: Final[EventBus] = event_bus
         self._access_service: Final[AccessService] = access_service
+        self._auth_session_service: Final[AuthSessionService] = auth_session_service
 
     async def __call__(self, data: ChangeUserPasswordCommand) -> None:
         logger.info("Change user password started.")
@@ -86,4 +89,7 @@ class ChangeUserPasswordCommandHandler:
 
         await self._event_bus.publish(self._user_service.pull_events())
         await self._transaction_manager.commit()
+        logger.info("Log out: user identified. User ID: '%s'.", current_user.id)
+        await self._auth_session_service.invalidate_current_session()
+        logger.info("Log out: done. User ID: '%s'.", current_user.id)
         logger.info("Change user password completed.")

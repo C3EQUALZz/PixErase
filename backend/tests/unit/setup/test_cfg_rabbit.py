@@ -38,4 +38,3 @@ def test_rabbit_port_rejects_incorrect_value(port: int) -> None:
     # Act & Assert
     with pytest.raises(ValidationError):
         RabbitConfig.model_validate(data)
-

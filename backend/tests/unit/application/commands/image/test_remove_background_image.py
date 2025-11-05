@@ -83,4 +83,3 @@ async def test_remove_background_not_found(
     )
     with pytest.raises(ImageNotFoundError):
         await sut(RemoveBackgroundImageCommand(image_id=image_id))
-

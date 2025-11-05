@@ -8,4 +8,3 @@ def test_reverse_image_search_placeholder() -> None:
     # Handler is not implemented yet; keep placeholder to signal coverage intent.
     assert ReverseImageSearchQuery is not None
     assert ReverseImageSearchQueryHandler is not None
-

@@ -172,4 +172,3 @@ def _set_response_attributes(span: trace.Span, response: HttpResponse) -> None:
         span.set_attribute("http.response.body.size", len(response.content))
     if response.status_code >= 400:
         span.set_status(Status(StatusCode.ERROR))
-

@@ -38,4 +38,3 @@ def test_observability_port_rejects_incorrect_value(port: int) -> None:
     # Act & Assert
     with pytest.raises(ValidationError):
         ObservabilityConfig.model_validate(data)
-

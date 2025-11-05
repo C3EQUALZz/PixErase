@@ -10,6 +10,7 @@ from pix_erase.application.common.ports.scheduler.task_scheduler import TaskSche
 from pix_erase.application.common.ports.transaction_manager import TransactionManager
 from pix_erase.application.common.ports.user.command_gateway import UserCommandGateway
 from pix_erase.application.common.ports.user.query_gateway import UserQueryGateway
+from pix_erase.application.common.services.auth_session import AuthSessionService
 from pix_erase.application.common.services.current_user import CurrentUserService
 from pix_erase.domain.image.services.image_service import ImageService
 from pix_erase.domain.internet_protocol.services import InternetProtocolService
@@ -128,3 +129,8 @@ def fake_image_service() -> ImageService:
 @pytest.fixture
 def fake_internet_domain_service() -> InternetDomainService:
     return cast("InternetDomainService", create_autospec(InternetDomainService))
+
+
+@pytest.fixture
+def fake_auth_session_service() -> AuthSessionService:
+    return cast("AuthSessionService", create_autospec(AuthSessionService))

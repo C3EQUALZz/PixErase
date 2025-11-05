@@ -116,4 +116,3 @@ def test_ping_result_str_failed() -> None:
     # Assert
     assert "failed" in result.lower()
     assert "Timeout" in result
-

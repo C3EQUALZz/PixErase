@@ -104,4 +104,3 @@ def test_any_of_denies_if_all_deny() -> None:
 def test_any_of_empty_returns_false() -> None:
     sut: AnyOf[DummyContext] = AnyOf()
     assert not sut.is_satisfied_by(DummyContext())
-

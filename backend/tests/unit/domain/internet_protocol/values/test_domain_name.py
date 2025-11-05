@@ -139,4 +139,3 @@ def test_domain_name_inequality() -> None:
 
     # Assert
     assert domain1 != domain2
-
