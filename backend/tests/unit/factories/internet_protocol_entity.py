@@ -24,3 +24,4 @@ def create_internet_domain(
         title=title,
         is_analyzed=is_analyzed,
     )
+

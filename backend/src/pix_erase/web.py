@@ -57,7 +57,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         The actual resource cleanup (Dishka container closure)
             happens after yield, during the application shutdown phase.
     """
-    setup_map_tables()
     task_manager: AsyncBroker = cast("AsyncBroker", app.state.task_manager)
 
     if not task_manager.is_worker_process:
@@ -97,6 +96,7 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
         - Registers all route handlers
     """
     configs: AppConfig = setup_configs()
+    setup_map_tables()
 
     app: FastAPI = FastAPI(
         lifespan=lifespan,

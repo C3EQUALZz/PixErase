@@ -23,3 +23,4 @@ async def test_remove_watermark_noop(
     )
 
     await sut(RemoveWatermarkFromImageCommand(image_id=uuid4(), use_ai=True))
+

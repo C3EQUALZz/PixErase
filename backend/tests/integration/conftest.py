@@ -1,21 +1,42 @@
 import os
-from typing import Generator
+from typing import Generator, AsyncIterator
 
 import pytest
-import pytest_asyncio
+from dishka import AsyncContainer, make_async_container
+from dishka.integrations.fastapi import setup_dishka as setup_dishka_fastapi
+from dishka.integrations.taskiq import setup_dishka as setup_dishka_taskiq
+from fastapi import FastAPI
+from fastapi.responses import ORJSONResponse
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncEngine
-from taskiq import InMemoryBroker
+from taskiq import InMemoryBroker, AsyncBroker
 from testcontainers.minio import MinioContainer
 from testcontainers.postgres import PostgresContainer
 from testcontainers.rabbitmq import RabbitMqContainer
 from testcontainers.redis import RedisContainer
 
+from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtSecret, JwtAlgorithm
+from pix_erase.infrastructure.adapters.common.password_hasher_bcrypt import PasswordPepper
+from pix_erase.infrastructure.auth.cookie_params import CookieParams
+from pix_erase.infrastructure.auth.session.timer_utc import AuthSessionTtlMin, AuthSessionRefreshThreshold
 from pix_erase.infrastructure.persistence.models.base import mapper_registry
+from pix_erase.setup.bootstrap import (
+    setup_task_manager_middlewares,
+    setup_task_manager_tasks,
+    setup_configs,
+    setup_http_routes,
+    setup_exc_handlers,
+    setup_http_middlewares, setup_map_tables
+)
+from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
-from pix_erase.setup.config.database import PostgresConfig
+from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
+from pix_erase.setup.config.http import HttpClientConfig
 from pix_erase.setup.config.rabbit import RabbitConfig
 from pix_erase.setup.config.s3 import S3Config
 from pix_erase.setup.config.settings import AppConfig
+from pix_erase.setup.ioc import setup_providers
+from pix_erase.web import lifespan
 
 
 @pytest.fixture(scope="session")
@@ -73,7 +94,7 @@ def rabbitmq_container() -> Generator[RabbitMqContainer, None, None]:
 
 
 @pytest.fixture(scope="session")
-def config(
+def configs(
         postgres_container: PostgresContainer,
         redis_container: RedisContainer,
         minio_container: MinioContainer,
@@ -98,15 +119,86 @@ def config(
     return AppConfig()
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
-async def db_schema(container):
+@pytest.fixture(scope="session")
+def broker(configs: AppConfig) -> AsyncBroker:
+    task_manager: AsyncBroker = InMemoryBroker(await_inplace=True)
+
+    task_manager_with_middlewares: AsyncBroker = setup_task_manager_middlewares(
+        broker=task_manager,
+        taskiq_config=configs.worker,
+    )
+
+    setup_task_manager_tasks(
+        broker=task_manager_with_middlewares
+    )
+
+    context = {
+        ASGIConfig: configs.asgi,
+        RedisConfig: configs.redis,
+        SQLAlchemyConfig: configs.alchemy,
+        PostgresConfig: configs.postgres,
+        JwtSecret: configs.security.auth.jwt_secret,
+        PasswordPepper: configs.security.password.pepper,
+        JwtAlgorithm: configs.security.auth.jwt_algorithm,
+        AuthSessionTtlMin: configs.security.auth.session_ttl_min,
+        AuthSessionRefreshThreshold: configs.security.auth.session_refresh_threshold,
+        CookieParams: CookieParams(secure=configs.security.cookies.secure),
+        S3Config: configs.s3,
+        AsyncBroker: task_manager,
+        HttpClientConfig: configs.http,
+    }
+
+    container: AsyncContainer = make_async_container(*setup_providers(), context=context)
+
+    setup_dishka_taskiq(container, broker=task_manager)
+
+    return task_manager
+
+
+@pytest.fixture(scope="session")
+async def app(broker: AsyncBroker) -> AsyncIterator[FastAPI]:
+    app = FastAPI(
+        lifespan=lifespan,
+        default_response_class=ORJSONResponse,
+        version="1.0.0",
+        root_path="/api",
+        debug=True,
+    )
+    configs = setup_configs()
+    context = {
+        ASGIConfig: configs.asgi,
+        RedisConfig: configs.redis,
+        SQLAlchemyConfig: configs.alchemy,
+        PostgresConfig: configs.postgres,
+        JwtSecret: configs.security.auth.jwt_secret,
+        PasswordPepper: configs.security.password.pepper,
+        JwtAlgorithm: configs.security.auth.jwt_algorithm,
+        AuthSessionTtlMin: configs.security.auth.session_ttl_min,
+        AuthSessionRefreshThreshold: configs.security.auth.session_refresh_threshold,
+        CookieParams: CookieParams(secure=configs.security.cookies.secure),
+        S3Config: configs.s3,
+        AsyncBroker: broker,
+        HttpClientConfig: configs.http,
+    }
+    container = make_async_container(*setup_providers(), context=context)
+    setup_map_tables()
+    setup_http_routes(app)
+    setup_exc_handlers(app)
+    setup_http_middlewares(app, api_config=configs.asgi)
+    setup_dishka_fastapi(container, app)
+
     engine = await container.get(AsyncEngine)
     async with engine.begin() as conn:
         await conn.run_sync(mapper_registry.metadata.create_all)
 
+    yield app
+
+    async with engine.begin() as conn:
+        await conn.run_sync(mapper_registry.metadata.drop_all)
+
 
 @pytest.fixture(scope="session")
-def broker(config):
-    broker = InMemoryBroker(await_inplace=True)
-    # configure_broker(config=config, broker=broker)
-    return broker
+async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
+    t = ASGITransport(app)
+    async with AsyncClient(transport=t, base_url="http://test") as ac:
+        yield ac

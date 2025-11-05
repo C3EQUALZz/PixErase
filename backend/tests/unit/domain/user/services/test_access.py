@@ -88,3 +88,4 @@ def test_preserves_super_admin_role(
         sut.toggle_user_admin_role(user, is_admin=is_admin)
 
     assert user.role == UserRole.SUPER_ADMIN
+

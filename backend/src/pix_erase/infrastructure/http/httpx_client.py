@@ -177,3 +177,4 @@ class HttpxHttpClient(HttpClient):
             )
             logger.exception(msg_for_log)
             raise HttpError(msg) from exc
+

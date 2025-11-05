@@ -45,3 +45,4 @@ def certificate_transparency() -> CertificateTransparencyPort:
 @pytest.fixture
 def http_title_fetcher() -> HttpTitleFetcherPort:
     return cast("HttpTitleFetcherPort", create_autospec(HttpTitleFetcherPort))
+

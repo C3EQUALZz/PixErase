@@ -18,4 +18,4 @@ async def get_redis(connection_pool: ConnectionPool) -> AsyncIterator[Redis]:
     try:
         yield client
     finally:
-        await client.close()
+        await client.aclose()

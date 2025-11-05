@@ -66,3 +66,4 @@ async def test_read_user_by_id_not_found(
     fake_current_user_service.get_current_user.assert_called_once()
     fake_user_query_gateway.read_user_by_id.assert_called_once()
     fake_access_service.authorize.assert_not_called()
+

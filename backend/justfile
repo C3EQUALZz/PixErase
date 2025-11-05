@@ -73,7 +73,7 @@ default:
 
 [doc("Run test")]
 [group("Test")]
-@test *args: up-dev
+@test *args:
     coverage run -m pytest -x --ff {{ args }}
     just stop
 

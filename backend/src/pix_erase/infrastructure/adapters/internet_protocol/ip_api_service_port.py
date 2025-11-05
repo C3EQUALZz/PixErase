@@ -25,9 +25,9 @@ class IPAPIServicePort(IPInfoServicePort):
 
     BASE_URL: Final[str] = "http://ip-api.com/json"
 
-    def __init__(self, http_client: HttpClient, timeout: float = 20) -> None:
+    def __init__(self, http_client: HttpClient) -> None:
         self._http: Final[HttpClient] = http_client
-        self._timeout = timeout
+        self._timeout = 20
 
     @override
     async def get_ip_info(self, ip_address: IPAddress) -> IPInfo:

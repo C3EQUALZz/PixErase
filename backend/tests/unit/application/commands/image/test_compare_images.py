@@ -129,3 +129,4 @@ async def test_compare_images_second_not_found(
     )
     with pytest.raises(ImageNotFoundError):
         await sut(CompareImageCommand(first_image=first_id, second_image=second_id))
+

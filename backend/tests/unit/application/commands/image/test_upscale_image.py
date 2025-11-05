@@ -83,3 +83,4 @@ async def test_upscale_image_not_found(
     )
     with pytest.raises(ImageNotFoundError):
         await sut(UpscaleImageCommand(image_id=image_id, algorithm="AI", scale=2))
+

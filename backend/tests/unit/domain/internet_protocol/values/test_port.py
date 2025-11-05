@@ -223,3 +223,4 @@ def test_all_ports_constant() -> None:
     # Assert
     assert sut.start.value == 1
     assert sut.end.value == 65535
+

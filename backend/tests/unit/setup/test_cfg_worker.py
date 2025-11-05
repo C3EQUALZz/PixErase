@@ -140,3 +140,4 @@ def test_taskiq_prometheus_port_rejects_incorrect_value(port: int) -> None:
     # Act & Assert
     with pytest.raises(ValidationError):
         TaskIQWorkerConfig.model_validate(data)
+

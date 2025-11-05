@@ -46,3 +46,4 @@ async def test_read_task_by_id_not_found(
     # Act / Assert
     with pytest.raises(TaskNotFoundError):
         await sut(ReadTaskByIDQuery(task_id=str(task_id)))
+

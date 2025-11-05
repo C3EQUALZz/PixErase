@@ -83,3 +83,4 @@ async def test_grayscale_image_not_found(
     )
     with pytest.raises(ImageNotFoundError):
         await sut(ConvertImageToGrayscaleCommand(image_id=image_id))
+
