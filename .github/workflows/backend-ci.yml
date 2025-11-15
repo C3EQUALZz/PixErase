@@ -84,14 +84,4 @@ jobs:
         run: uv pip install --system -e ".[dev]"
 
       - name: Run tests with coverage
-        env:
-          PYTEST_ADDOPTS: "--color=yes"
-        run: uv run pytest --cov=src --cov-report=term-missing --cov-report=xml --cov-report=html:htmlcov tests
-
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage-${{ matrix.python-version }}
-          path: |
-            backend/htmlcov
-            backend/coverage.xml
+        run: coverage run -m pytest -x --ff
