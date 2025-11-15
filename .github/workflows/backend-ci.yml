@@ -41,7 +41,7 @@ jobs:
           cache-dependency-glob: "backend/pyproject.toml"
 
       - name: Install dev dependencies
-        run: uv pip install --system -e . --group dev
+        run: uv pip install --system -e ".[dev]"
 
       - name: Ruff import sort (check only)
         run: uv run ruff check src --select I --config pyproject.toml
