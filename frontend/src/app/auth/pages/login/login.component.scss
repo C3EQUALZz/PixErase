@@ -1,0 +1,103 @@
+.auth-card {
+  width: min(750px, 150%);
+  background: rgba(11, 17, 32, 0.88);
+  color: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 25px 60px rgba(2, 6, 23, 0.65);
+  border-radius: 1.5rem;
+  padding: 0.5rem 0 1.5rem;
+  margin: 0 auto;
+  --mdc-outlined-text-field-outline-width: 2px;
+  --mdc-outlined-text-field-outline-color: rgba(148, 163, 184, 0.8);
+  --mdc-outlined-text-field-hover-outline-color: rgba(226, 232, 240, 0.9);
+  --mdc-outlined-text-field-focus-outline-color: #c084fc;
+  --mdc-outlined-text-field-container-color: transparent;
+  --mat-form-field-container-text-color: #f4f6fb;
+  --mat-form-field-subscript-text-color: rgba(226, 232, 240, 0.9);
+  --mat-form-field-focus-select-arrow-color: #c084fc;
+  --mat-form-field-trailing-icon-color: rgba(226, 232, 240, 0.85);
+}
+
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.01);
+}
+
+:host ::ng-deep input.mat-mdc-input-element {
+  color: #ffffff !important;
+  caret-color: #c084fc;
+
+  &::placeholder {
+    color: rgba(226, 232, 240, 0.8);
+    opacity: 1;
+  }
+}
+
+:host ::ng-deep .mdc-text-field .mdc-floating-label {
+  color: rgba(226, 232, 240, 0.85) !important;
+}
+
+:host ::ng-deep .mdc-text-field .mdc-floating-label--float-above {
+  color: #ffffff !important;
+}
+
+mat-card-header {
+  padding: 1.5rem 2rem 0;
+}
+
+mat-card-content,
+mat-card-actions {
+  padding-inline: 2rem;
+}
+
+mat-card-subtitle {
+  color: rgba(224, 231, 255, 0.85);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  color: #ffffff;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-messages {
+  min-height: 1.5rem;
+}
+
+.error-message {
+  color: #f87171;
+  font-size: 0.875rem;
+}
+
+button[mat-flat-button] {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: none;
+  color: #ffffff;
+
+  &.mat-mdc-button-base .mdc-button__label {
+    color: #ffffff;
+  }
+
+  &:disabled {
+    color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  color: #cbd5f5;
+  padding-top: 1rem;
+}
+

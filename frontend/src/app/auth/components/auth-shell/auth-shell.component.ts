@@ -1,12 +1,9 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-auth-shell',
-  standalone: true,
-  imports: [],
   templateUrl: './auth-shell.component.html',
-  styleUrl: './auth-shell.component.scss'
+  styleUrls: ['./auth-shell.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AuthShellComponent {
-
-}
+export class AuthShellComponent {}
