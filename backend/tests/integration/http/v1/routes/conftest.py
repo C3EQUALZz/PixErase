@@ -35,7 +35,8 @@ async def auth_user(client: AsyncClient) -> AuthUser:
         assert me_resp.status_code == status.HTTP_200_OK
         created = {"id": me_resp.json()["id"]}
     else:
-        assert False, f"Unexpected signup status: {signup_resp.status_code}, body: {signup_resp.text}"
+        msg = f"Unexpected signup status: {signup_resp.status_code}, body: {signup_resp.text}"
+        raise AssertionError(msg)
 
     # Ensure authenticated for subsequent tests
     login_payload = {"email": email, "password": password}

@@ -1,9 +1,9 @@
 import uuid
 
 import pytest
-from httpx import AsyncClient, ASGITransport
-from starlette import status
 from fastapi import FastAPI
+from httpx import ASGITransport, AsyncClient
+from starlette import status
 
 from tests.integration.http.v1.routes.conftest import AuthUser
 
@@ -80,7 +80,5 @@ async def test_logout_then_me_requires_auth(client: AsyncClient, auth_user: Auth
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     # Re-login to restore state for other tests
-    resp = await client.post(
-        "/v1/auth/login/", json={"email": auth_user["email"], "password": auth_user["password"]}
-    )
+    resp = await client.post("/v1/auth/login/", json={"email": auth_user["email"], "password": auth_user["password"]})
     assert resp.status_code == status.HTTP_204_NO_CONTENT
