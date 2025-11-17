@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "docs/**"
+  pull_request:
+    paths:
+      - "docs/**"
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
   workflow_dispatch:
 
 permissions:
