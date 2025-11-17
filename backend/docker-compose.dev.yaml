@@ -47,7 +47,7 @@ services:
     <<: *default
     container_name: pix_erase.postgres
     hostname: pix_erase.postgres
-    image: postgres:16.10-alpine3.22
+    image: postgres:18.0-alpine3.22
     environment:
       <<: *x-db-environment
     deploy:
@@ -70,7 +70,7 @@ services:
 
   redis:
     <<: *default
-    image: redis:8.0.2-alpine
+    image: redis:8.2.3-alpine
     container_name: pix_erase.redis
     hostname: pix_erase.redis
     environment:
@@ -95,7 +95,7 @@ services:
 
   rabbitmq:
     <<: *default
-    image: rabbitmq:4.0-management-alpine
+    image: rabbitmq:4.2-management-alpine
     container_name: pix_erase.rabbitmq
     hostname: pix_erase.rabbitmq
     expose:
@@ -161,7 +161,7 @@ services:
 
   tempo:
     <<: *default
-    image: grafana/tempo:2.8.2
+    image: grafana/tempo:2.9.0
     container_name: pix_erase.tempo
     hostname: pix_erase.tempo
     command: [ "-config.file=/etc/tempo.yaml" ]

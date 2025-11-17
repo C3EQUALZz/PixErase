@@ -79,7 +79,7 @@ services:
   grafana:
     <<: *default
     profiles: [ "grafana" ]
-    image: grafana/grafana:12.3.0-18765596677
+    image: grafana/grafana:9799770991
     container_name: pix_erase.grafana
     hostname: pix_erase.grafana
     expose:
@@ -122,7 +122,7 @@ services:
   loki:
     <<: *default
     profiles: [ "grafana" ]
-    image: grafana/loki:3.5.3
+    image: grafana/loki:3.5.8
     container_name: pix_erase.loki
     hostname: pix_erase.loki
     expose:
@@ -149,7 +149,7 @@ services:
   vector:
     <<: *default
     profiles: [ "grafana" ]
-    image: timberio/vector:nightly-2025-10-25-alpine
+    image: timberio/vector:nightly-2025-11-08-alpine
     container_name: pix_erase.vector
     hostname: pix_erase.vector
     expose:
@@ -185,7 +185,7 @@ services:
   tempo:
     <<: *default
     profiles: [ "grafana" ]
-    image: grafana/tempo:2.8.2
+    image: grafana/tempo:2.9.0
     container_name: pix_erase.tempo
     hostname: pix_erase.tempo
     command:  [ "-config.file=/etc/tempo.yaml" ]
@@ -212,7 +212,7 @@ services:
   prometheus:
     <<: *default
     profiles: [ "grafana" ]
-    image: prom/prometheus:v3.7.2
+    image: prom/prometheus:v3.7.3
     container_name: pix_erase.prometheus
     hostname: pix_erase.prometheus
     volumes:
@@ -239,7 +239,7 @@ services:
     profiles: [ "api", "db" ]
     container_name: pix_erase.postgres
     hostname: pix_erase.postgres
-    image: postgres:16.10-alpine3.22
+    image: postgres:18.0-alpine3.22
     environment:
       <<: *x-db-environment
     deploy:
@@ -396,7 +396,7 @@ services:
   redis:
     <<: *default
     profiles: [ "api", "cache" ]
-    image: redis:8.0.2-alpine
+    image: redis:8.2.3-alpine
     container_name: pix_erase.redis
     hostname: pix_erase.redis
     environment:
@@ -422,7 +422,7 @@ services:
   rabbitmq:
     <<: *default
     profiles: [ "api", "rabbit" ]
-    image: rabbitmq:4.0-management-alpine
+    image: rabbitmq:4.2-management-alpine
     container_name: pix_erase.rabbitmq
     hostname: pix_erase.rabbitmq
     expose:
