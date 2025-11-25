@@ -12,7 +12,7 @@ Contributions to the PixErase are welcome! This guide outlines how to contribute
 
 2. **Clone Your Fork**:
    ```bash
-   git clone https://github.com/<your_username>/pure-architecture-fastapi
+   git clone https://github.com/<your_username>/PixErase
    cd PixErase/backend
    python3 -m venv .venv
    source .venv/bin/activate
