@@ -25,6 +25,7 @@ from pix_erase.setup.bootstrap import (
     setup_http_routes,
     setup_map_tables,
     setup_task_manager,
+    setup_task_manager_tasks,
 )
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
@@ -109,6 +110,9 @@ def create_fastapi_app() -> FastAPI:  # pragma: no cover
     task_manager: AsyncBroker = setup_task_manager(
         taskiq_config=configs.worker, rabbitmq_config=configs.rabbitmq, redis_config=configs.redis
     )
+
+    setup_task_manager_tasks(task_manager)
+
     app.state.task_manager = task_manager
 
     context = {

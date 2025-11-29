@@ -1978,7 +1978,7 @@ requires-dist = [
     { name = "semgrep", marker = "extra == 'lint'", specifier = "==1.139.0" },
     { name = "sqlalchemy", specifier = "==2.0.43" },
     { name = "structlog", specifier = "==25.4.0" },
-    { name = "taskiq", extras = ["metrics", "reload"], specifier = ">=0.11.18" },
+    { name = "taskiq", extras = ["metrics", "reload"], specifier = "==0.11.18" },
     { name = "taskiq-aio-pika", specifier = "==0.4.3" },
     { name = "taskiq-redis", specifier = "==1.1.0" },
     { name = "tenacity", specifier = ">=9.1.2" },

@@ -59,13 +59,13 @@ just up-dev
 To start the `worker`, use the command below:
 
 ```bash
-taskiq worker --ack-type when_saved pix_erase.worker:create_worker_taskiq_app -fsd -tp pix_erase.infrastructure.scheduler.tasks
+taskiq worker --ack-type when_saved pix_erase.worker:create_worker_taskiq_app -fsd -tp **/tasks/*.py
 ```
 
 Now start the `scheduler` itself in a separate process:
 
 ```bash
-taskiq scheduler pix_erase.scheduler:create_scheduler_taskiq_app -fsd -tp pix_erase.infrastructure.scheduler.tasks
+taskiq scheduler pix_erase.scheduler:create_scheduler_taskiq_app -fsd -tp **/tasks/*.py
 ```
 
 > [!IMPORTANT]

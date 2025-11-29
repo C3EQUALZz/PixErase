@@ -29,7 +29,7 @@ class TaskIQTaskScheduler(TaskScheduler):
     ) -> None:
         task_name = task_id.split(":")[0]
 
-        logger.debug("All tasks: %s", self._broker.get_all_tasks())
+        logger.info("All tasks: %s", self._broker.get_all_tasks())
 
         if task := self._broker.get_all_tasks().get(task_name):
             await task.kicker().with_task_id(task_id).kiq(payload)

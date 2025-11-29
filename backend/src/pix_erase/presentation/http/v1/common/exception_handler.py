@@ -13,6 +13,7 @@ from pix_erase.application.errors.auth import AlreadyAuthenticatedError, Authent
 from pix_erase.application.errors.base import ApplicationError
 from pix_erase.application.errors.image import ImageDoesntBelongToThisUserError, ImageNotFoundError
 from pix_erase.application.errors.query_params import PaginationError, SortingError
+from pix_erase.application.errors.task import TaskNotFoundError
 from pix_erase.application.errors.user import UserAlreadyExistsError, UserNotFoundByEmailError, UserNotFoundByIDError
 from pix_erase.domain.common.errors.base import (
     AppError,
@@ -115,6 +116,7 @@ class ExceptionHandler:
             UserNotFoundByEmailError: status.HTTP_404_NOT_FOUND,
             ImageNotFoundError: status.HTTP_404_NOT_FOUND,
             IPInfoNotFoundError: status.HTTP_404_NOT_FOUND,
+            TaskNotFoundError: status.HTTP_404_NOT_FOUND,
             # 408
             PingTimeoutError: status.HTTP_408_REQUEST_TIMEOUT,
             PortScanTimeoutError: status.HTTP_408_REQUEST_TIMEOUT,
