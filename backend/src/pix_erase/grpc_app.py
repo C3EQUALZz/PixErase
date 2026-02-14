@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import sys
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 import grpc.aio
 from dishka import make_async_container
@@ -32,6 +32,27 @@ if TYPE_CHECKING:
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
+class NoneHandlerSafeInterceptor(grpc.aio.ServerInterceptor):
+    """Wraps another interceptor, skipping it when handler lookup returns None."""
+
+    def __init__(self, inner: grpc.aio.ServerInterceptor) -> None:
+        self._inner = inner
+
+    async def intercept_service(
+        self,
+        continuation: Any,  # noqa: ANN401
+        handler_call_details: grpc.HandlerCallDetails,
+    ) -> Any:  # noqa: ANN401
+        handler = await continuation(handler_call_details)
+        if handler is None:
+            return None
+
+        async def patched_continuation(_: grpc.HandlerCallDetails) -> Any:  # noqa: ANN401
+            return handler
+
+        return await self._inner.intercept_service(patched_continuation, handler_call_details)
+
+
 async def serve() -> None:
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
@@ -55,8 +76,8 @@ async def serve() -> None:
 
     container = make_async_container(*setup_grpc_providers(), context=context)
 
-    interceptors = setup_grpc_interceptors()
-    interceptors.append(DishkaAioInterceptor(container))
+    dishka_interceptor = DishkaAioInterceptor(container)
+    interceptors = [NoneHandlerSafeInterceptor(dishka_interceptor), *setup_grpc_interceptors()]
 
     server = grpc.aio.server(interceptors=interceptors)
     setup_grpc_servicers(server)

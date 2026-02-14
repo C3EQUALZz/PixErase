@@ -4,6 +4,7 @@ from typing import Final
 from bazario.asyncio import Dispatcher, Registry
 from bazario.asyncio.resolvers.dishka import DishkaResolver
 from dishka import Provider, Scope, WithParents
+from grpc import ServicerContext
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
@@ -84,6 +85,9 @@ from pix_erase.domain.user.services.user_service import UserService
 from pix_erase.infrastructure.adapters.auth.access_revoker import AuthSessionAccessRevoker
 from pix_erase.infrastructure.adapters.auth.identity_provider import AuthSessionIdentityProvider
 from pix_erase.infrastructure.adapters.auth.jwt_auth_session_transport import JwtCookieAuthSessionTransport
+from pix_erase.infrastructure.adapters.auth.jwt_grpc_metadata_auth_session_transport import (
+    JwtGrpcMetadataAuthSessionTransport,
+)
 from pix_erase.infrastructure.adapters.auth.jwt_token_processor import JwtAccessTokenProcessor, JwtAlgorithm, JwtSecret
 from pix_erase.infrastructure.adapters.auth.secrets_auth_session_generator import SecretsAuthSessionIdGenerator
 from pix_erase.infrastructure.adapters.common.bazario_event_bus import BazarioEventBus
@@ -210,6 +214,17 @@ def auth_ports_provider() -> Provider:
     provider.provide(source=AuthSessionIdentityProvider, provides=IdentityProvider)
     provider.provide(source=AuthSessionService)
     provider.provide(source=JwtCookieAuthSessionTransport, provides=AuthSessionTransport)
+    return provider
+
+def grpc_auth_ports_provider() -> Provider:
+    provider: Final[Provider] = Provider(scope=Scope.REQUEST)
+    provider.from_context(provides=ServicerContext, scope=Scope.REQUEST)
+    provider.provide_all(CurrentUserService, JwtAccessTokenProcessor, UtcAuthSessionTimer)
+    provider.provide(source=SecretsAuthSessionIdGenerator, provides=AuthSessionIDGenerator)
+    provider.provide(source=AuthSessionAccessRevoker, provides=AccessRevoker)
+    provider.provide(source=AuthSessionIdentityProvider, provides=IdentityProvider)
+    provider.provide(source=AuthSessionService)
+    provider.provide(source=JwtGrpcMetadataAuthSessionTransport, provides=AuthSessionTransport)
     return provider
 
 
@@ -347,6 +362,7 @@ def setup_grpc_providers() -> Iterable[Provider]:
     return (
         configs_provider(),
         db_provider(),
+        grpc_auth_ports_provider(),
         domain_ports_provider(),
         gateways_provider(),
         cache_provider(),

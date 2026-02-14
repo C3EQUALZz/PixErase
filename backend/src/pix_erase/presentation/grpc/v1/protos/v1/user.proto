@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pix_erase.v1;
+
+message ReadUserByIDRequest {
+  string user_id = 1;
+}
+
+message ReadUserByIDResponse {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+}
+
+service UserService {
+  rpc ReadUserByID (ReadUserByIDRequest) returns (ReadUserByIDResponse);
+}
