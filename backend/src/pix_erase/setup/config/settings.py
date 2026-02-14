@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from pix_erase.setup.config.asgi import ASGIConfig
 from pix_erase.setup.config.cache import RedisConfig
 from pix_erase.setup.config.database import PostgresConfig, SQLAlchemyConfig
+from pix_erase.setup.config.grpc import GrpcConfig
 from pix_erase.setup.config.http import HttpClientConfig
 from pix_erase.setup.config.obversability import ObservabilityConfig
 from pix_erase.setup.config.rabbit import RabbitConfig
@@ -60,4 +61,8 @@ class AppConfig(BaseModel):
     http: HttpClientConfig = Field(
         default_factory=lambda: HttpClientConfig(**os.environ),
         description="HTTP settings",
+    )
+    grpc: GrpcConfig = Field(
+        default_factory=lambda: GrpcConfig(**os.environ),
+        description="gRPC settings",
     )

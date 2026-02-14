@@ -341,3 +341,18 @@ def setup_providers() -> Iterable[Provider]:
         application_ports_provider(),
         http_client_provider(),
     )
+
+
+def setup_grpc_providers() -> Iterable[Provider]:
+    return (
+        configs_provider(),
+        db_provider(),
+        domain_ports_provider(),
+        gateways_provider(),
+        cache_provider(),
+        interactors_provider(),
+        event_bus_provider(),
+        s3_provider(),
+        application_ports_provider(),
+        http_client_provider(),
+    )

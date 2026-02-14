@@ -52,6 +52,9 @@ dependencies = [
     "taskiq-redis==1.1.0",
     "taskiq[reload, metrics]==0.11.18",
     "tenacity>=9.1.2",
+    "grpcio>=1.68.0",
+    "grpcio-tools>=1.68.0",
+    "grpcio-reflection>=1.68.0",
     "uvicorn==0.36.0",
     "uvloop==0.21.0; sys_platform != 'win32'",
 ]
@@ -138,7 +141,9 @@ env = [
     "SESSION_REFRESH_THRESHOLD=0.2",
     "SECURE=0",
     "TEMPO_GRPC_PORT=4317",
-    "TEMPO_HOST=localhost"
+    "TEMPO_HOST=localhost",
+    "GRPC_HOST=0.0.0.0",
+    "GRPC_PORT=50051"
 ]
 
 [tool.basedpyright]
@@ -177,7 +182,7 @@ ignore_missing_imports = true
 [tool.ruff]
 src = ["src"]
 include = ["src/**.py", "tests/**.py"]
-exclude = ["src/pix_erase/setup/config/**.py"]
+exclude = ["src/pix_erase/setup/config/**.py", "src/pix_erase/presentation/grpc/v1/generated/**"]
 target-version = "py312"
 line-length = 120
 fix = true
@@ -198,6 +203,7 @@ ignore = ["D", "CPY001", "A005", "TRY003", "COM812", "FBT001", "FBT003", "PLR091
 "src/pix_erase/infrastructure/adapters/persistence/**" = ["PGH003"]
 "src/pix_erase/presentation/http/v1/routes/image/create_image/handlers.py" = ["S311"]
 "src/pix_erase/infrastructure/adapters/image_converters/**" = ["PLR2004"]
+"src/pix_erase/presentation/grpc/v1/generated/**" = ["ALL"]
 "tests/**" = ["S101", "PLR0913", "S106", "PLR2004", "ARG001", "S105"]
 
 [tool.ruff.format]

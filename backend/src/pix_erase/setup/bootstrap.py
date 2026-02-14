@@ -4,10 +4,12 @@ from functools import lru_cache
 from types import TracebackType
 from typing import Any, Final
 
+import grpc.aio
 from asgi_monitor.integrations.fastapi import MetricsConfig, TracingConfig, setup_metrics, setup_tracing
 from asgi_monitor.logging import configure_logging
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from grpc_reflection.v1alpha import reflection
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
@@ -23,6 +25,11 @@ from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_s
 from pix_erase.infrastructure.persistence.models.image_comparisons import map_image_comparisons_table
 from pix_erase.infrastructure.persistence.models.users import map_users_table
 from pix_erase.infrastructure.scheduler.tasks.images_tasks import setup_images_task
+from pix_erase.presentation.grpc.v1.generated.v1 import health_pb2, health_pb2_grpc, user_pb2, user_pb2_grpc
+from pix_erase.presentation.grpc.v1.interceptors.exception import ExceptionInterceptor
+from pix_erase.presentation.grpc.v1.interceptors.logging import LoggingInterceptor
+from pix_erase.presentation.grpc.v1.servicers.health.servicer import HealthServiceServicer
+from pix_erase.presentation.grpc.v1.servicers.user.servicer import UserServiceServicer
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionHandler
 from pix_erase.presentation.http.v1.common.routes import healthcheck, index
 from pix_erase.presentation.http.v1.middlewares.asgi_auth import ASGIAuthMiddleware
@@ -213,6 +220,24 @@ def setup_scheduler(broker: AsyncBroker, schedule_source: ScheduleSource) -> Tas
             schedule_source,
         ],
     )
+
+
+def setup_grpc_interceptors() -> list[grpc.aio.ServerInterceptor]:
+    return [LoggingInterceptor(), ExceptionInterceptor()]
+
+
+def setup_grpc_servicers(server: grpc.aio.Server) -> None:
+    health_pb2_grpc.add_HealthServiceServicer_to_server(HealthServiceServicer(), server)
+    user_pb2_grpc.add_UserServiceServicer_to_server(UserServiceServicer(), server)
+
+
+def setup_grpc_reflection(server: grpc.aio.Server) -> None:
+    service_names = (
+        health_pb2.DESCRIPTOR.services_by_name["HealthService"].full_name,
+        user_pb2.DESCRIPTOR.services_by_name["UserService"].full_name,
+        reflection.SERVICE_NAME,
+    )
+    reflection.enable_server_reflection(service_names, server)
 
 
 def setup_exc_handlers(app: FastAPI, /) -> None:
