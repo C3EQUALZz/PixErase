@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package pix_erase.v1;
+
+import "google/protobuf/empty.proto";
+
+message SignUpRequest {
+  string email = 1;
+  string name = 2;
+  string password = 3;
+}
+
+message SignUpResponse {
+  string user_id = 1;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string access_token = 1;
+}
+
+message ReadUserResponse {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+}
+
+service AuthService {
+  rpc SignUp (SignUpRequest) returns (SignUpResponse);
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc ReadMe (google.protobuf.Empty) returns (ReadUserResponse);
+}

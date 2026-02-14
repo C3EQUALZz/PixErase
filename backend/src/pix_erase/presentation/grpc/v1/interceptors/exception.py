@@ -56,27 +56,50 @@ class ExceptionInterceptor(grpc.aio.ServerInterceptor):
             async def wrapped_unary_unary(request: Any, context: grpc.aio.ServicerContext) -> Any:  # noqa: ANN401
                 try:
                     return await original(request, context)
-                except Exception as exc:
-                    status_code = _resolve_status(exc)
-
-                    if status_code in {grpc.StatusCode.INTERNAL, grpc.StatusCode.UNAVAILABLE}:
-                        logger.exception(
-                            "gRPC exception '%s' in %s",
-                            type(exc).__name__,
-                            handler_call_details.method,
-                        )
-                        details = "Internal server error."
-                    else:
-                        logger.warning(
-                            "gRPC exception '%s' in %s: '%s'",
-                            type(exc).__name__,
-                            handler_call_details.method,
-                            exc,
-                        )
-                        details = str(exc)
-
-                    await context.abort(status_code, details)
+                except Exception as exc:  # noqa: BLE001
+                    await self._handle_exception(exc, handler_call_details, context)
 
             handler.unary_unary = wrapped_unary_unary
 
+        if handler.unary_stream:
+            original_stream = handler.unary_stream
+
+            async def wrapped_unary_stream(
+                request: Any,  # noqa: ANN401
+                context: grpc.aio.ServicerContext,
+            ) -> Any:  # noqa: ANN401
+                try:
+                    async for chunk in original_stream(request, context):
+                        yield chunk
+                except Exception as exc:  # noqa: BLE001
+                    await self._handle_exception(exc, handler_call_details, context)
+
+            handler.unary_stream = wrapped_unary_stream
+
         return handler
+
+    @staticmethod
+    async def _handle_exception(
+        exc: Exception,
+        handler_call_details: grpc.HandlerCallDetails,
+        context: grpc.aio.ServicerContext,
+    ) -> None:
+        status_code = _resolve_status(exc)
+
+        if status_code in {grpc.StatusCode.INTERNAL, grpc.StatusCode.UNAVAILABLE}:
+            logger.exception(
+                "gRPC exception '%s' in %s",
+                type(exc).__name__,
+                handler_call_details.method,
+            )
+            details = "Internal server error."
+        else:
+            logger.warning(
+                "gRPC exception '%s' in %s: '%s'",
+                type(exc).__name__,
+                handler_call_details.method,
+                exc,
+            )
+            details = str(exc)
+
+        await context.abort(status_code, details)

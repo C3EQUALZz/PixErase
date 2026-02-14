@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pix_erase.v1;
+
+message ReadTaskByIDRequest {
+  string task_id = 1;
+}
+
+message ReadTaskByIDResponse {
+  string status = 1;
+  string description = 2;
+}
+
+service TaskService {
+  rpc ReadTaskByID (ReadTaskByIDRequest) returns (ReadTaskByIDResponse);
+}

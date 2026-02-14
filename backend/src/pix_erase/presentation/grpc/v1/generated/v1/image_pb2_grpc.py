@@ -4,7 +4,7 @@ import grpc
 import warnings
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from pix_erase.presentation.grpc.v1.generated.v1 import user_pb2 as v1_dot_user__pb2
+from pix_erase.presentation.grpc.v1.generated.v1 import image_pb2 as v1_dot_image__pb2
 
 GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__
@@ -19,14 +19,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in v1/user_pb2_grpc.py depends on'
+        + ' but the generated code in v1/image_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class UserServiceStub(object):
+class ImageServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -35,187 +35,171 @@ class UserServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.ReadUserByID = channel.unary_unary(
-                '/pix_erase.v1.UserService/ReadUserByID',
-                request_serializer=v1_dot_user__pb2.ReadUserByIDRequest.SerializeToString,
-                response_deserializer=v1_dot_user__pb2.ReadUserByIDResponse.FromString,
+        self.CreateImage = channel.unary_unary(
+                '/pix_erase.v1.ImageService/CreateImage',
+                request_serializer=v1_dot_image__pb2.CreateImageRequest.SerializeToString,
+                response_deserializer=v1_dot_image__pb2.CreateImageResponse.FromString,
                 _registered_method=True)
-        self.ReadAllUsers = channel.unary_unary(
-                '/pix_erase.v1.UserService/ReadAllUsers',
-                request_serializer=v1_dot_user__pb2.ReadAllUsersRequest.SerializeToString,
-                response_deserializer=v1_dot_user__pb2.ReadAllUsersResponse.FromString,
+        self.ReadImage = channel.unary_stream(
+                '/pix_erase.v1.ImageService/ReadImage',
+                request_serializer=v1_dot_image__pb2.ReadImageRequest.SerializeToString,
+                response_deserializer=v1_dot_image__pb2.ReadImageChunk.FromString,
                 _registered_method=True)
-        self.CreateUser = channel.unary_unary(
-                '/pix_erase.v1.UserService/CreateUser',
-                request_serializer=v1_dot_user__pb2.CreateUserRequest.SerializeToString,
-                response_deserializer=v1_dot_user__pb2.CreateUserResponse.FromString,
-                _registered_method=True)
-        self.ActivateUser = channel.unary_unary(
-                '/pix_erase.v1.UserService/ActivateUser',
-                request_serializer=v1_dot_user__pb2.ActivateUserRequest.SerializeToString,
+        self.DeleteImage = channel.unary_unary(
+                '/pix_erase.v1.ImageService/DeleteImage',
+                request_serializer=v1_dot_image__pb2.DeleteImageRequest.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
-        self.ChangeUserEmail = channel.unary_unary(
-                '/pix_erase.v1.UserService/ChangeUserEmail',
-                request_serializer=v1_dot_user__pb2.ChangeUserEmailRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+        self.ReadImageExif = channel.unary_unary(
+                '/pix_erase.v1.ImageService/ReadImageExif',
+                request_serializer=v1_dot_image__pb2.ReadImageExifRequest.SerializeToString,
+                response_deserializer=v1_dot_image__pb2.ReadImageExifResponse.FromString,
                 _registered_method=True)
-        self.ChangeUserName = channel.unary_unary(
-                '/pix_erase.v1.UserService/ChangeUserName',
-                request_serializer=v1_dot_user__pb2.ChangeUserNameRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+        self.CompressImage = channel.unary_unary(
+                '/pix_erase.v1.ImageService/CompressImage',
+                request_serializer=v1_dot_image__pb2.CompressImageRequest.SerializeToString,
+                response_deserializer=v1_dot_image__pb2.TaskResponse.FromString,
                 _registered_method=True)
-        self.ChangeUserPassword = channel.unary_unary(
-                '/pix_erase.v1.UserService/ChangeUserPassword',
-                request_serializer=v1_dot_user__pb2.ChangeUserPasswordRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+        self.GrayscaleImage = channel.unary_unary(
+                '/pix_erase.v1.ImageService/GrayscaleImage',
+                request_serializer=v1_dot_image__pb2.GrayscaleImageRequest.SerializeToString,
+                response_deserializer=v1_dot_image__pb2.TaskResponse.FromString,
                 _registered_method=True)
-        self.DeleteUser = channel.unary_unary(
-                '/pix_erase.v1.UserService/DeleteUser',
-                request_serializer=v1_dot_user__pb2.DeleteUserRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+        self.RemoveBackground = channel.unary_unary(
+                '/pix_erase.v1.ImageService/RemoveBackground',
+                request_serializer=v1_dot_image__pb2.RemoveBackgroundRequest.SerializeToString,
+                response_deserializer=v1_dot_image__pb2.TaskResponse.FromString,
                 _registered_method=True)
-        self.GrantAdmin = channel.unary_unary(
-                '/pix_erase.v1.UserService/GrantAdmin',
-                request_serializer=v1_dot_user__pb2.GrantAdminRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+        self.RotateImage = channel.unary_unary(
+                '/pix_erase.v1.ImageService/RotateImage',
+                request_serializer=v1_dot_image__pb2.RotateImageRequest.SerializeToString,
+                response_deserializer=v1_dot_image__pb2.TaskResponse.FromString,
                 _registered_method=True)
-        self.RevokeAdmin = channel.unary_unary(
-                '/pix_erase.v1.UserService/RevokeAdmin',
-                request_serializer=v1_dot_user__pb2.RevokeAdminRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+        self.UpscaleImage = channel.unary_unary(
+                '/pix_erase.v1.ImageService/UpscaleImage',
+                request_serializer=v1_dot_image__pb2.UpscaleImageRequest.SerializeToString,
+                response_deserializer=v1_dot_image__pb2.TaskResponse.FromString,
                 _registered_method=True)
 
 
-class UserServiceServicer(object):
+class ImageServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def ReadUserByID(self, request, context):
+    def CreateImage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ReadAllUsers(self, request, context):
+    def ReadImage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def CreateUser(self, request, context):
+    def DeleteImage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ActivateUser(self, request, context):
+    def ReadImageExif(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ChangeUserEmail(self, request, context):
+    def CompressImage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ChangeUserName(self, request, context):
+    def GrayscaleImage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ChangeUserPassword(self, request, context):
+    def RemoveBackground(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DeleteUser(self, request, context):
+    def RotateImage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GrantAdmin(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def RevokeAdmin(self, request, context):
+    def UpscaleImage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_UserServiceServicer_to_server(servicer, server):
+def add_ImageServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'ReadUserByID': grpc.unary_unary_rpc_method_handler(
-                    servicer.ReadUserByID,
-                    request_deserializer=v1_dot_user__pb2.ReadUserByIDRequest.FromString,
-                    response_serializer=v1_dot_user__pb2.ReadUserByIDResponse.SerializeToString,
+            'CreateImage': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateImage,
+                    request_deserializer=v1_dot_image__pb2.CreateImageRequest.FromString,
+                    response_serializer=v1_dot_image__pb2.CreateImageResponse.SerializeToString,
             ),
-            'ReadAllUsers': grpc.unary_unary_rpc_method_handler(
-                    servicer.ReadAllUsers,
-                    request_deserializer=v1_dot_user__pb2.ReadAllUsersRequest.FromString,
-                    response_serializer=v1_dot_user__pb2.ReadAllUsersResponse.SerializeToString,
+            'ReadImage': grpc.unary_stream_rpc_method_handler(
+                    servicer.ReadImage,
+                    request_deserializer=v1_dot_image__pb2.ReadImageRequest.FromString,
+                    response_serializer=v1_dot_image__pb2.ReadImageChunk.SerializeToString,
             ),
-            'CreateUser': grpc.unary_unary_rpc_method_handler(
-                    servicer.CreateUser,
-                    request_deserializer=v1_dot_user__pb2.CreateUserRequest.FromString,
-                    response_serializer=v1_dot_user__pb2.CreateUserResponse.SerializeToString,
-            ),
-            'ActivateUser': grpc.unary_unary_rpc_method_handler(
-                    servicer.ActivateUser,
-                    request_deserializer=v1_dot_user__pb2.ActivateUserRequest.FromString,
+            'DeleteImage': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteImage,
+                    request_deserializer=v1_dot_image__pb2.DeleteImageRequest.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'ChangeUserEmail': grpc.unary_unary_rpc_method_handler(
-                    servicer.ChangeUserEmail,
-                    request_deserializer=v1_dot_user__pb2.ChangeUserEmailRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            'ReadImageExif': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReadImageExif,
+                    request_deserializer=v1_dot_image__pb2.ReadImageExifRequest.FromString,
+                    response_serializer=v1_dot_image__pb2.ReadImageExifResponse.SerializeToString,
             ),
-            'ChangeUserName': grpc.unary_unary_rpc_method_handler(
-                    servicer.ChangeUserName,
-                    request_deserializer=v1_dot_user__pb2.ChangeUserNameRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            'CompressImage': grpc.unary_unary_rpc_method_handler(
+                    servicer.CompressImage,
+                    request_deserializer=v1_dot_image__pb2.CompressImageRequest.FromString,
+                    response_serializer=v1_dot_image__pb2.TaskResponse.SerializeToString,
             ),
-            'ChangeUserPassword': grpc.unary_unary_rpc_method_handler(
-                    servicer.ChangeUserPassword,
-                    request_deserializer=v1_dot_user__pb2.ChangeUserPasswordRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            'GrayscaleImage': grpc.unary_unary_rpc_method_handler(
+                    servicer.GrayscaleImage,
+                    request_deserializer=v1_dot_image__pb2.GrayscaleImageRequest.FromString,
+                    response_serializer=v1_dot_image__pb2.TaskResponse.SerializeToString,
             ),
-            'DeleteUser': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteUser,
-                    request_deserializer=v1_dot_user__pb2.DeleteUserRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            'RemoveBackground': grpc.unary_unary_rpc_method_handler(
+                    servicer.RemoveBackground,
+                    request_deserializer=v1_dot_image__pb2.RemoveBackgroundRequest.FromString,
+                    response_serializer=v1_dot_image__pb2.TaskResponse.SerializeToString,
             ),
-            'GrantAdmin': grpc.unary_unary_rpc_method_handler(
-                    servicer.GrantAdmin,
-                    request_deserializer=v1_dot_user__pb2.GrantAdminRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            'RotateImage': grpc.unary_unary_rpc_method_handler(
+                    servicer.RotateImage,
+                    request_deserializer=v1_dot_image__pb2.RotateImageRequest.FromString,
+                    response_serializer=v1_dot_image__pb2.TaskResponse.SerializeToString,
             ),
-            'RevokeAdmin': grpc.unary_unary_rpc_method_handler(
-                    servicer.RevokeAdmin,
-                    request_deserializer=v1_dot_user__pb2.RevokeAdminRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            'UpscaleImage': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpscaleImage,
+                    request_deserializer=v1_dot_image__pb2.UpscaleImageRequest.FromString,
+                    response_serializer=v1_dot_image__pb2.TaskResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'pix_erase.v1.UserService', rpc_method_handlers)
+            'pix_erase.v1.ImageService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('pix_erase.v1.UserService', rpc_method_handlers)
+    server.add_registered_method_handlers('pix_erase.v1.ImageService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class UserService(object):
+class ImageService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def ReadUserByID(request,
+    def CreateImage(request,
             target,
             options=(),
             channel_credentials=None,
@@ -228,9 +212,9 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/pix_erase.v1.UserService/ReadUserByID',
-            v1_dot_user__pb2.ReadUserByIDRequest.SerializeToString,
-            v1_dot_user__pb2.ReadUserByIDResponse.FromString,
+            '/pix_erase.v1.ImageService/CreateImage',
+            v1_dot_image__pb2.CreateImageRequest.SerializeToString,
+            v1_dot_image__pb2.CreateImageResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -242,7 +226,7 @@ class UserService(object):
             _registered_method=True)
 
     @staticmethod
-    def ReadAllUsers(request,
+    def ReadImage(request,
             target,
             options=(),
             channel_credentials=None,
@@ -252,12 +236,12 @@ class UserService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
+        return grpc.experimental.unary_stream(
             request,
             target,
-            '/pix_erase.v1.UserService/ReadAllUsers',
-            v1_dot_user__pb2.ReadAllUsersRequest.SerializeToString,
-            v1_dot_user__pb2.ReadAllUsersResponse.FromString,
+            '/pix_erase.v1.ImageService/ReadImage',
+            v1_dot_image__pb2.ReadImageRequest.SerializeToString,
+            v1_dot_image__pb2.ReadImageChunk.FromString,
             options,
             channel_credentials,
             insecure,
@@ -269,7 +253,7 @@ class UserService(object):
             _registered_method=True)
 
     @staticmethod
-    def CreateUser(request,
+    def DeleteImage(request,
             target,
             options=(),
             channel_credentials=None,
@@ -282,35 +266,8 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/pix_erase.v1.UserService/CreateUser',
-            v1_dot_user__pb2.CreateUserRequest.SerializeToString,
-            v1_dot_user__pb2.CreateUserResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def ActivateUser(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/pix_erase.v1.UserService/ActivateUser',
-            v1_dot_user__pb2.ActivateUserRequest.SerializeToString,
+            '/pix_erase.v1.ImageService/DeleteImage',
+            v1_dot_image__pb2.DeleteImageRequest.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
@@ -323,7 +280,7 @@ class UserService(object):
             _registered_method=True)
 
     @staticmethod
-    def ChangeUserEmail(request,
+    def ReadImageExif(request,
             target,
             options=(),
             channel_credentials=None,
@@ -336,9 +293,9 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/pix_erase.v1.UserService/ChangeUserEmail',
-            v1_dot_user__pb2.ChangeUserEmailRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            '/pix_erase.v1.ImageService/ReadImageExif',
+            v1_dot_image__pb2.ReadImageExifRequest.SerializeToString,
+            v1_dot_image__pb2.ReadImageExifResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -350,7 +307,7 @@ class UserService(object):
             _registered_method=True)
 
     @staticmethod
-    def ChangeUserName(request,
+    def CompressImage(request,
             target,
             options=(),
             channel_credentials=None,
@@ -363,9 +320,9 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/pix_erase.v1.UserService/ChangeUserName',
-            v1_dot_user__pb2.ChangeUserNameRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            '/pix_erase.v1.ImageService/CompressImage',
+            v1_dot_image__pb2.CompressImageRequest.SerializeToString,
+            v1_dot_image__pb2.TaskResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -377,7 +334,7 @@ class UserService(object):
             _registered_method=True)
 
     @staticmethod
-    def ChangeUserPassword(request,
+    def GrayscaleImage(request,
             target,
             options=(),
             channel_credentials=None,
@@ -390,9 +347,9 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/pix_erase.v1.UserService/ChangeUserPassword',
-            v1_dot_user__pb2.ChangeUserPasswordRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            '/pix_erase.v1.ImageService/GrayscaleImage',
+            v1_dot_image__pb2.GrayscaleImageRequest.SerializeToString,
+            v1_dot_image__pb2.TaskResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -404,7 +361,7 @@ class UserService(object):
             _registered_method=True)
 
     @staticmethod
-    def DeleteUser(request,
+    def RemoveBackground(request,
             target,
             options=(),
             channel_credentials=None,
@@ -417,9 +374,9 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/pix_erase.v1.UserService/DeleteUser',
-            v1_dot_user__pb2.DeleteUserRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            '/pix_erase.v1.ImageService/RemoveBackground',
+            v1_dot_image__pb2.RemoveBackgroundRequest.SerializeToString,
+            v1_dot_image__pb2.TaskResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -431,7 +388,7 @@ class UserService(object):
             _registered_method=True)
 
     @staticmethod
-    def GrantAdmin(request,
+    def RotateImage(request,
             target,
             options=(),
             channel_credentials=None,
@@ -444,9 +401,9 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/pix_erase.v1.UserService/GrantAdmin',
-            v1_dot_user__pb2.GrantAdminRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            '/pix_erase.v1.ImageService/RotateImage',
+            v1_dot_image__pb2.RotateImageRequest.SerializeToString,
+            v1_dot_image__pb2.TaskResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -458,7 +415,7 @@ class UserService(object):
             _registered_method=True)
 
     @staticmethod
-    def RevokeAdmin(request,
+    def UpscaleImage(request,
             target,
             options=(),
             channel_credentials=None,
@@ -471,9 +428,9 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/pix_erase.v1.UserService/RevokeAdmin',
-            v1_dot_user__pb2.RevokeAdminRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            '/pix_erase.v1.ImageService/UpscaleImage',
+            v1_dot_image__pb2.UpscaleImageRequest.SerializeToString,
+            v1_dot_image__pb2.TaskResponse.FromString,
             options,
             channel_credentials,
             insecure,

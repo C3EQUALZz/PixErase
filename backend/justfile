@@ -54,7 +54,7 @@ default:
 [doc("Generate gRPC stubs from .proto files")]
 [group("app")]
 @proto-gen:
-    python -m grpc_tools.protoc -I src/pix_erase/presentation/grpc/v1/protos --python_out=src/pix_erase/presentation/grpc/v1/generated --grpc_python_out=src/pix_erase/presentation/grpc/v1/generated --pyi_out=src/pix_erase/presentation/grpc/v1/generated src/pix_erase/presentation/grpc/v1/protos/v1/health.proto src/pix_erase/presentation/grpc/v1/protos/v1/user.proto
+    python -m grpc_tools.protoc -I src/pix_erase/presentation/grpc/v1/protos --python_out=src/pix_erase/presentation/grpc/v1/generated --grpc_python_out=src/pix_erase/presentation/grpc/v1/generated --pyi_out=src/pix_erase/presentation/grpc/v1/generated src/pix_erase/presentation/grpc/v1/protos/v1/health.proto src/pix_erase/presentation/grpc/v1/protos/v1/user.proto src/pix_erase/presentation/grpc/v1/protos/v1/auth.proto src/pix_erase/presentation/grpc/v1/protos/v1/image.proto src/pix_erase/presentation/grpc/v1/protos/v1/internet_protocol.proto src/pix_erase/presentation/grpc/v1/protos/v1/task.proto
     python -c "import pathlib, re; [f.write_text(re.sub(r'from v1 import', 'from pix_erase.presentation.grpc.v1.generated.v1 import', f.read_text())) for f in pathlib.Path('src/pix_erase/presentation/grpc/v1/generated').rglob('*_grpc.py')]"
 
 [doc("Run gRPC server")]

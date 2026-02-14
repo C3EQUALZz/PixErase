@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package pix_erase.v1;
+
+import "google/protobuf/empty.proto";
+
+message CreateImageRequest {
+  bytes image_data = 1;
+  string filename = 2;
+}
+
+message CreateImageResponse {
+  string image_id = 1;
+}
+
+message ReadImageRequest {
+  string image_id = 1;
+}
+
+message ReadImageChunk {
+  bytes data = 1;
+}
+
+message DeleteImageRequest {
+  string image_id = 1;
+}
+
+message ReadImageExifRequest {
+  string image_id = 1;
+}
+
+message CameraSettingsExif {
+  string make = 1;
+  string model = 2;
+  string orientation = 3;
+  string focal_length = 4;
+  string focal_length_35mm = 5;
+  string max_aperture = 6;
+  string aperture_value = 7;
+}
+
+message ExposureSettings {
+  string exposure_time = 1;
+  string aperture = 2;
+  int32 iso = 3;
+  string exposure_bias = 4;
+  string metering_mode = 5;
+  string white_balance = 6;
+}
+
+message FlashInfo {
+  bool fired = 1;
+  string mode = 2;
+  bool return_light = 3;
+  bool function_present = 4;
+  bool red_eye_reduction = 5;
+}
+
+message GPSInfo {
+  double latitude = 1;
+  double longitude = 2;
+  double altitude = 3;
+  string latitude_ref = 4;
+  string longitude_ref = 5;
+}
+
+message DateTimeInfo {
+  string created = 1;
+  string digitized = 2;
+  string original = 3;
+}
+
+message ReadImageExifResponse {
+  int32 width = 1;
+  int32 height = 2;
+  string format = 3;
+  bool is_animated = 4;
+  CameraSettingsExif camera_settings = 5;
+  ExposureSettings exposure_settings = 6;
+  FlashInfo flash_info = 7;
+  GPSInfo gps_info = 8;
+  DateTimeInfo datetime_info = 9;
+}
+
+message CompressImageRequest {
+  string image_id = 1;
+  int32 quality = 2;
+}
+
+message GrayscaleImageRequest {
+  string image_id = 1;
+}
+
+message RemoveBackgroundRequest {
+  string image_id = 1;
+}
+
+message RotateImageRequest {
+  string image_id = 1;
+  int32 angle = 2;
+}
+
+message UpscaleImageRequest {
+  string image_id = 1;
+  string algorithm = 2;
+  int32 scale = 3;
+}
+
+message TaskResponse {
+  string task_id = 1;
+}
+
+service ImageService {
+  rpc CreateImage (CreateImageRequest) returns (CreateImageResponse);
+  rpc ReadImage (ReadImageRequest) returns (stream ReadImageChunk);
+  rpc DeleteImage (DeleteImageRequest) returns (google.protobuf.Empty);
+  rpc ReadImageExif (ReadImageExifRequest) returns (ReadImageExifResponse);
+  rpc CompressImage (CompressImageRequest) returns (TaskResponse);
+  rpc GrayscaleImage (GrayscaleImageRequest) returns (TaskResponse);
+  rpc RemoveBackground (RemoveBackgroundRequest) returns (TaskResponse);
+  rpc RotateImage (RotateImageRequest) returns (TaskResponse);
+  rpc UpscaleImage (UpscaleImageRequest) returns (TaskResponse);
+}

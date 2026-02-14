@@ -23,9 +23,15 @@ class JwtGrpcMetadataAuthSessionTransport(AuthSessionTransport):
     ) -> None:
         self._context: Final[ServicerContext] = context
         self._access_token_processor: Final[JwtAccessTokenProcessor] = access_token_processor
+        self._last_access_token: str | None = None
+
+    @property
+    def last_access_token(self) -> str | None:
+        return self._last_access_token
 
     def deliver(self, auth_session: AuthSession) -> None:
         access_token: str = self._access_token_processor.encode(auth_session)
+        self._last_access_token = access_token
         self._context.set_trailing_metadata(
             ((METADATA_SET_TOKEN_KEY, access_token),),
         )

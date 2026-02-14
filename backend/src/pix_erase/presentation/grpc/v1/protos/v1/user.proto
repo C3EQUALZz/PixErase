@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pix_erase.v1;
 
+import "google/protobuf/empty.proto";
+
 message ReadUserByIDRequest {
   string user_id = 1;
 }
@@ -13,6 +15,68 @@ message ReadUserByIDResponse {
   string role = 4;
 }
 
+message ReadAllUsersRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+  string sorting_field = 3;
+  string sorting_order = 4;
+}
+
+message ReadAllUsersResponse {
+  repeated ReadUserByIDResponse users = 1;
+}
+
+message CreateUserRequest {
+  string email = 1;
+  string name = 2;
+  string password = 3;
+  string role = 4;
+}
+
+message CreateUserResponse {
+  string user_id = 1;
+}
+
+message ActivateUserRequest {
+  string user_id = 1;
+}
+
+message ChangeUserEmailRequest {
+  string user_id = 1;
+  string new_email = 2;
+}
+
+message ChangeUserNameRequest {
+  string user_id = 1;
+  string new_name = 2;
+}
+
+message ChangeUserPasswordRequest {
+  string user_id = 1;
+  string password = 2;
+}
+
+message DeleteUserRequest {
+  string user_id = 1;
+}
+
+message GrantAdminRequest {
+  string user_id = 1;
+}
+
+message RevokeAdminRequest {
+  string user_id = 1;
+}
+
 service UserService {
   rpc ReadUserByID (ReadUserByIDRequest) returns (ReadUserByIDResponse);
+  rpc ReadAllUsers (ReadAllUsersRequest) returns (ReadAllUsersResponse);
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc ActivateUser (ActivateUserRequest) returns (google.protobuf.Empty);
+  rpc ChangeUserEmail (ChangeUserEmailRequest) returns (google.protobuf.Empty);
+  rpc ChangeUserName (ChangeUserNameRequest) returns (google.protobuf.Empty);
+  rpc ChangeUserPassword (ChangeUserPasswordRequest) returns (google.protobuf.Empty);
+  rpc DeleteUser (DeleteUserRequest) returns (google.protobuf.Empty);
+  rpc GrantAdmin (GrantAdminRequest) returns (google.protobuf.Empty);
+  rpc RevokeAdmin (RevokeAdminRequest) returns (google.protobuf.Empty);
 }

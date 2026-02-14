@@ -25,10 +25,27 @@ from pix_erase.infrastructure.persistence.models.auth_sessions import map_auth_s
 from pix_erase.infrastructure.persistence.models.image_comparisons import map_image_comparisons_table
 from pix_erase.infrastructure.persistence.models.users import map_users_table
 from pix_erase.infrastructure.scheduler.tasks.images_tasks import setup_images_task
-from pix_erase.presentation.grpc.v1.generated.v1 import health_pb2, health_pb2_grpc, user_pb2, user_pb2_grpc
+from pix_erase.presentation.grpc.v1.generated.v1 import (
+    auth_pb2,
+    auth_pb2_grpc,
+    health_pb2,
+    health_pb2_grpc,
+    image_pb2,
+    image_pb2_grpc,
+    internet_protocol_pb2,
+    internet_protocol_pb2_grpc,
+    task_pb2,
+    task_pb2_grpc,
+    user_pb2,
+    user_pb2_grpc,
+)
 from pix_erase.presentation.grpc.v1.interceptors.exception import ExceptionInterceptor
 from pix_erase.presentation.grpc.v1.interceptors.logging import LoggingInterceptor
+from pix_erase.presentation.grpc.v1.servicers.auth.servicer import AuthServiceServicer
 from pix_erase.presentation.grpc.v1.servicers.health.servicer import HealthServiceServicer
+from pix_erase.presentation.grpc.v1.servicers.image.servicer import ImageServiceServicer
+from pix_erase.presentation.grpc.v1.servicers.internet_protocol.servicer import InternetProtocolServiceServicer
+from pix_erase.presentation.grpc.v1.servicers.task.servicer import TaskServiceServicer
 from pix_erase.presentation.grpc.v1.servicers.user.servicer import UserServiceServicer
 from pix_erase.presentation.http.v1.common.exception_handler import ExceptionHandler
 from pix_erase.presentation.http.v1.common.routes import healthcheck, index
@@ -228,13 +245,21 @@ def setup_grpc_interceptors() -> list[grpc.aio.ServerInterceptor]:
 
 def setup_grpc_servicers(server: grpc.aio.Server) -> None:
     health_pb2_grpc.add_HealthServiceServicer_to_server(HealthServiceServicer(), server)
+    auth_pb2_grpc.add_AuthServiceServicer_to_server(AuthServiceServicer(), server)
     user_pb2_grpc.add_UserServiceServicer_to_server(UserServiceServicer(), server)
+    image_pb2_grpc.add_ImageServiceServicer_to_server(ImageServiceServicer(), server)
+    internet_protocol_pb2_grpc.add_InternetProtocolServiceServicer_to_server(InternetProtocolServiceServicer(), server)
+    task_pb2_grpc.add_TaskServiceServicer_to_server(TaskServiceServicer(), server)
 
 
 def setup_grpc_reflection(server: grpc.aio.Server) -> None:
     service_names = (
         health_pb2.DESCRIPTOR.services_by_name["HealthService"].full_name,
+        auth_pb2.DESCRIPTOR.services_by_name["AuthService"].full_name,
         user_pb2.DESCRIPTOR.services_by_name["UserService"].full_name,
+        image_pb2.DESCRIPTOR.services_by_name["ImageService"].full_name,
+        internet_protocol_pb2.DESCRIPTOR.services_by_name["InternetProtocolService"].full_name,
+        task_pb2.DESCRIPTOR.services_by_name["TaskService"].full_name,
         reflection.SERVICE_NAME,
     )
     reflection.enable_server_reflection(service_names, server)

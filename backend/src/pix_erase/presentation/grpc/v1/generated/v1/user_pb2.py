@@ -22,19 +22,42 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rv1/user.proto\x12\x0cpix_erase.v1\"&\n\x13ReadUserByIDRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"M\n\x14ReadUserByIDResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0c\n\x04role\x18\x04 \x01(\t2d\n\x0bUserService\x12U\n\x0cReadUserByID\x12!.pix_erase.v1.ReadUserByIDRequest\x1a\".pix_erase.v1.ReadUserByIDResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rv1/user.proto\x12\x0cpix_erase.v1\x1a\x1bgoogle/protobuf/empty.proto\"&\n\x13ReadUserByIDRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"M\n\x14ReadUserByIDResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0c\n\x04role\x18\x04 \x01(\t\"b\n\x13ReadAllUsersRequest\x12\r\n\x05limit\x18\x01 \x01(\x05\x12\x0e\n\x06offset\x18\x02 \x01(\x05\x12\x15\n\rsorting_field\x18\x03 \x01(\t\x12\x15\n\rsorting_order\x18\x04 \x01(\t\"I\n\x14ReadAllUsersResponse\x12\x31\n\x05users\x18\x01 \x03(\x0b\x32\".pix_erase.v1.ReadUserByIDResponse\"P\n\x11\x43reateUserRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12\x0c\n\x04role\x18\x04 \x01(\t\"%\n\x12\x43reateUserResponse\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"&\n\x13\x41\x63tivateUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"<\n\x16\x43hangeUserEmailRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x11\n\tnew_email\x18\x02 \x01(\t\":\n\x15\x43hangeUserNameRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x10\n\x08new_name\x18\x02 \x01(\t\">\n\x19\x43hangeUserPasswordRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"$\n\x11\x44\x65leteUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"$\n\x11GrantAdminRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"%\n\x12RevokeAdminRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t2\xa5\x06\n\x0bUserService\x12U\n\x0cReadUserByID\x12!.pix_erase.v1.ReadUserByIDRequest\x1a\".pix_erase.v1.ReadUserByIDResponse\x12U\n\x0cReadAllUsers\x12!.pix_erase.v1.ReadAllUsersRequest\x1a\".pix_erase.v1.ReadAllUsersResponse\x12O\n\nCreateUser\x12\x1f.pix_erase.v1.CreateUserRequest\x1a .pix_erase.v1.CreateUserResponse\x12I\n\x0c\x41\x63tivateUser\x12!.pix_erase.v1.ActivateUserRequest\x1a\x16.google.protobuf.Empty\x12O\n\x0f\x43hangeUserEmail\x12$.pix_erase.v1.ChangeUserEmailRequest\x1a\x16.google.protobuf.Empty\x12M\n\x0e\x43hangeUserName\x12#.pix_erase.v1.ChangeUserNameRequest\x1a\x16.google.protobuf.Empty\x12U\n\x12\x43hangeUserPassword\x12\'.pix_erase.v1.ChangeUserPasswordRequest\x1a\x16.google.protobuf.Empty\x12\x45\n\nDeleteUser\x12\x1f.pix_erase.v1.DeleteUserRequest\x1a\x16.google.protobuf.Empty\x12\x45\n\nGrantAdmin\x12\x1f.pix_erase.v1.GrantAdminRequest\x1a\x16.google.protobuf.Empty\x12G\n\x0bRevokeAdmin\x12 .pix_erase.v1.RevokeAdminRequest\x1a\x16.google.protobuf.Emptyb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'v1.user_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_READUSERBYIDREQUEST']._serialized_start=31
-  _globals['_READUSERBYIDREQUEST']._serialized_end=69
-  _globals['_READUSERBYIDRESPONSE']._serialized_start=71
-  _globals['_READUSERBYIDRESPONSE']._serialized_end=148
-  _globals['_USERSERVICE']._serialized_start=150
-  _globals['_USERSERVICE']._serialized_end=250
+  _globals['_READUSERBYIDREQUEST']._serialized_start=60
+  _globals['_READUSERBYIDREQUEST']._serialized_end=98
+  _globals['_READUSERBYIDRESPONSE']._serialized_start=100
+  _globals['_READUSERBYIDRESPONSE']._serialized_end=177
+  _globals['_READALLUSERSREQUEST']._serialized_start=179
+  _globals['_READALLUSERSREQUEST']._serialized_end=277
+  _globals['_READALLUSERSRESPONSE']._serialized_start=279
+  _globals['_READALLUSERSRESPONSE']._serialized_end=352
+  _globals['_CREATEUSERREQUEST']._serialized_start=354
+  _globals['_CREATEUSERREQUEST']._serialized_end=434
+  _globals['_CREATEUSERRESPONSE']._serialized_start=436
+  _globals['_CREATEUSERRESPONSE']._serialized_end=473
+  _globals['_ACTIVATEUSERREQUEST']._serialized_start=475
+  _globals['_ACTIVATEUSERREQUEST']._serialized_end=513
+  _globals['_CHANGEUSEREMAILREQUEST']._serialized_start=515
+  _globals['_CHANGEUSEREMAILREQUEST']._serialized_end=575
+  _globals['_CHANGEUSERNAMEREQUEST']._serialized_start=577
+  _globals['_CHANGEUSERNAMEREQUEST']._serialized_end=635
+  _globals['_CHANGEUSERPASSWORDREQUEST']._serialized_start=637
+  _globals['_CHANGEUSERPASSWORDREQUEST']._serialized_end=699
+  _globals['_DELETEUSERREQUEST']._serialized_start=701
+  _globals['_DELETEUSERREQUEST']._serialized_end=737
+  _globals['_GRANTADMINREQUEST']._serialized_start=739
+  _globals['_GRANTADMINREQUEST']._serialized_end=775
+  _globals['_REVOKEADMINREQUEST']._serialized_start=777
+  _globals['_REVOKEADMINREQUEST']._serialized_end=814
+  _globals['_USERSERVICE']._serialized_start=817
+  _globals['_USERSERVICE']._serialized_end=1622
 # @@protoc_insertion_point(module_scope)
